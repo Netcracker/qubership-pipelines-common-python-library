@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "qubership-pipelines-common-library"
+version = "0.0.3"
+description = "Qubership Pipelines common library"
+authors = ["Igor Lebedev <lebedev.light@gmail.com>"]
+readme = "README.md"
+packages = [{include = "qubership_pipelines_common_library"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+pyyaml = "^6.0.2"
+click = "^8.1.7"
+requests = "^2.32.3"
+urllib3 = "^2.2.3"
+PyArtifactory = "^2.7.1"
+python-jenkins = "^1.8.2"
+GitPython = "^3.1.43"
+http-exceptions = "^0.2.10"
+python-gitlab = "^4.13.0"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^6.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

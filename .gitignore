@@ -1,0 +1,12 @@
+.idea
+.vs
+.cache
+.venv
+.execution
+dist
+pack
+venv
+__pycache__/
+poetry.lock
+tests/**/logs/
+tests/**/temp/
