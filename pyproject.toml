@@ -19,6 +19,7 @@ http-exceptions = "^0.2.10"
 python-gitlab = "^4.13.0"
 minio = "^7.2.12"
 kubernetes = "^29.0.0"
+webexpythonsdk = "2.0.1"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^6.0.0"
