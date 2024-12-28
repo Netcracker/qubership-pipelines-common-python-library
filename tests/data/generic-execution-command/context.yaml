@@ -1,0 +1,7 @@
+kind: "AtlasModuleContextDescriptor"
+apiVersion: "v1"
+paths:
+  input:
+    params: "./tests/data/generic-execution-command/params.yaml"
+  output:
+    params: "./tests/data/generic-execution-command/result.yaml"
