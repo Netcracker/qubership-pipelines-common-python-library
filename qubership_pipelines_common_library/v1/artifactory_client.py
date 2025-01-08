@@ -33,4 +33,5 @@ class ArtifactoryClient:
             properties = None
         return properties
 
-
+    def get_folder_files_list(self, path_to_folder: str):
+        return self.artifactory.artifacts.list(artifact_path=path_to_folder).files
