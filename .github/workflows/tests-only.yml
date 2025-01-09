@@ -1,0 +1,32 @@
+name: Run Tests Only
+
+on: 
+  workflow_dispatch:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    env:
+      package_name: 'qubership_pipelines_common_library'
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install --user pipx
+        pipx install poetry
+
+    - name: Build & Test
+      run: |
+        poetry install
+        poetry run pytest
