@@ -18,7 +18,7 @@ from requests.auth import HTTPBasicAuth
 
 from http_exceptions import UnauthorizedException, NotFoundException, ClientException, ServerException
 
-from v1.log_client import LogClient
+from qubership_pipelines_common_library.v1.log_client import LogClient
 
 class RestClient:
     def __init__(self, host: str, user: str, password: str):
@@ -67,3 +67,14 @@ class RestClient:
         elif response.status_code >= 500:
             raise ServerException(response.status_code)
         return response
+
+    def check_url_existence(self, input_url: str) -> bool:
+        try:
+            response = self.session.head(input_url, allow_redirects=True)
+            if response.status_code == 200:
+                return True
+            else:
+                return False
+        except requests.RequestException as e:
+            logging.error(f"Error: {e}")
+            return False

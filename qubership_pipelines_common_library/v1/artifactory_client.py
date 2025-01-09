@@ -14,6 +14,7 @@
 
 import logging
 from pyartifactory import Artifactory
+from pyartifactory.exception import PropertyNotFoundError
 
 
 class ArtifactoryClient:
@@ -22,6 +23,15 @@ class ArtifactoryClient:
         self.user = params.get("username")
         self.token = params.get("password")
         self.artifactory = Artifactory(url=self.url, auth=(self.user, self.token), api_version=1)
-        logging.info("Artifactory Client configured for %s %s %s", params.get("url"),
-                     params.get("username"), params.get("password"))
+        logging.info("Artifactory Client configured for %s", params.get("url"))
 
+    def get_artifact_properties(self, path_to_artifact: str):
+        try:
+            properties = self.artifactory.artifacts.properties(artifact_path=path_to_artifact)
+        except PropertyNotFoundError:
+            logging.error("There are not properties for artifact %s", path_to_artifact)
+            properties = None
+        return properties
+
+    def get_folder_files_list(self, path_to_folder: str):
+        return self.artifactory.artifacts.list(artifact_path=path_to_folder).files
