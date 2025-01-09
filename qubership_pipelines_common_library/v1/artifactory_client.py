@@ -29,7 +29,7 @@ class ArtifactoryClient:
         try:
             properties = self.artifactory.artifacts.properties(artifact_path=path_to_artifact)
         except PropertyNotFoundError:
-            logging.error("There are not properties for artifact")
+            logging.error("There are not properties for artifact %s", path_to_artifact)
             properties = None
         return properties
 
