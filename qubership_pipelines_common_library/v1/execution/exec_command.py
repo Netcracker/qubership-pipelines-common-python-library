@@ -13,11 +13,15 @@
 # limitations under the License.
 
 import logging
+import sys
 import traceback
 
 from .exec_context import ExecutionContext
 
 class ExecutionCommand:
+
+    SUCCESS_MSG = "Status: SUCCESS"
+    FAILURE_MSG = "Status: FAILURE"
 
     def __init__(self, context_path):
         self.context = ExecutionContext(context_path)
@@ -25,14 +29,24 @@ class ExecutionCommand:
     def run(self):
         try:
             if not self._validate():
-                logging.error("Status: FAILURE")
-                return False
+                logging.error(ExecutionCommand.FAILURE_MSG)
+                self._exit(False, ExecutionCommand.FAILURE_MSG)
             self._execute()
+            self._exit(True, ExecutionCommand.SUCCESS_MSG)
         except Exception as e:
             logging.error(traceback.format_exc())
+            self._exit(False, ExecutionCommand.FAILURE_MSG)
 
     def _validate(self):
         return self.context.validate(["paths.input.params"])
 
     def _execute(self):
-        logging.info(f"Status: SKIPPED")
+        logging.info("Status: SKIPPED")
+
+    def _exit(self, success: bool, message: str):
+        if success:
+            self.context.logger.info(message)
+            sys.exit(0)
+        else:
+            self.context.logger.error(message)
+            sys.exit(1)

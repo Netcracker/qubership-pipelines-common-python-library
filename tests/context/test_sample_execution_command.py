@@ -32,17 +32,24 @@ class SampleExecutionCommand(ExecutionCommand):
         result_sum = int(self.context.input_param_get("params.param_1")) + int(self.context.input_param_get("params.param_2"))
         self.context.output_param_set("params.result", result_sum)
         self.context.output_params_save()
-        self.context.logger.info(f"Status: SUCCESS")
 
 
 class TestExecCommandV1(unittest.TestCase):
 
     def test_cmd_execution_with_existing_context(self):
-        cmd = SampleExecutionCommand('./tests/data/generic-execution-command/context.yaml')
-        cmd.run()
-        with open('./tests/data/generic-execution-command/result.yaml', 'r', encoding='utf-8') as result_file:
+        with self.assertRaises(SystemExit) as exit_result:
+            cmd = SampleExecutionCommand('./tests/data/generic-execution-command/valid/context.yaml')
+            cmd.run()
+        self.assertEqual(0, exit_result.exception.code)
+        with open('./tests/data/generic-execution-command/valid/result.yaml', 'r', encoding='utf-8') as result_file:
             result = yaml.safe_load(result_file)
             self.assertEqual(19, int(result["params"]["result"]))
+
+    def test_cmd_execution_with_invalid_params(self):
+        with self.assertRaises(SystemExit) as exit_result:
+            cmd = SampleExecutionCommand('./tests/data/generic-execution-command/invalid/context.yaml')
+            cmd.run()
+        self.assertEqual(1, exit_result.exception.code)
 
 
 if __name__ == '__main__':
