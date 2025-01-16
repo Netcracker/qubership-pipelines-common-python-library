@@ -25,15 +25,15 @@ def parse_system_params(context_path: str, system: str):
 
 
 def fill_param_by_type(json_data, param_name, new_value, clear_current_value=False):
-   current_value = json_data[param_name]
-   if type(current_value) == list:
+   current_value = json_data.get(param_name)
+   if isinstance(current_value, list):
       if clear_current_value:
-         new_list = list()
-         new_list.append(new_value)
-         json_data[param_name] = new_list
+         json_data[param_name] = new_value if isinstance(new_value, list) else [new_value]
       else:
-         current_value.append(new_value)
-         json_data[param_name] = current_value
+         if isinstance(new_value, list):
+            current_value.extend(new_value)
+         else:
+            current_value.append(new_value)
    else:
       json_data[param_name] = new_value
    return json_data

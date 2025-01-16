@@ -35,3 +35,7 @@ class ArtifactoryClient:
 
     def get_folder_files_list(self, path_to_folder: str):
         return self.artifactory.artifacts.list(artifact_path=path_to_folder).files
+
+    def get_artifact_content_by_url(self, path_to_file: str):
+        file_content = self.artifactory.artifacts.download(artifact_path=path_to_file)
+        return file_content.read_text("utf-8")
