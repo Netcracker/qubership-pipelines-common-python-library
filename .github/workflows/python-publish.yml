@@ -4,11 +4,13 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    env:
+      package_name: 'qubership_pipelines_common_library'
     steps:
     - uses: actions/checkout@v4
 
@@ -28,19 +30,7 @@ jobs:
         poetry install
         poetry run pytest
 
-    - name: Patch version
-      if: ${{ vars.PATCH_POETRY_VERSION == 'true' }}
-      run: poetry version patch
-
     - name: Publish package
       run: |
         poetry config pypi-token.pypi ${{ secrets.PYPI_API_TOKEN }}
- #       poetry publish --build --no-interaction
-
-    - name: Push updated version
-      if: ${{ vars.PATCH_POETRY_VERSION == 'true' }}
-      run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git commit -a -m "Update library version"
-        git push
+        poetry publish --build --no-interaction
