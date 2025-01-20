@@ -1,7 +1,23 @@
 name: Publish Python Module to PyPI
 
-on: 
+on:
   workflow_dispatch:
+    inputs:
+      patch_version:
+        description: 'Patch version'
+        default: true
+        required: true
+        type: boolean
+      use_custom_version:
+        description: 'Use custom_version instead of increment'
+        default: false
+        required: true
+        type: boolean
+      custom_version:
+        description: 'Specific version to release:'
+        default: 0.0.1
+        type: string
+        required: true
 
 permissions:
   contents: write
@@ -30,9 +46,13 @@ jobs:
         poetry install
         poetry run pytest
 
-    - name: Patch version
-      if: ${{ vars.PATCH_POETRY_VERSION == 'true' }}
+    - name: Patch minor version
+      if: ${{ inputs.patch_version && !inputs.use_custom_version }}
       run: poetry version patch
+
+    - name: Set specific version
+      if: ${{ inputs.patch_version && inputs.use_custom_version }}
+      run: poetry version ${{ inputs.custom_version }}
 
     - name: Publish package
       run: |
@@ -40,7 +60,7 @@ jobs:
         poetry publish --build --no-interaction
 
     - name: Push updated version
-      if: ${{ vars.PATCH_POETRY_VERSION == 'true' }}
+      if: ${{ inputs.patch_version }}
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
