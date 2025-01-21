@@ -24,6 +24,11 @@ webexpythonsdk = "2.0.1"
 [tool.poetry.group.test.dependencies]
 pytest = "^6.0.0"
 
+[tool.pytest.ini_options]
+markers = [
+    "integration: tests requiring external services (deselect with '-m \"not integration\"')",
+]
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

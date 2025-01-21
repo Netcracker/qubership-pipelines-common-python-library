@@ -44,7 +44,7 @@ jobs:
     - name: Build & Test
       run: |
         poetry install
-        poetry run pytest
+        poetry run pytest -m "not integration"
 
     - name: Patch minor version
       if: ${{ inputs.patch_version && !inputs.use_custom_version }}
