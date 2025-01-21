@@ -13,18 +13,18 @@
 # limitations under the License.
 
 import logging
-from enum import StrEnum
+from enum import Enum
 
 from kubernetes import client, config
 from kubernetes.client import Configuration, ApiException, V1Deployment
 
 
-class ScaleMode(StrEnum):
+class ScaleMode(str, Enum):
     UP = 'Up'
     DOWN = 'Down'
 
 
-class ResourceKind(StrEnum):
+class ResourceKind(str, Enum):
     DEPLOYMENT = 'Deployment'
     STATEFUL_SET = 'StatefulSet'
 

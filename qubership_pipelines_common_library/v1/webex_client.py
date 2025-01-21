@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import logging
-from webexpythonsdk import WebexAPI
+from webexteamssdk import WebexTeamsAPI
 
 
 class WebexClient:
@@ -21,7 +21,7 @@ class WebexClient:
         """ 'proxies' dict for different protocols is passed to requests session.
             e.g. proxies = { 'https' : 'https://user:password@ip:port' }
         """
-        self.webex = WebexAPI(
+        self.webex = WebexTeamsAPI(
             access_token=bot_token,
             proxies=proxies,
         )
