@@ -1,6 +1,6 @@
 name: Run Tests Only
 
-on: 
+on:
   workflow_dispatch:
   pull_request:
 
@@ -10,8 +10,7 @@ permissions:
 jobs:
   run-tests:
     runs-on: ubuntu-latest
-    env:
-      package_name: 'qubership_pipelines_common_library'
+
     steps:
     - uses: actions/checkout@v4
 
@@ -29,4 +28,4 @@ jobs:
     - name: Build & Test
       run: |
         poetry install
-        poetry run pytest
+        poetry run pytest -m "not integration"

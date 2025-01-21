@@ -1,0 +1,44 @@
+name: Run Integration Tests
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  run-integration-tests:
+    runs-on: ubuntu-latest
+    env:
+      MINIO_USER: admin
+      MINIO_PASSWORD: admin123
+    services:
+      minio:
+        image: minio/minio:edge-cicd
+        ports:
+          - 9000:9000
+        env:
+          MINIO_ROOT_USER: ${{ env.MINIO_USER }}
+          MINIO_ROOT_PASSWORD: ${{ env.MINIO_PASSWORD }}
+        options: --health-cmd "curl -I http://localhost:9000/minio/health/live"
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup MiniO
+      run: ./.github/scripts/setup_minio.sh
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install --user pipx
+        pipx install poetry
+
+    - name: Build & Test
+      run: |
+        poetry install
+        poetry run pytest -m "integration"
