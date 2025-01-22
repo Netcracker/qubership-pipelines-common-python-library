@@ -27,6 +27,11 @@ jobs:
     - name: Setup MiniO
       run: ./.github/scripts/setup_minio.sh
 
+    - name: Setup minikube
+      uses: medyagh/setup-minikube@latest
+      with:
+        start-args: "--static-ip 192.168.200.200"
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
