@@ -15,24 +15,25 @@
 import unittest
 import pytest
 
-from qubership_pipelines_common_library.v1.minio_client import MinioClient
+from qubership_pipelines_common_library.v1.kube_client import KubeClient
 
 
 @pytest.mark.integration
-class TestMinioIntegration(unittest.TestCase):
+class TestMiniKubeIntegration(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
         # static IP used in workflow
-        cls.client = MinioClient("http://127.0.0.1:9000", "admin", "admin123")
-        cls.bucket_name = "integration-test-bucket"
+        cls.client = KubeClient("http://192.168.200.200:8443", kubeconfig_path="~/.kube/config")
+        cls.client.create_namespace("test-integration-namespace")
 
-    def test_bucket_exists(self):
-        exists = TestMinioIntegration.client.minio.bucket_exists(TestMinioIntegration.bucket_name)
-        self.assertEqual(exists, True)
+    def test_list_namespaces(self):
+        self.assertCountEqual(TestMiniKubeIntegration.client.list_namespaces(),
+                              ['default', 'kube-node-lease', 'kube-public', 'kube-system',
+                               'test-integration-namespace'])
 
-    def test_bucket_is_empty(self):
-        self.assertEqual(TestMinioIntegration.client.list_objects(TestMinioIntegration.bucket_name, ""), [])
+    def test_namespace_doesnt_exist(self):
+        self.assertEqual(TestMiniKubeIntegration.client.namespace_exists("test-integration-namespace"), True)
 
 
 if __name__ == '__main__':
