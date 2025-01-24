@@ -37,6 +37,13 @@ class GitClient:
     BREAK_STATUS_LIST = [STATUS_FAILED, STATUS_CANCELLED, STATUS_SKIPPED]
 
     def __init__(self, host: str, username: str, password: str, email: str = None):
+        """
+        Arguments:
+            host (str): Gitlab instance URL
+            username (str): User used in auth request, might be empty string if no auth is required
+            password (str): Token used in auth request
+            email (str): Email used when committing changes using client
+        """
         self.host = host.rstrip("/")
         self.username = username
         self.email = email
@@ -49,6 +56,7 @@ class GitClient:
         logging.info("Git Client configured for %s", self.host)
 
     def clone(self, repo_path: str, branch: str, temp_path: str):
+        """"""
         repo_path = repo_path.lstrip("/").rstrip("/")
         if not repo_path:
             raise Exception("Repository path should be defined")
@@ -67,6 +75,7 @@ class GitClient:
         )
 
     def commit_and_push(self, commit_message: str):
+        """"""
         if not self._is_cloned():
             raise Exception("Cannot commit without preliminary cloning")
         if not self.email:
@@ -82,18 +91,21 @@ class GitClient:
             self.repo.git.push(self.repo.remote().name, self.repo.active_branch.name)
 
     def get_file_content_utf8(self, relative_path: str):
+        """"""
         if not self._is_cloned():
             raise Exception("Cannot get file content without preliminary cloning")
         filepath = os.path.join(self.temp_path, relative_path)
         return UtilsFile.read_text_utf8(filepath)
 
     def set_file_content_utf8(self, relative_path: str, content: str):
+        """"""
         if not self._is_cloned():
             raise Exception("Cannot set file content without preliminary cloning")
         filepath = os.path.join(self.temp_path, relative_path)
         UtilsFile.write_text_utf8(filepath, content)
 
     def delete_by_path(self, relative_path: str):
+        """"""
         if not self._is_cloned():
             raise Exception("Cannot delete file without preliminary cloning")
         filepath = os.path.join(self.temp_path, relative_path)
@@ -103,12 +115,14 @@ class GitClient:
             shutil.rmtree(filepath)
 
     def trigger_pipeline(self, project_id: str, pipeline_params: dict):
+        """"""
         execution = ExecutionInfo().with_name(project_id).with_params(pipeline_params).with_status(ExecutionInfo.STATUS_UNKNOWN)
         project = self.gl.projects.get(project_id)
         pipeline = project.pipelines.create(pipeline_params)
         return execution.with_id(pipeline.get_id()).start()
 
     def cancel_pipeline_execution(self, execution: ExecutionInfo, timeout: float = 1.0):
+        """"""
         project = self.gl.projects.get(execution.get_name())
         pipeline = project.pipelines.get(execution.get_id())
         counter = 0
@@ -121,6 +135,7 @@ class GitClient:
         return execution.stop(ExecutionInfo.STATUS_ABORTED)
 
     def get_pipeline_status(self, execution: ExecutionInfo):
+        """"""
         project = self.gl.projects.get(execution.get_name())
         pipeline = project.pipelines.get(execution.get_id())
         if pipeline:
@@ -136,6 +151,7 @@ class GitClient:
         return execution
 
     def wait_pipeline_execution(self, execution: ExecutionInfo, timeout_seconds: float = 10.0, break_status_list: list = None):
+        """"""
         if break_status_list is None:
             break_status_list = self.BREAK_STATUS_LIST
         timeout = 0
@@ -195,5 +211,6 @@ class GitClient:
         return result
 
     def get_file_content(self, project_id: str, ref: str, file_path: str):
+        """"""
         project = self.gl.projects.get(project_id)
         return project.files.get(file_path=file_path, ref=ref).decode().decode("utf-8")

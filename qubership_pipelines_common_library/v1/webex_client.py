@@ -18,8 +18,12 @@ from webexpythonsdk import WebexAPI
 
 class WebexClient:
     def __init__(self, bot_token: str, proxies: dict = None):
-        """ 'proxies' dict for different protocols is passed to requests session.
+        """ **`proxies`** dict for different protocols is passed to requests session.
             e.g. proxies = { 'https' : 'https://user:password@ip:port' }
+
+        Arguments:
+            bot_token (str): bot's auth token
+            proxies (dict): dict with proxy connections for different protocols
         """
         self.webex = WebexAPI(
             access_token=bot_token,
@@ -28,4 +32,5 @@ class WebexClient:
         logging.info("Webex Client configured")
 
     def send_message(self, room_id: str, msg: str = None, attachment_path: str = None):
+        """"""
         self.webex.messages.create(roomId=room_id, text=msg, files=[attachment_path] if attachment_path else None)

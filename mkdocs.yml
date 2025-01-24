@@ -1,0 +1,42 @@
+site_name: "Qubership Pipelines Common Library"
+watch: [mkdocs.yml, README.md, qubership_pipelines_common_library/]
+
+theme:
+  name: "mkdocs"
+  include_homepage_in_sidebar: false
+  user_color_mode_toggle: true
+
+nav:
+  - Home: index.md
+  - Clients: clients.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: false
+#            docstring_options:
+#              ignore_init_summary: true
+            docstring_section_style: 'list' # table/spacy
+            filters: [ "!^_" ]
+            heading_level: 2
+            inherited_members: true
+            merge_init_into_class: true
+            parameter_headings: false
+            separate_signature: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_signature_annotations: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            signature_crossrefs: true
+            summary: false # true also looks good
+            show_if_no_docstring: false
+            members_order: 'source'
+
+markdown_extensions:
+- pymdownx.snippets:
+    base_path: [!relative $config_dir]
+    check_paths: true

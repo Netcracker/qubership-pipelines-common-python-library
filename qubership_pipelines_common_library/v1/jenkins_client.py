@@ -30,6 +30,12 @@ class JenkinsClient:
     STATUSES_COMPLETE = [STATUS_SUCCESS, STATUS_UNSTABLE, STATUS_FAILURE, STATUS_ABORTED, STATUS_NOT_BUILT]
 
     def __init__(self, host: str, user: str, password: str):
+        """
+        Arguments:
+            host (str): Jenkins host URL
+            user (str): User used in auth request
+            password (str): Token used in auth request
+        """
         self.url = host
         self.user = user
         self.token = password
@@ -40,6 +46,7 @@ class JenkinsClient:
                       who_am_i, jenkins_version)
 
     def run_pipeline(self, job_name: str, job_params: dict, timeout_seconds: float = 180.0, wait_seconds: float = 1.0):
+        """"""
         logging.debug("Run job with name '%s', params '%s' and timeout '%s' seconds", job_name, job_params, timeout_seconds)
         execution = ExecutionInfo().with_name(job_name).with_params(job_params).with_status(ExecutionInfo.STATUS_UNKNOWN)
         if not self.server.job_exists(job_name):
@@ -81,6 +88,7 @@ class JenkinsClient:
         return execution.with_id(build_id).start()
 
     def get_pipeline_execution_status(self, execution: ExecutionInfo, timeout_seconds: float = 30.0, wait_seconds: float = 1.0):
+        """"""
         build_info = self._get_build_info(execution, timeout_seconds, wait_seconds)
         logging.debug("Job info: %s", build_info)
         if build_info:
@@ -93,6 +101,7 @@ class JenkinsClient:
         return execution
 
     def wait_pipeline_execution(self, execution: ExecutionInfo, timeout_seconds: float, wait_seconds: float = 1.0):
+        """"""
         count = 0
         while count < timeout_seconds:
             try:
@@ -117,6 +126,7 @@ class JenkinsClient:
         return execution
 
     def cancel_pipeline_execution(self, execution: ExecutionInfo, timeout_seconds: float = 30.0, wait_seconds: float = 1.0):
+        """"""
         self.server.stop_build(execution.get_name(), execution.get_id())
         count = 0
         while count < timeout_seconds:
@@ -126,7 +136,7 @@ class JenkinsClient:
         return execution.stop(ExecutionInfo.STATUS_ABORTED)
 
     def get_pipeline_execution_artifacts(self, execution: ExecutionInfo, timeout_seconds: float = 30.0, wait_seconds: float = 1.0):
-        # returns list of artifact relative paths
+        """Returns list of artifact relative paths"""
         build_info = self._get_build_info(execution, timeout_seconds, wait_seconds)
         logging.debug("Job info: %s", build_info)
         if build_info:
@@ -137,6 +147,7 @@ class JenkinsClient:
             return []
 
     def save_pipeline_execution_artifact_to_file(self, execution: ExecutionInfo, artifact_path: str, file_path: str):
+        """"""
         artifact_bytes = self.server.get_build_artifact_as_bytes(execution.get_name(), execution.get_id(), artifact_path)
         Path(file_path).write_bytes(artifact_bytes)
 
