@@ -35,6 +35,14 @@ class KubeClient:
     STATEFUL_SETS_KEY = "statefulsets"
 
     def __init__(self, endpoint: str = None, token: str = None, kubeconfig_path: str = None):
+        """
+        Needs either of **`endpoint`** and **`token`** or **`kubeconfig_path`**
+
+        Arguments:
+            endpoint (str): Kubernetes API server URL
+            token (str): Token used for cluster access
+            kubeconfig_path (str): Path to local .kubeconfig file
+        """
         if kubeconfig_path:
             config.load_kube_config(config_file=kubeconfig_path)
         elif endpoint and token:
@@ -46,10 +54,12 @@ class KubeClient:
         logging.info("Kube Client configured for %s", Configuration.get_default_copy().host)
 
     def list_namespaces(self):
+        """"""
         ns_list = self.core_api.list_namespace(watch=False)
         return [i.metadata.name for i in ns_list.items]
 
     def namespace_exists(self, namespace: str):
+        """"""
         if not namespace:
             return False
         try:
@@ -61,15 +71,18 @@ class KubeClient:
             raise e
 
     def deployments_exist(self, namespace: str):
+        """"""
         deployments = self.apps_api.list_namespaced_deployment(namespace, limit=1)
         return len(deployments.items) > 0
 
     def is_namespace_scaled_to_zero(self, namespace: str):
+        """"""
         all_replicas = [i.spec.replicas for i in self.__get_deployments_and_stateful_sets(namespace)]
         logging.debug(f"StatefulSet and Deployment replica count for {namespace}: {all_replicas}")
         return len(all_replicas) == 0 or all(r == 0 for r in all_replicas)
 
     def list_not_ready_resources(self, namespace):
+        """"""
         deployment_unavailable_replicas = [
             ResourceReplicaCount(p.metadata.name,
                                  ResourceKind.DEPLOYMENT if isinstance(p, V1Deployment) else ResourceKind.STATEFUL_SET,
@@ -79,10 +92,12 @@ class KubeClient:
         return deployment_unavailable_replicas
 
     def create_namespace(self, namespace: str):
+        """"""
         body = client.V1Namespace(metadata=client.V1ObjectMeta(name=namespace))
         return self.core_api.create_namespace(body=body)
 
     def delete_namespaces(self, namespaces: list[str], ignore_not_found: bool = False):
+        """"""
         for namespace in namespaces:
             try:
                 self.core_api.delete_namespace(namespace)
@@ -93,12 +108,15 @@ class KubeClient:
                     raise e
 
     def list_config_map_names(self, namespace: str):
+        """"""
         return [i.metadata.name for i in self.core_api.list_namespaced_config_map(namespace).items]
 
     def read_config_map(self, namespace: str, config_map_name: str):
+        """"""
         return self.core_api.read_namespaced_config_map(config_map_name, namespace)
 
     def create_config_map(self, namespace: str, config_map_name: str, config_map_data: dict):
+        """"""
         object_meta = client.V1ObjectMeta(name=config_map_name, namespace=namespace)
         body = client.V1ConfigMap(api_version="v1", kind="ConfigMap", metadata=object_meta, data=config_map_data)
         self.core_api.create_namespaced_config_map(namespace=namespace, body=body)
@@ -116,15 +134,18 @@ class KubeClient:
         self.core_api.replace_namespaced_config_map(name=config_map_name, namespace=namespace, body=body)
 
     def create_or_replace_config_map(self, namespace: str, config_map_name: str, config_map_data: dict):
+        """ Creates map if it doesn't exist, replaces it otherwise """
         if config_map_name in self.list_config_map_names(namespace):
             self.replace_config_map(namespace, config_map_name, config_map_data)
         else:
             self.create_config_map(namespace, config_map_name, config_map_data)
 
     def delete_config_map(self, namespace: str, config_map_name: str):
+        """"""
         self.core_api.delete_namespaced_config_map(name=config_map_name, namespace=namespace)
 
     def scale_namespace(self, namespace: str, scale_mode: ScaleMode, use_config_map: bool = True, replicas: int = 0):
+        """"""
         logging.info(f"Scaling {namespace} '{scale_mode}', use_config_map: {use_config_map}, replicas: {replicas}")
         if scale_mode == ScaleMode.DOWN:
             self.scale_namespace_down(namespace)
@@ -132,6 +153,7 @@ class KubeClient:
             self.scale_namespace_up(namespace, use_config_map, replicas)
 
     def scale_namespace_down(self, namespace: str):
+        """"""
         if self.is_namespace_scaled_to_zero(namespace):
             logging.info(f"Namespace {namespace} is already scaled to zero!")
             return
@@ -153,6 +175,7 @@ class KubeClient:
                                                               body={'spec': {'replicas': 0}})
 
     def scale_namespace_up(self, namespace: str, use_config_map: bool, replicas: int = 0):
+        """"""
         if use_config_map:
             replicas_data = self.read_config_map(namespace, KubeClient.REPLICAS_CONFIG_MAP_NAME).data
             logging.info(f"Using following data for scaling up: {replicas_data}")
