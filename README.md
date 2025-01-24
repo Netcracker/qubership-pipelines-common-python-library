@@ -2,11 +2,11 @@
 
 Open-source python library of clients used by Qubership pipelines/modules.
 
-Library provides easy-to-use clients and wrappers for common devops services (e.g. Jenkins, GitLab Pipelines)
+Library provides easy-to-use clients and wrappers for common devops services (e.g. Jenkins, MiniO, GitLab Pipelines)
 
 ## Structure
 
-Library is presented as a set of [clients](docs/Clients.md) with predefined operations
+Library is presented as a set of clients with predefined operations
 
 
 ## Installation
