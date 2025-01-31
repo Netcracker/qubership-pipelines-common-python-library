@@ -16,7 +16,7 @@ import logging, jenkins
 
 from time import sleep
 from pathlib import Path
-from v1.execution.exec_info import ExecutionInfo
+from qubership_pipelines_common_library.v1.execution.exec_info import ExecutionInfo
 
 
 class JenkinsClient:

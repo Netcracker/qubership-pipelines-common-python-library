@@ -15,9 +15,9 @@
 import os, logging
 
 from pathlib import Path
-from v1.utils.utils_file import UtilsFile
-from .exec_context_file import ExecutionContextFile
-from .exec_logger import ExecutionLogger
+from qubership_pipelines_common_library.v1.utils.utils_file import UtilsFile
+from qubership_pipelines_common_library.v1.execution.exec_context_file import ExecutionContextFile
+from qubership_pipelines_common_library.v1.execution.exec_logger import ExecutionLogger
 
 
 class ExecutionContext:

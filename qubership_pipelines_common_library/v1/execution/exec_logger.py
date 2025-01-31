@@ -21,6 +21,8 @@ class ExecutionLogger:
     DEFAULT_FORMAT = u'[%(asctime)s] [%(levelname)-5s] [class=%(filename)s:%(lineno)-3s] %(message)s'
 
     def __init__(self, path_logs):
+        # todo: Currently all commands (if more than one are invoked in one go) will reuse same logger
+        #  Also, file handlers are never removed
         self.path_logs = path_logs
         self.logger = logging.getLogger("execution_logger")
         self.logger.setLevel(logging.INFO)

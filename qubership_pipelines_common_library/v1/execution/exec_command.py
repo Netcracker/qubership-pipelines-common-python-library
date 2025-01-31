@@ -16,14 +16,20 @@ import logging
 import sys
 import traceback
 
-from .exec_context import ExecutionContext
+from qubership_pipelines_common_library.v1.execution.exec_context import ExecutionContext
+from qubership_pipelines_common_library.v1.utils.utils_context import create_execution_context
+
 
 class ExecutionCommand:
 
     SUCCESS_MSG = "Status: SUCCESS"
     FAILURE_MSG = "Status: FAILURE"
 
-    def __init__(self, context_path):
+    def __init__(self, context_path: str = None, input_params: dict = None, folder_path: str = None,
+                 parent_context_to_reuse: ExecutionContext = None):
+        if not context_path:
+            context_path = create_execution_context(input_params=input_params, folder_path=folder_path,
+                                                    parent_context_to_reuse=parent_context_to_reuse)
         self.context = ExecutionContext(context_path)
 
     def run(self):
