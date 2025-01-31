@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .utils_file import UtilsFile
+from qubership_pipelines_common_library.v1.utils.utils_file import UtilsFile
 
 
 def parse_system_params(context_path: str, system: str):
@@ -37,3 +37,14 @@ def fill_param_by_type(json_data, param_name, new_value, clear_current_value=Fal
    else:
       json_data[param_name] = new_value
    return json_data
+
+
+def recursive_merge(source: dict, target: dict):
+   if target is None:
+      return source
+   for key, value in target.items():
+      if key in source and isinstance(source[key], dict) and isinstance(value, dict):
+         source[key] = recursive_merge(source[key], value)
+      else:
+         source[key] = value
+   return source

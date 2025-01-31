@@ -17,8 +17,8 @@ from pathlib import Path
 from time import sleep
 from git import Repo
 
-from v1.utils.utils_file import UtilsFile
-from v1.execution.exec_info import ExecutionInfo
+from qubership_pipelines_common_library.v1.utils.utils_file import UtilsFile
+from qubership_pipelines_common_library.v1.execution.exec_info import ExecutionInfo
 
 class GitClient:
     # statuses taken from https://docs.gitlab.com/ee/api/pipelines.html
