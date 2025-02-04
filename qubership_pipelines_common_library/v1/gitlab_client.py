@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging, gitlab
+import logging, gitlab, json
 from time import sleep
 from gitlab import GitlabGetError
 from qubership_pipelines_common_library.v1.execution.exec_info import ExecutionInfo
@@ -94,14 +94,16 @@ class GitlabClient:
         latest_commit = project.commits.list(ref_name=branch_name, per_page=1, get_all=False)[0]
         return latest_commit.id
 
-    def get_file(self, project_path_or_id: str, file_path: str, branch_name: str):
+    def get_file_info(self, project_path_or_id: str, file_path: str, branch_name: str, required_info: list) -> dict:
         """"""
+        result_dict = dict()
         project = self.gl.projects.get(project_path_or_id, lazy=True)
-        try:
-            file = project.files.get(file_path=file_path, ref=branch_name)
-        except GitlabGetError:
-            return None
-        return file
+        file = project.files.get(file_path=file_path, ref=branch_name)
+        file_json = json.loads(file.to_json())
+        for key, value in file_json.items():
+            if key in required_info:
+                result_dict[key] = value
+        return result_dict
 
     def trigger_pipeline(self, project_id: str, pipeline_params: dict):
         """"""
