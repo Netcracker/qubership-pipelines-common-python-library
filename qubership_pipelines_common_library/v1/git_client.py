@@ -12,35 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging, os, re, shutil, json, gitlab
+import logging, os, re, shutil
 from pathlib import Path
-from time import sleep
 from git import Repo
 
 from qubership_pipelines_common_library.v1.utils.utils_file import UtilsFile
-from qubership_pipelines_common_library.v1.execution.exec_info import ExecutionInfo
+
 
 class GitClient:
-    # statuses taken from https://docs.gitlab.com/ee/api/pipelines.html
-    STATUS_CREATED = "created"
-    STATUS_WAITING = "waiting_for_resource"
-    STATUS_PREPARING = "preparing"
-    STATUS_PENDING = "pending"
-    STATUS_RUNNING = "running"
-    STATUS_SUCCESS = "success"
-    STATUS_FAILED = "failed"
-    STATUS_CANCELLED = "canceled"
-    STATUS_SKIPPED = "skipped"
-    STATUS_MANUAL = "manual"
-    STATUS_SCHEDULED = "scheduled"
-
-    BREAK_STATUS_LIST = [STATUS_FAILED, STATUS_CANCELLED, STATUS_SKIPPED]
 
     def __init__(self, host: str, username: str, password: str, email: str = None):
         """
         Arguments:
-            host (str): Gitlab instance URL
-            username (str): User used in auth request, might be empty string if no auth is required
+            host (str): Git instance URL
+            username (str): User used in auth request
             password (str): Token used in auth request
             email (str): Email used when committing changes using client
         """
@@ -52,7 +37,6 @@ class GitClient:
         self.repo = None  # git repository object
         self.repo_path = None  # path to repository in GIT
         self.branch = None  # last processed branch
-        self.gl = gitlab.Gitlab(url=self.host, private_token=self.password)
         logging.info("Git Client configured for %s", self.host)
 
     def clone(self, repo_path: str, branch: str, temp_path: str):
@@ -114,69 +98,6 @@ class GitClient:
         elif Path(filepath).is_dir():
             shutil.rmtree(filepath)
 
-    def trigger_pipeline(self, project_id: str, pipeline_params: dict):
-        """"""
-        execution = ExecutionInfo().with_name(project_id).with_params(pipeline_params).with_status(ExecutionInfo.STATUS_UNKNOWN)
-        project = self.gl.projects.get(project_id)
-        pipeline = project.pipelines.create(pipeline_params)
-        return execution.with_id(pipeline.get_id()).start()
-
-    def cancel_pipeline_execution(self, execution: ExecutionInfo, timeout: float = 1.0):
-        """"""
-        project = self.gl.projects.get(execution.get_name())
-        pipeline = project.pipelines.get(execution.get_id())
-        counter = 0
-        while counter < timeout:
-            counter += 1
-            logging.info("Waiting pipeline execution timeout 1 second")
-            sleep(1)
-            continue
-        pipeline.cancel()
-        return execution.stop(ExecutionInfo.STATUS_ABORTED)
-
-    def get_pipeline_status(self, execution: ExecutionInfo):
-        """"""
-        project = self.gl.projects.get(execution.get_name())
-        pipeline = project.pipelines.get(execution.get_id())
-        if pipeline:
-            json_pipeline = json.loads(pipeline.to_json())
-            pipeline_url = json_pipeline["web_url"]
-            pipeline_status = self._map_status(json_pipeline["status"], ExecutionInfo.STATUS_UNKNOWN)
-            execution.with_url(pipeline_url)
-            execution.with_status(pipeline_status)
-        else:
-            execution.with_url(None)
-            execution.with_status(ExecutionInfo.STATUS_UNKNOWN)
-            logging.error("Can't get pipeline status")
-        return execution
-
-    def wait_pipeline_execution(self, execution: ExecutionInfo, timeout_seconds: float = 10.0, break_status_list: list = None):
-        """"""
-        if break_status_list is None:
-            break_status_list = self.BREAK_STATUS_LIST
-        timeout = 0
-        execution.with_status(execution.get_status())
-        while timeout < timeout_seconds:
-            try:
-                project = self.gl.projects.get(execution.get_name())
-                pipeline = project.pipelines.get(execution.get_id())
-                pipeline_status = json.loads(pipeline.to_json())["status"]
-                execution.with_status(self._map_status(pipeline_status, ExecutionInfo.STATUS_UNKNOWN))
-                if pipeline_status in break_status_list:
-                    logging.info("Pipeline status: %s contains in input break status list. Stop waiting.", pipeline_status)
-                    break
-                else:
-                    timeout += 1
-                    logging.info("Waiting pipeline execution timeout 1 second")
-                    sleep(1)
-                    continue
-            except Exception:
-                timeout += 1
-                logging.info("Waiting pipeline execution timeout 1 second")
-                sleep(1)
-                continue
-        return execution
-
     def _gen_repo_auth_url(self, host: str, username: str, password: str, repo_path: str) -> str:
         tmp = re.split("(://)", host)
         repo_auth_url = f"{tmp[0]}{tmp[1]}{username}:{password}@{tmp[2]}/{repo_path}"
@@ -192,25 +113,3 @@ class GitClient:
         self.repo = None
         self.repo_path = None
         self.branch = None
-
-    def _map_status(self, git_status: str, default_status: str):
-        result = default_status
-        if git_status in (GitClient.STATUS_CREATED, GitClient.STATUS_WAITING,
-                          GitClient.STATUS_PREPARING, GitClient.STATUS_PENDING, GitClient.STATUS_SCHEDULED):
-            result = ExecutionInfo.STATUS_NOT_STARTED
-        elif git_status == GitClient.STATUS_RUNNING:
-            result = ExecutionInfo.STATUS_IN_PROGRESS
-        elif git_status == GitClient.STATUS_SUCCESS:
-            result = ExecutionInfo.STATUS_SUCCESS
-        elif git_status == GitClient.STATUS_FAILED:
-            result = ExecutionInfo.STATUS_FAILED
-        elif git_status in (GitClient.STATUS_CANCELLED, GitClient.STATUS_SKIPPED):
-            result = ExecutionInfo.STATUS_ABORTED
-        elif git_status == GitClient.STATUS_MANUAL:
-            result = ExecutionInfo.STATUS_MANUAL
-        return result
-
-    def get_file_content(self, project_id: str, ref: str, file_path: str):
-        """"""
-        project = self.gl.projects.get(project_id)
-        return project.files.get(file_path=file_path, ref=ref).decode().decode("utf-8")

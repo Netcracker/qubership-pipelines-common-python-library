@@ -9,6 +9,10 @@
 
 ---
 
+::: qubership_pipelines_common_library.v1.gitlab_client.GitlabClient
+
+---
+
 ::: qubership_pipelines_common_library.v1.jenkins_client.JenkinsClient
 
 ---

@@ -21,19 +21,17 @@ from qubership_pipelines_common_library.v1.git_client import GitClient
 class TestGitClientV1(unittest.TestCase):
 
     def setUp(self):
-        self.url = "http://git.qubership.org"
+        self.url = "https://git.qubership.org"
         self.user = "user"
         self.token = "token"
-        self.email = "test@qs.org"
-        self.client = GitClient(self.url, self.user, self.token, self.email)
+        self.client = GitClient(self.url, self.user, self.token)
 
-    @patch("gitlab.v4.objects.projects.ProjectManager.get")
-    def test_get_file_decodes(self, get_project_mock):
-        get_project_mock().files.get().decode.return_value = b"kind: AtlasConfig"
-        result = self.client.get_file_content("1337", "main", "test.yaml")
-
-        get_project_mock().files.get.assert_called_with(file_path="test.yaml", ref="main")
-        self.assertEqual("kind: AtlasConfig", result)
+    @patch("git.repo.base.Repo.clone_from")
+    def test_clone_generates_correct_repo_url(self, clone_repo_mock):
+        temp_path = "temp/repo_temp_dir"
+        branch = "main"
+        self.client.clone("quber/tests", branch, temp_path)
+        clone_repo_mock.assert_called_with(f"https://{self.user}:{self.token}@git.qubership.org/quber/tests", temp_path, branch=branch)
 
 
 if __name__ == '__main__':

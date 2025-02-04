@@ -44,8 +44,9 @@ class ExecutionInfo:
         self.status = ExecutionInfo.STATUS_IN_PROGRESS
         return self
 
-    def stop(self, status: str):
-        self.with_status(status)
+    def stop(self, status: str = None):
+        if status:
+            self.with_status(status)
         self.time_stop = datetime.now()
         return self
 
