@@ -88,7 +88,7 @@ class GitlabClient:
         self.gl.projects.get(project_id, lazy=True).files \
             .get(file_path=file_path, ref=ref).delete(branch=ref, commit_message=commit_message)
 
-    def get_latest_commit(self, project_path_or_id: str, branch_name: str):
+    def get_latest_commit_id(self, project_path_or_id: str, branch_name: str):
         """"""
         project = self.gl.projects.get(project_path_or_id, lazy=True)
         latest_commit = project.commits.list(ref_name=branch_name, per_page=1, get_all=False)[0]
