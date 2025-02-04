@@ -12,6 +12,7 @@ jobs:
     env:
       MINIO_USER: admin
       MINIO_PASSWORD: admin123
+      GITLAB_QUBER_TOKEN: ${{ secrets.GITLAB_QUBER_TOKEN }}
     services:
       minio:
         image: minio/minio:edge-cicd

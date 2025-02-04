@@ -21,3 +21,12 @@ Library is presented as a set of clients with predefined operations
   ```bash
   pip install qubership-pipelines-common-library
   ```
+
+## Backported version
+
+There also exists backported to python3.9 version of this library
+
+You can install it via `pip`:
+  ```bash
+  pip install qubership-pipelines-common-library-py39
+  ```
