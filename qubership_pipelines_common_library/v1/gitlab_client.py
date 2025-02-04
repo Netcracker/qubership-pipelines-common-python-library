@@ -88,6 +88,21 @@ class GitlabClient:
         self.gl.projects.get(project_id, lazy=True).files \
             .get(file_path=file_path, ref=ref).delete(branch=ref, commit_message=commit_message)
 
+    def get_latest_commit(self, project_path_or_id: str, branch_name: str):
+        """"""
+        project = self.gl.projects.get(project_path_or_id, lazy=True)
+        latest_commit = project.commits.list(ref_name=branch_name, per_page=1, get_all=False)[0]
+        return latest_commit.id
+
+    def get_file(self, project_path_or_id: str, file_path: str, branch_name: str):
+        """"""
+        project = self.gl.projects.get(project_path_or_id, lazy=True)
+        try:
+            file = project.files.get(file_path=file_path, ref=branch_name)
+        except GitlabGetError:
+            return None
+        return file
+
     def trigger_pipeline(self, project_id: str, pipeline_params: dict):
         """"""
         project = self.gl.projects.get(project_id, lazy=True)
