@@ -4,17 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       patch_version:
-        description: 'Patch version'
+        description: "Patch version"
         default: true
         required: true
         type: boolean
       use_custom_version:
-        description: 'Use custom_version instead of increment'
+        description: "Use custom_version instead of increment"
         default: false
         required: true
         type: boolean
       custom_version:
-        description: 'Specific version to release:'
+        description: "Specific version to release:"
         default: 0.0.1
         type: string
         required: true
@@ -33,7 +33,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
