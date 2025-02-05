@@ -1,8 +1,5 @@
-
 ---
-
 ::: qubership_pipelines_common_library.v1.artifactory_client.ArtifactoryClient
-
 ---
 
 ::: qubership_pipelines_common_library.v1.git_client.GitClient
