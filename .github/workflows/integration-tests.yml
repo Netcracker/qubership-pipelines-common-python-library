@@ -23,28 +23,28 @@ jobs:
           MINIO_ROOT_PASSWORD: ${{ env.MINIO_PASSWORD }}
         options: --health-cmd "curl -I http://localhost:9000/minio/health/live"
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup MiniO
-      run: ./.github/scripts/setup_minio.sh
+      - name: Setup MiniO
+        run: ./.github/scripts/setup_minio.sh
 
-    - name: Setup minikube
-      uses: medyagh/setup-minikube@latest
-      with:
-        start-args: "--static-ip 192.168.200.200"
+      - name: Setup minikube
+        uses: medyagh/setup-minikube@latest
+        with:
+          start-args: "--static-ip 192.168.200.200"
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install --user pipx
-        pipx install poetry
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --user pipx
+          pipx install poetry
 
-    - name: Build & Test
-      run: |
-        poetry install
-        poetry run pytest -m "integration"
+      - name: Build & Test
+        run: |
+          poetry install
+          poetry run pytest -m "integration"
