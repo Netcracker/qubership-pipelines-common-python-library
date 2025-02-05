@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging, gitlab, json
+import logging, gitlab
 from time import sleep
 from gitlab import GitlabGetError
 from qubership_pipelines_common_library.v1.execution.exec_info import ExecutionInfo
@@ -88,22 +88,20 @@ class GitlabClient:
         self.gl.projects.get(project_id, lazy=True).files \
             .get(file_path=file_path, ref=ref).delete(branch=ref, commit_message=commit_message)
 
-    def get_latest_commit_id(self, project_path_or_id: str, branch_name: str):
+    def get_latest_commit_id(self, project_id: str, ref: str):
         """"""
-        project = self.gl.projects.get(project_path_or_id, lazy=True)
-        latest_commit = project.commits.list(ref_name=branch_name, per_page=1, get_all=False)[0]
+        project = self.gl.projects.get(project_id, lazy=True)
+        latest_commit = project.commits.list(ref_name=ref, per_page=1, get_all=False)[0]
         return latest_commit.id
 
-    def get_file_info(self, project_path_or_id: str, file_path: str, branch_name: str, required_info: list) -> dict:
-        """"""
-        result_dict = dict()
-        project = self.gl.projects.get(project_path_or_id, lazy=True)
-        file = project.files.get(file_path=file_path, ref=branch_name)
-        file_json = json.loads(file.to_json())
-        for key, value in file_json.items():
-            if key in required_info:
-                result_dict[key] = value
-        return result_dict
+    def get_file_commit_info(self, project_id: str, ref: str, file_path: str):
+        """Returns dict with 'commit_id' and 'last_commit_id' from Gitlab API"""
+        project = self.gl.projects.get(project_id, lazy=True)
+        file = project.files.get(file_path=file_path, ref=ref)
+        return {
+            "commit_id": file.commit_id,
+            "last_commit_id": file.last_commit_id,
+        }
 
     def trigger_pipeline(self, project_id: str, pipeline_params: dict):
         """"""
