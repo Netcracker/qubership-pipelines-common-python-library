@@ -25,7 +25,7 @@ class ExecutionLogger:
         #  Also, file handlers are never removed
         self.path_logs = path_logs
         self.logger = logging.getLogger("execution_logger")
-        self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(logging.DEBUG) # set to the lowest level to allow handlers to capture anything
         # execution logs - only in local logger
         if path_logs:
             handler_exec = logging.FileHandler(os.path.join(path_logs, ExecutionLogger.FILE_NAME_EXECUTION))
