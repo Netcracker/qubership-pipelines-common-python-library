@@ -34,6 +34,17 @@ class SampleExecutionCommand(ExecutionCommand):
         self.context.output_params_save()
 
 
+class ExecutionCommandWithOptionalParams(ExecutionCommand):
+
+    def _validate(self):
+        names = ["paths.input.params", "paths.output.params"]
+        return self.context.validate(names)
+
+    def _execute(self):
+        self.context.output_param_set("params.result", int(self.context.input_param_get("params.empty_param", 123)))
+        self.context.output_params_save()
+
+
 class TestExecCommandV1(unittest.TestCase):
 
     def test_cmd_execution_with_existing_context(self):
@@ -51,6 +62,14 @@ class TestExecCommandV1(unittest.TestCase):
             cmd.run()
         self.assertEqual(1, exit_result.exception.code)
 
+    def test_cmd_execution_with_empty_param_in_context(self):
+        with self.assertRaises(SystemExit) as exit_result:
+            cmd = ExecutionCommandWithOptionalParams('./tests/data/generic-execution-command/valid/context.yaml')
+            cmd.run()
+        self.assertEqual(0, exit_result.exception.code)
+        with open('./tests/data/generic-execution-command/valid/result.yaml', 'r', encoding='utf-8') as result_file:
+            result = yaml.safe_load(result_file)
+            self.assertEqual(123, int(result["params"]["result"]))
 
 if __name__ == '__main__':
     unittest.main()
