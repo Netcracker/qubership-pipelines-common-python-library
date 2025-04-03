@@ -28,3 +28,7 @@
 ::: qubership_pipelines_common_library.v1.webex_client.WebexClient
 
 ---
+
+::: qubership_pipelines_common_library.v1.github_client.GithubClient
+
+---

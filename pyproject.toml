@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "qubership-pipelines-common-library-py39"
-version = "0.1.2"
+version = "0.1.3"
 description = "Qubership Pipelines common library backported for Python 3.9"
 authors = ["Igor Lebedev <lebedev.light@gmail.com>"]
 readme = "README.md"
@@ -19,7 +19,7 @@ http-exceptions = "^0.2.10"
 python-gitlab = "^4.13.0"
 minio = "^7.2.12"
 kubernetes = "^29.0.0"
-webexteamssdk = "^1.7"
+PyGithub = "^2.6.1"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^6.0.0"

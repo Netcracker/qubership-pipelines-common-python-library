@@ -21,7 +21,7 @@ class UtilsDictionary:
             path = path.split(".")
         curr = input_dict
         for key in path:
-            if key not in curr:
+            if key not in curr or curr[key] is None:
                 return def_value
             curr = curr[key]
         return curr
