@@ -47,9 +47,37 @@ class WebexClient:
         self.messages = MessagesAPI(self._session)
         logging.info("Webex Client configured")
 
-    def send_message(self, room_id: str, msg: str = None, attachment_path: str = None):
-        """"""
-        self.messages.create(roomId=room_id, text=msg, files=[attachment_path] if attachment_path else None)
+    def send_message(self,
+                     room_id: str,
+                     msg: str = None,
+                     attachment_path: str = None,
+                     parent_id: str = None,
+                     to_person_id: str = None,
+                     to_person_email: str = None,
+                     markdown: str = None,
+                     **request_parameters
+                     ):
+        """ Post a message to a room.
+
+        Args:
+            room_id(str): The room ID.
+            to_person_id(str): The ID of the recipient when sending a
+                private 1:1 message.
+            to_person_email(str): The email address of the recipient when
+                sending a private 1:1 message.
+            msg(str): The message, in plain text. If `markdown` is
+                specified this parameter may be optionally used to provide
+                alternate text for UI clients that do not support rich text.
+            markdown(str): The message, in Markdown format.
+            attachment_path(str): Path to file that will be attached to a message
+            parent_id(str): The parent message to reply to. This will
+                start or reply to a thread.
+            **request_parameters: Additional request parameters (provides
+                support for parameters that may be added in the future).
+        """
+        self.messages.create(roomId=room_id, text=msg, files=[attachment_path] if attachment_path else None,
+                             parentId=parent_id, toPersonId=to_person_id, toPersonEmail=to_person_email,
+                             markdown=markdown, **request_parameters)
 
 
 class RestSession(object):
