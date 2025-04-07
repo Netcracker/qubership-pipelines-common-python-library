@@ -13,7 +13,10 @@
 # limitations under the License.
 
 import logging
+import requests
+
 from datetime import datetime, timezone
+from pathlib import Path
 from github import Github, Auth
 from time import sleep
 from qubership_pipelines_common_library.v1.execution.exec_info import ExecutionInfo
@@ -129,6 +132,26 @@ class GithubClient:
             sleep(1)
         run.cancel()
         return execution.stop(ExecutionInfo.STATUS_ABORTED)
+
+    def download_workflow_run_artifacts(self, execution: ExecutionInfo, local_dir: str):
+        """"""
+        repo_full_name = self._get_repo_full_name(execution)
+        if not repo_full_name:
+            return execution
+        local_dir_path = Path(local_dir)
+        if not local_dir_path.exists():
+            local_dir_path.mkdir(parents=True, exist_ok=True)
+        run = self.gh.get_repo(repo_full_name).get_workflow_run(int(execution.get_id()))
+        for artifact in run.get_artifacts():
+            local_path = Path(local_dir_path, f"{artifact.name}.zip")
+            (status, headers, _) = artifact.requester.requestBlob("GET", artifact.archive_download_url)
+            if status != 302:
+                logging.error(f"Unexpected status while downloading run artifact {artifact.name}: expected 302, got {status}")
+                continue
+            response = requests.get(headers["location"])
+            with local_path.open('wb') as f:
+                logging.info(f"saving {local_path}...")
+                f.write(response.content)
 
     def _map_status_and_conclusion(self, status: str, conclusion: str, default_status: str):
         logging.info(f"status: {status}, conclusion: {conclusion}")
