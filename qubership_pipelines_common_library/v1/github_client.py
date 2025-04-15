@@ -12,13 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import logging
+import tempfile
+import uuid
+import zipfile
 import requests
 
 from datetime import datetime, timezone
 from pathlib import Path
 from github import Github, Auth
 from time import sleep
+from github.Artifact import Artifact
+from github.PaginatedList import PaginatedList
+from github.WorkflowRun import WorkflowRun
+
 from qubership_pipelines_common_library.v1.execution.exec_info import ExecutionInfo
 
 
@@ -39,6 +47,10 @@ class GithubClient:
     CONCLUSION_ACTION_REQUIRED = "action_required"
 
     BREAK_STATUS_LIST = [STATUS_COMPLETED, STATUS_FAILURE]
+    DISPATCH_PARAMS_LIMIT = 10
+    DEFAULT_UUID_ARTIFACT_NAME = "input_params"
+    DEFAULT_UUID_FILE_NAME = "input_params.json"
+    DEFAULT_UUID_PARAM_NAME = "workflow_run_uuid"
 
     def __init__(self, token: str = None, api_url: str = None, **kwargs):
         """
@@ -55,9 +67,23 @@ class GithubClient:
         logging.info("Github Client configured")
 
     def trigger_workflow(self, owner: str, repo_name: str, workflow_file_name: str, branch: str, pipeline_params: dict,
-                         timeout_seconds: float = 30.0, wait_seconds: float = 3.0):
-        """ There's currently no reliable way to get ID of triggered workflow, dispatch is async and doesn't return anything
-        As a workaround - we start looking for newly created runs of that workflow, filtering them as much as possible """
+                         timeout_seconds: float = 30.0, wait_seconds: float = 3.0, find_via_uuid: bool = False,
+                         uuid_param_name: str = DEFAULT_UUID_PARAM_NAME,
+                         uuid_artifact_name: str = DEFAULT_UUID_ARTIFACT_NAME, uuid_file_name: str = DEFAULT_UUID_FILE_NAME):
+        """ There's currently no reliable way to get ID of triggered workflow, without adding explicit ID as an input parameter to each workflow, dispatch is async and doesn't return anything
+        This method supports two different ways to find and return started workflow:
+            Unreliable - where we start looking for newly created runs of that workflow, filtering them as much as possible (might return wrong run in a concurrent scenario)
+            Reliable:
+                you need to add specific explicit ID param to the workflow you are triggering (e.g. 'workflow_run_uuid'),
+                said workflow should have a step where it will save its input params,
+                and then you run this method with 'find_via_uuid = True'
+        """
+        if pipeline_params is None:
+            pipeline_params = {}
+        if find_via_uuid:
+            pipeline_params[uuid_param_name] = str(uuid.uuid4())
+        if len(pipeline_params) > GithubClient.DISPATCH_PARAMS_LIMIT:
+            logging.warning(f"Trying to dispatch workflow with more than {GithubClient.DISPATCH_PARAMS_LIMIT} pipeline_params, GitHub does not support it!")
         workflow = self.gh.get_repo(f"{owner}/{repo_name}", lazy=True).get_workflow(workflow_file_name)
         dispatch_time = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         execution = ExecutionInfo()
@@ -65,14 +91,22 @@ class GithubClient:
         logging.info(f"Workflow Dispatch event for {workflow_file_name} is sent, workflow is created: {is_created}")
         if is_created:
             current_timeout = 0
+            already_checked_runs = []
             while current_timeout < timeout_seconds:
                 runs_list = workflow.get_runs(event="workflow_dispatch", created=f">={dispatch_time}", branch=branch)
                 if runs_list.totalCount > 0:
-                    created_run = runs_list.get_page(0).pop()
-                    logging.info(f"Pipeline successfully started at {created_run.html_url}")
-                    return execution.with_name(created_run.name).with_id(created_run.id) \
-                        .with_url(created_run.html_url).with_params(pipeline_params) \
-                        .start()
+                    if find_via_uuid:
+                        created_run = self._find_run_via_uuid_input_param(runs_list, already_checked_runs,
+                                                                          uuid_artifact_name, uuid_file_name,
+                                                                          uuid_param_name,
+                                                                          pipeline_params[uuid_param_name])
+                    else:
+                        created_run = runs_list.get_page(0).pop()
+                    if created_run:
+                        logging.info(f"Pipeline successfully started at {created_run.html_url}")
+                        return execution.with_name(created_run.name).with_id(created_run.id) \
+                            .with_url(created_run.html_url).with_params(pipeline_params) \
+                            .start()
                 current_timeout += wait_seconds
                 logging.info(f"Waiting for triggered workflow run to start... Timeout {wait_seconds} seconds")
                 sleep(wait_seconds)
@@ -143,15 +177,60 @@ class GithubClient:
             local_dir_path.mkdir(parents=True, exist_ok=True)
         run = self.gh.get_repo(repo_full_name).get_workflow_run(int(execution.get_id()))
         for artifact in run.get_artifacts():
-            local_path = Path(local_dir_path, f"{artifact.name}.zip")
-            (status, headers, _) = artifact.requester.requestBlob("GET", artifact.archive_download_url)
-            if status != 302:
-                logging.error(f"Unexpected status while downloading run artifact {artifact.name}: expected 302, got {status}")
+            self._save_artifact_to_dir(artifact, local_dir_path)
+
+    def get_workflow_run_input_params(self, run: WorkflowRun, artifact_name: str = DEFAULT_UUID_ARTIFACT_NAME,
+                                      file_name: str = DEFAULT_UUID_FILE_NAME):
+        """"""
+        for artifact in run.get_artifacts():
+            if artifact.name == artifact_name:
+                return self._get_input_params_from_artifact(artifact, file_name)
+        logging.info(f"Could not find input_params artifact for run {run.id}")
+        return {}
+
+    def _find_run_via_uuid_input_param(self, runs_list: PaginatedList[WorkflowRun], already_checked_runs: list,
+                                       uuid_artifact_name: str, uuid_file_name: str,
+                                       uuid_param_name: str, uuid_param_value: str):
+        for run in runs_list:
+            if run.id in already_checked_runs:
                 continue
-            response = requests.get(headers["location"])
-            with local_path.open('wb') as f:
-                logging.info(f"saving {local_path}...")
-                f.write(response.content)
+            for artifact in run.get_artifacts():
+                if artifact.name == uuid_artifact_name:
+                    if self._check_input_params_uuid(artifact, uuid_file_name, uuid_param_name, uuid_param_value):
+                        logging.info(f"Found workflow run with expected UUID: {run.id} with {uuid_param_name}={uuid_param_value}")
+                        return run
+                    else:
+                        already_checked_runs.append(run.id)
+                        break
+        return None
+
+    def _check_input_params_uuid(self, artifact: Artifact, uuid_file_name: str, uuid_param_name: str, uuid_param_value: str):
+        try:
+            input_params = self._get_input_params_from_artifact(artifact, uuid_file_name)
+            return input_params.get(uuid_param_name) == uuid_param_value
+        except Exception as ex:
+            logging.error(f"Exception when downloading and checking artifact ({artifact.name}): {ex}")
+        return False
+
+    def _get_input_params_from_artifact(self, artifact: Artifact, file_name: str):
+        with tempfile.TemporaryDirectory() as temp_dirname:
+            artifact_path = self._save_artifact_to_dir(artifact, temp_dirname)
+            with zipfile.ZipFile(artifact_path) as zf:
+                zf.extractall(temp_dirname)
+                with open(Path(temp_dirname, file_name)) as input_params_file:
+                    return json.load(input_params_file)
+
+    def _save_artifact_to_dir(self, artifact: Artifact, dirname):
+        local_path = Path(dirname, f"{artifact.name}.zip")
+        (status, headers, _) = artifact.requester.requestBlob("GET", artifact.archive_download_url)
+        if status != 302:
+            logging.error(f"Unexpected status while downloading run artifact {artifact.name}: expected 302, got {status}")
+            return None
+        response = requests.get(headers["location"])
+        with local_path.open('wb') as f:
+            logging.info(f"saving {local_path}...")
+            f.write(response.content)
+            return local_path
 
     def _map_status_and_conclusion(self, status: str, conclusion: str, default_status: str):
         logging.info(f"status: {status}, conclusion: {conclusion}")

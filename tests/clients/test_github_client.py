@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from qubership_pipelines_common_library.v1.execution.exec_info import ExecutionInfo
 from qubership_pipelines_common_library.v1.github_client import GithubClient
 
@@ -42,6 +42,17 @@ class TestGithubClientV1(unittest.TestCase):
         self.gh_client.get_workflow_run_status(execution)
 
         self.assertEqual(ExecutionInfo.STATUS_NOT_STARTED, execution.get_status())
+
+    @patch("github.WorkflowRun.WorkflowRun")
+    def test_get_workflow_run_input_params__returns_params(self, workflow_run_mock):
+        artifact_mock = MagicMock()
+        artifact_mock.name = GithubClient.DEFAULT_UUID_ARTIFACT_NAME
+        workflow_run_mock.get_artifacts.return_value = [artifact_mock]
+        self.gh_client._save_artifact_to_dir = MagicMock(return_value = f"./tests/data/{GithubClient.DEFAULT_UUID_ARTIFACT_NAME}.zip")
+
+        params = self.gh_client.get_workflow_run_input_params(workflow_run_mock)
+
+        self.assertEqual({"test_input_param": "123", "workflow_run_uuid": "e0228fab-6be5-46c4-9024-3ddc3e229b41"}, params)
 
 
 if __name__ == '__main__':
