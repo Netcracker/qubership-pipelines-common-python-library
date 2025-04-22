@@ -30,8 +30,8 @@ class TestGitClientV1(unittest.TestCase):
     def test_clone_generates_correct_repo_url(self, clone_repo_mock):
         temp_path = "temp/repo_temp_dir"
         branch = "main"
-        self.client.clone("quber/tests", branch, temp_path)
-        clone_repo_mock.assert_called_with(f"https://{self.user}:{self.token}@git.qubership.org/quber/tests", temp_path, branch=branch)
+        self.client.clone("quber/tests", branch, temp_path, depth=1)
+        clone_repo_mock.assert_called_with(f"https://{self.user}:{self.token}@git.qubership.org/quber/tests", temp_path, branch=branch, depth=1)
 
 
 if __name__ == '__main__':
