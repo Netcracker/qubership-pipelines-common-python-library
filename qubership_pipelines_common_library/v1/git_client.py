@@ -39,7 +39,7 @@ class GitClient:
         self.branch = None  # last processed branch
         logging.info("Git Client configured for %s", self.host)
 
-    def clone(self, repo_path: str, branch: str, temp_path: str):
+    def clone(self, repo_path: str, branch: str, temp_path: str, **kwargs):
         """"""
         repo_path = repo_path.lstrip("/").rstrip("/")
         if not repo_path:
@@ -56,6 +56,7 @@ class GitClient:
             self._gen_repo_auth_url(self.host, self.username, self.password, self.repo_path),
             temp_path,
             branch=branch,
+            **kwargs
         )
 
     def commit_and_push(self, commit_message: str):
