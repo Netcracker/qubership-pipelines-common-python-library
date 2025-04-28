@@ -22,3 +22,7 @@ class UtilsString:
         parts = re.split(r'[\n,;]', input_str)
         # trim whitespace from each part
         return [part.strip() for part in parts if part.strip()]
+
+    @staticmethod
+    def convert_to_bool(input_str):
+        return str(input_str).strip().lower() == "true"

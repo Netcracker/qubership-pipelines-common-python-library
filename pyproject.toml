@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "qubership-pipelines-common-library-py39"
-version = "0.1.5"
+version = "0.1.6"
 description = "Qubership Pipelines common library backported for Python 3.9"
 authors = ["Igor Lebedev <lebedev.light@gmail.com>"]
 readme = "README.md"
