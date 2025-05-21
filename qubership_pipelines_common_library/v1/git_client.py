@@ -60,6 +60,10 @@ class GitClient:
         )
 
     def commit_and_push(self, commit_message: str):
+        self.commit(commit_message)
+        self.push()
+
+    def commit(self, commit_message: str):
         """"""
         if not self._is_cloned():
             raise Exception("Cannot commit without preliminary cloning")
@@ -73,7 +77,20 @@ class GitClient:
             self.repo.config_writer().set_value("user", "name", self.username).release()
             self.repo.config_writer().set_value("user", "email", self.email).release()
             self.repo.git.commit('-a', '-m', commit_message)
-            self.repo.git.push(self.repo.remote().name, self.repo.active_branch.name)
+
+    def push(self):
+        """"""
+        if not self._is_cloned():
+            raise Exception("Cannot push without preliminary cloning")
+        logging.debug(f"Push into remote = {self.repo.remote().name} and branch = {self.repo.active_branch.name}")
+        self.repo.git.push(self.repo.remote().name, self.repo.active_branch.name)
+
+    def pull(self, **kwargs):
+        """"""
+        if not self._is_cloned():
+            raise Exception("Cannot pull without preliminary cloning")
+        logging.debug(f"Pull with options: {kwargs}")
+        self.repo.git.pull(**kwargs)
 
     def get_file_content_utf8(self, relative_path: str):
         """"""
