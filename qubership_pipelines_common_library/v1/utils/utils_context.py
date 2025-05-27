@@ -38,9 +38,11 @@ def init_context(context_path):
     UtilsFile.write_yaml(context_path, context)
 
 
-def create_execution_context(input_params: dict = None, folder_path: str = None, parent_context_to_reuse: ExecutionContext = None):
+def create_execution_context(input_params: dict = None, input_params_secure: dict = None, folder_path: str = None,
+                             parent_context_to_reuse: ExecutionContext = None):
     """params:
         input_params: dict (will be merged into created input params)
+        input_params_secure: dict (will be merged into created secure input params)
         folder_path: str (optional, will generate new temp)
         parent_context_to_reuse: ExecutionContext (optional, to propagate existing input params)
     """
@@ -71,6 +73,7 @@ def create_execution_context(input_params: dict = None, folder_path: str = None,
 
     input_params_file.content = recursive_merge(input_params_file.content, input_params)
     input_params_file.save(context_file.get("paths.input.params"))
+    input_params_secure_file.content = recursive_merge(input_params_secure_file.content, input_params_secure)
     input_params_secure_file.save(context_file.get("paths.input.params_secure"))
 
     ExecutionContextFile().init_params().save(context_file.get("paths.output.params"))
