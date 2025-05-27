@@ -25,11 +25,11 @@ class ExecutionCommand:
     SUCCESS_MSG = "Status: SUCCESS"
     FAILURE_MSG = "Status: FAILURE"
 
-    def __init__(self, context_path: str = None, input_params: dict = None, folder_path: str = None,
-                 parent_context_to_reuse: ExecutionContext = None):
+    def __init__(self, context_path: str = None, input_params: dict = None, input_params_secure: dict = None,
+                 folder_path: str = None, parent_context_to_reuse: ExecutionContext = None):
         if not context_path:
-            context_path = create_execution_context(input_params=input_params, folder_path=folder_path,
-                                                    parent_context_to_reuse=parent_context_to_reuse)
+            context_path = create_execution_context(input_params=input_params, input_params_secure=input_params_secure,
+                                                    folder_path=folder_path, parent_context_to_reuse=parent_context_to_reuse)
         self.context = ExecutionContext(context_path)
 
     def run(self):
