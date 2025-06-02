@@ -36,6 +36,6 @@ pip install qubership-pipelines-common-library-py39
 
 ## Sample implementation
 
-Sample implementation of CLI commands using this library is available at [Quber CLI](https://github.com/LightlessOne/Quber-CLI?tab=readme-ov-file)
+Sample implementation of CLI commands using this library is available at [qubership-pipelines-cli-command-samples](https://github.com/Netcracker/qubership-pipelines-cli-command-samples)
 
-It includes reference python implementation along with [Development Guide](https://github.com/LightlessOne/Quber-CLI/blob/master/docs/development.md)
+It includes reference python implementation along with the [Development Guide](https://github.com/Netcracker/qubership-pipelines-cli-command-samples/blob/main/docs/development.md)
