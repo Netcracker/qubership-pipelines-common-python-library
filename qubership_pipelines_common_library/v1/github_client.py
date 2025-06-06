@@ -19,13 +19,10 @@ import uuid
 import zipfile
 import requests
 
+from ghapi.all import GhApi
 from datetime import datetime, timezone
 from pathlib import Path
-from github import Github, Auth
 from time import sleep
-from github.Artifact import Artifact
-from github.PaginatedList import PaginatedList
-from github.WorkflowRun import WorkflowRun
 
 from qubership_pipelines_common_library.v1.execution.exec_info import ExecutionInfo
 
@@ -59,11 +56,7 @@ class GithubClient:
             api_url (str): Optional Github Enterprise API URL, leave empty if using github.com
             **kwargs (Any): will be passed into Github API constructor
         """
-        self.auth = Auth.Token(token) if token else None
-        if api_url:
-            self.gh = Github(base_url=api_url, auth=self.auth, **kwargs)
-        else:
-            self.gh = Github(auth=self.auth, **kwargs)
+        self.gh = GhApi(token=token, gh_host=api_url, **kwargs)
         logging.info("Github Client configured")
 
     def trigger_workflow(self, owner: str, repo_name: str, workflow_file_name: str, branch: str, pipeline_params: dict,
@@ -84,24 +77,29 @@ class GithubClient:
             pipeline_params[uuid_param_name] = str(uuid.uuid4())
         if len(pipeline_params) > GithubClient.DISPATCH_PARAMS_LIMIT:
             logging.warning(f"Trying to dispatch workflow with more than {GithubClient.DISPATCH_PARAMS_LIMIT} pipeline_params, GitHub does not support it!")
-        workflow = self.gh.get_repo(f"{owner}/{repo_name}", lazy=True).get_workflow(workflow_file_name)
         dispatch_time = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         execution = ExecutionInfo()
-        is_created = workflow.create_dispatch(ref=branch, inputs=pipeline_params)
+        try:
+            self.gh.actions.create_workflow_dispatch(owner, repo_name, workflow_file_name, branch, pipeline_params)
+            is_created = True
+        except Exception as ex:
+            logging.error(f"Exception when triggering workflow: {ex}")
+            is_created = False
         logging.info(f"Workflow Dispatch event for {workflow_file_name} is sent, workflow is created: {is_created}")
         if is_created:
             current_timeout = 0
             already_checked_runs = []
             while current_timeout < timeout_seconds:
-                runs_list = workflow.get_runs(event="workflow_dispatch", created=f">={dispatch_time}", branch=branch)
-                if runs_list.totalCount > 0:
+                runs_list = self.gh.actions.list_workflow_runs(owner, repo_name, workflow_file_name, event="workflow_dispatch", created=f">={dispatch_time}", branch=branch)
+                if runs_list.total_count > 0:
                     if find_via_uuid:
-                        created_run = self._find_run_via_uuid_input_param(runs_list, already_checked_runs,
+                        created_run = self._find_run_via_uuid_input_param(owner, repo_name, runs_list.workflow_runs,
+                                                                          already_checked_runs,
                                                                           uuid_artifact_name, uuid_file_name,
                                                                           uuid_param_name,
                                                                           pipeline_params[uuid_param_name])
                     else:
-                        created_run = runs_list.get_page(0).pop()
+                        created_run = runs_list.workflow_runs[0]
                     if created_run:
                         logging.info(f"Pipeline successfully started at {created_run.html_url}")
                         return execution.with_name(created_run.name).with_id(created_run.id) \
@@ -117,10 +115,10 @@ class GithubClient:
 
     def get_workflow_run_status(self, execution: ExecutionInfo):
         """"""
-        repo_full_name = self._get_repo_full_name(execution)
-        if not repo_full_name:
+        owner_and_repo_name = self._get_owner_and_repo(execution)
+        if not owner_and_repo_name:
             return execution.with_status(ExecutionInfo.STATUS_UNKNOWN)
-        run = self.gh.get_repo(repo_full_name).get_workflow_run(int(execution.get_id()))
+        run = self.gh.actions.get_workflow_run(owner_and_repo_name[0], owner_and_repo_name[1], execution.get_id())
         if run:
             execution.with_status(self._map_status_and_conclusion(run.status, run.conclusion, ExecutionInfo.STATUS_UNKNOWN))
         else:
@@ -133,13 +131,13 @@ class GithubClient:
         """"""
         if break_status_list is None:
             break_status_list = self.BREAK_STATUS_LIST
-        repo_full_name = self._get_repo_full_name(execution)
-        if not repo_full_name:
+        owner_and_repo_name = self._get_owner_and_repo(execution)
+        if not owner_and_repo_name:
             return execution.with_status(ExecutionInfo.STATUS_UNKNOWN)
         timeout = 0
         while timeout < timeout_seconds:
             try:
-                run = self.gh.get_repo(repo_full_name).get_workflow_run(int(execution.get_id()))
+                run = self.gh.actions.get_workflow_run(owner_and_repo_name[0], owner_and_repo_name[1], execution.get_id())
                 execution.with_status(self._map_status_and_conclusion(run.status, run.conclusion, ExecutionInfo.STATUS_UNKNOWN))
                 if run.status in break_status_list:
                     logging.info(f"Workflow Run status: '{run.status}' is present in input break statuses list. Stop waiting.")
@@ -155,46 +153,54 @@ class GithubClient:
 
     def cancel_workflow_run_execution(self, execution: ExecutionInfo, timeout: float = 1.0):
         """"""
-        repo_full_name = self._get_repo_full_name(execution)
-        if not repo_full_name:
+        owner_and_repo_name = self._get_owner_and_repo(execution)
+        if not owner_and_repo_name:
             return execution
-        run = self.gh.get_repo(repo_full_name).get_workflow_run(int(execution.get_id()))
         counter = 0
         while counter < timeout:
             counter += 1
             logging.info("Waiting pipeline execution timeout 1 second")
             sleep(1)
-        run.cancel()
+        self.gh.actions.cancel_workflow_run(owner_and_repo_name[0], owner_and_repo_name[1], execution.get_id())
         return execution.stop(ExecutionInfo.STATUS_ABORTED)
 
     def download_workflow_run_artifacts(self, execution: ExecutionInfo, local_dir: str):
         """"""
-        repo_full_name = self._get_repo_full_name(execution)
-        if not repo_full_name:
+        owner_and_repo_name = self._get_owner_and_repo(execution)
+        if not owner_and_repo_name:
             return execution
         local_dir_path = Path(local_dir)
         if not local_dir_path.exists():
             local_dir_path.mkdir(parents=True, exist_ok=True)
-        run = self.gh.get_repo(repo_full_name).get_workflow_run(int(execution.get_id()))
-        for artifact in run.get_artifacts():
+        artifacts = self.gh.actions.list_workflow_run_artifacts(owner_and_repo_name[0], owner_and_repo_name[1], execution.get_id(), 100)
+        for artifact in artifacts.artifacts:
             self._save_artifact_to_dir(artifact, local_dir_path)
 
-    def get_workflow_run_input_params(self, run: WorkflowRun, artifact_name: str = DEFAULT_UUID_ARTIFACT_NAME,
+    def get_workflow_run_input_params(self, execution: ExecutionInfo, artifact_name: str = DEFAULT_UUID_ARTIFACT_NAME,
                                       file_name: str = DEFAULT_UUID_FILE_NAME):
         """"""
-        for artifact in run.get_artifacts():
+        owner_and_repo_name = self._get_owner_and_repo(execution)
+        if not owner_and_repo_name:
+            return {}
+        artifacts = self.gh.actions.list_workflow_run_artifacts(owner_and_repo_name[0], owner_and_repo_name[1], execution.get_id(), 100)
+        for artifact in artifacts.artifacts:
             if artifact.name == artifact_name:
                 return self._get_input_params_from_artifact(artifact, file_name)
-        logging.info(f"Could not find input_params artifact for run {run.id}")
+        logging.info(f"Could not find input_params artifact for run {execution.get_id()}")
         return {}
 
-    def _find_run_via_uuid_input_param(self, runs_list: PaginatedList[WorkflowRun], already_checked_runs: list,
+    def get_repo_default_branch(self, owner: str, repo_name: str):
+        return self.gh.repos.get(owner, repo_name).default_branch
+
+    def _find_run_via_uuid_input_param(self, owner: str, repo_name: str,
+                                       workflow_runs: list, already_checked_runs: list,
                                        uuid_artifact_name: str, uuid_file_name: str,
                                        uuid_param_name: str, uuid_param_value: str):
-        for run in runs_list:
+        for run in workflow_runs:
             if run.id in already_checked_runs:
                 continue
-            for artifact in run.get_artifacts():
+            artifacts = self.gh.actions.list_workflow_run_artifacts(owner, repo_name, run.id, 100)
+            for artifact in artifacts.artifacts:
                 if artifact.name == uuid_artifact_name:
                     if self._check_input_params_uuid(artifact, uuid_file_name, uuid_param_name, uuid_param_value):
                         logging.info(f"Found workflow run with expected UUID: {run.id} with {uuid_param_name}={uuid_param_value}")
@@ -204,7 +210,7 @@ class GithubClient:
                         break
         return None
 
-    def _check_input_params_uuid(self, artifact: Artifact, uuid_file_name: str, uuid_param_name: str, uuid_param_value: str):
+    def _check_input_params_uuid(self, artifact, uuid_file_name: str, uuid_param_name: str, uuid_param_value: str):
         try:
             input_params = self._get_input_params_from_artifact(artifact, uuid_file_name)
             return input_params.get(uuid_param_name) == uuid_param_value
@@ -212,7 +218,7 @@ class GithubClient:
             logging.error(f"Exception when downloading and checking artifact ({artifact.name}): {ex}")
         return False
 
-    def _get_input_params_from_artifact(self, artifact: Artifact, file_name: str):
+    def _get_input_params_from_artifact(self, artifact, file_name: str):
         with tempfile.TemporaryDirectory() as temp_dirname:
             artifact_path = self._save_artifact_to_dir(artifact, temp_dirname)
             with zipfile.ZipFile(artifact_path) as zf:
@@ -220,13 +226,13 @@ class GithubClient:
                 with open(Path(temp_dirname, file_name)) as input_params_file:
                     return json.load(input_params_file)
 
-    def _save_artifact_to_dir(self, artifact: Artifact, dirname):
+    def _save_artifact_to_dir(self, artifact, dirname):
         local_path = Path(dirname, f"{artifact.name}.zip")
-        (status, headers, _) = artifact.requester.requestBlob("GET", artifact.archive_download_url)
-        if status != 302:
-            logging.error(f"Unexpected status while downloading run artifact {artifact.name}: expected 302, got {status}")
+        redirect_response = requests.get(artifact.archive_download_url, headers=self.gh.headers, allow_redirects=False)
+        if redirect_response.status_code != 302:
+            logging.error(f"Unexpected status while downloading run artifact {artifact.name}: expected 302, got {redirect_response.status_code}")
             return None
-        response = requests.get(headers["location"])
+        response = requests.get(redirect_response.headers["location"])
         with local_path.open('wb') as f:
             logging.info(f"saving {local_path}...")
             f.write(response.content)
@@ -258,3 +264,10 @@ class GithubClient:
             return None
         url_parts = execution.get_url().split("://")[1].split("/")
         return f"{url_parts[1]}/{url_parts[2]}"
+
+    def _get_owner_and_repo(self, execution: ExecutionInfo):
+        if not execution.get_id() or not execution.get_url():
+            logging.error("Can't get workflow run - empty run id or url in ExecutionInfo!")
+            return None
+        url_parts = execution.get_url().split("://")[1].split("/")
+        return url_parts[1], url_parts[2]
