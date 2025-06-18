@@ -23,34 +23,36 @@ class TestGithubClientV1(unittest.TestCase):
     def setUp(self):
         self.gh_client = GithubClient()
 
-    @patch("github.MainClass.Github.get_repo")
-    def test_get_workflow_run_status__returns_success_status(self, get_repo_mock):
-        get_repo_mock().get_workflow_run().status = GithubClient.STATUS_COMPLETED
-        get_repo_mock().get_workflow_run().conclusion = GithubClient.CONCLUSION_SUCCESS
+    @patch("ghapi.core.GhApi.__call__")
+    def test_get_workflow_run_status__returns_success_status(self, get_workflow_run_mock):
+        get_workflow_run_mock().status = GithubClient.STATUS_COMPLETED
+        get_workflow_run_mock().conclusion = GithubClient.CONCLUSION_SUCCESS
         execution = ExecutionInfo().with_id("123").with_url("https://github.com/Netcracker/qubership-pipelines-common-python-library")
 
         self.gh_client.get_workflow_run_status(execution)
 
         self.assertEqual(ExecutionInfo.STATUS_SUCCESS, execution.get_status())
 
-    @patch("github.MainClass.Github.get_repo")
-    def test_get_workflow_run_status__returns_not_started_status(self, get_repo_mock):
-        get_repo_mock().get_workflow_run().status = GithubClient.STATUS_PENDING
-        get_repo_mock().get_workflow_run().conclusion = None
+    @patch("ghapi.core.GhApi.__call__")
+    def test_get_workflow_run_status__returns_not_started_status(self, get_workflow_run_mock):
+        get_workflow_run_mock().status = GithubClient.STATUS_PENDING
+        get_workflow_run_mock().conclusion = None
         execution = ExecutionInfo().with_id("123").with_url("https://github.com/Netcracker/qubership-pipelines-common-python-library")
 
         self.gh_client.get_workflow_run_status(execution)
 
         self.assertEqual(ExecutionInfo.STATUS_NOT_STARTED, execution.get_status())
 
-    @patch("github.WorkflowRun.WorkflowRun")
-    def test_get_workflow_run_input_params__returns_params(self, workflow_run_mock):
+    @patch("ghapi.core.GhApi.__call__")
+    def test_get_workflow_run_input_params__returns_params(self, ghapi_mock):
         artifact_mock = MagicMock()
         artifact_mock.name = GithubClient.DEFAULT_UUID_ARTIFACT_NAME
-        workflow_run_mock.get_artifacts.return_value = [artifact_mock]
+        artifacts_mock = MagicMock()
+        artifacts_mock.artifacts = [artifact_mock]
+        ghapi_mock.return_value = artifacts_mock
         self.gh_client._save_artifact_to_dir = MagicMock(return_value = f"./tests/data/{GithubClient.DEFAULT_UUID_ARTIFACT_NAME}.zip")
 
-        params = self.gh_client.get_workflow_run_input_params(workflow_run_mock)
+        params = self.gh_client.get_workflow_run_input_params(ghapi_mock)
 
         self.assertEqual({"test_input_param": "123", "workflow_run_uuid": "e0228fab-6be5-46c4-9024-3ddc3e229b41"}, params)
 

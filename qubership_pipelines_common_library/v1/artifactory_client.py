@@ -13,8 +13,10 @@
 # limitations under the License.
 
 import logging
-from pyartifactory import Artifactory
-from pyartifactory.exception import PropertyNotFoundError
+from dataclasses import dataclass
+
+import requests
+from requests.auth import HTTPBasicAuth
 
 
 class ArtifactoryClient:
@@ -30,23 +32,88 @@ class ArtifactoryClient:
         self.url = params.get("url")
         self.user = params.get("username")
         self.token = params.get("password")
-        self.artifactory = Artifactory(url=self.url, auth=(self.user, self.token), api_version=1)
+        self.artifactory = ArtifactoryAPI(self.url, HTTPBasicAuth(self.user, self.token))
         logging.info("Artifactory Client configured for %s", params.get("url"))
 
     def get_artifact_properties(self, path_to_artifact: str):
         """"""
         try:
-            properties = self.artifactory.artifacts.properties(artifact_path=path_to_artifact)
-        except PropertyNotFoundError:
+            properties = self.artifactory.get_artifact_properties(artifact_path=path_to_artifact)
+        except ArtifactoryError:
             logging.error("There are not properties for artifact %s", path_to_artifact)
             properties = None
         return properties
 
     def get_folder_files_list(self, path_to_folder: str):
         """"""
-        return self.artifactory.artifacts.list(artifact_path=path_to_folder).files
+        return self.artifactory.get_files_list(artifact_path=path_to_folder)
 
     def get_artifact_content_by_url(self, path_to_file: str):
         """"""
-        file_content = self.artifactory.artifacts.download(artifact_path=path_to_file)
-        return file_content.read_text("utf-8")
+        return self.artifactory.get_file_content(artifact_path=path_to_file)
+
+
+class ArtifactoryAPI:
+    def __init__(self, api_url: str, auth, verify=False):
+        self.api_url = api_url.rstrip('/')
+        self._session = requests.session()
+        self._session.verify = False
+        if auth:
+            self._session.auth = auth
+
+    def _get(self, url):
+        response = self._session.get(url)
+        response.raise_for_status()
+        return response
+
+    def get_artifact_info(self, artifact_path: str):
+        try:
+            response = self._get(f"{self.api_url}/api/storage/{artifact_path}").json()
+            artifact_info = ArtifactInfo(repo=response['repo'], path=response['path'])
+            return artifact_info
+        except requests.exceptions.HTTPError as error:
+            raise ArtifactoryError from error
+
+    def get_artifact_properties(self, artifact_path: str):
+        try:
+            response = self._get(f"{self.api_url}/api/storage/{artifact_path}?properties").json()
+            return ArtifactProperties(properties=response['properties'])
+        except requests.exceptions.HTTPError as error:
+            raise ArtifactoryError from error
+
+    def get_files_list(self, artifact_path: str):
+        try:
+            response = self._get(f"{self.api_url}/api/storage/{artifact_path}?list&deep=1&listFolders=1").json()
+            return [ArtifactListEntry(uri=f['uri'], size=int(f['size']), folder=f['folder'] == True) for f in
+                    response['files']]
+        except requests.exceptions.HTTPError as error:
+            raise ArtifactoryError from error
+
+    def get_file_content(self, artifact_path: str):
+        try:
+            info = self.get_artifact_info(artifact_path)
+            return self._get(f"{self.api_url}/{info.repo}{info.path}").content.decode("utf-8")
+        except requests.exceptions.HTTPError as error:
+            raise ArtifactoryError from error
+
+
+class ArtifactoryError(Exception):
+    pass
+
+
+@dataclass
+class ArtifactInfo:
+    repo: str
+    path: str
+
+
+@dataclass
+class ArtifactProperties:
+    properties: dict
+
+
+@dataclass
+class ArtifactListEntry:
+    uri: str
+    size: int
+    folder: bool
