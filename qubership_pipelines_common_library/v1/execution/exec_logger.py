@@ -18,6 +18,8 @@ import logging, os
 class ExecutionLogger:
     FILE_NAME_EXECUTION = "execution.log"
     FILE_NAME_FULL = "full.log"
+    EXECUTION_LOG_LEVEL = logging.INFO
+    FULL_LOG_LEVEL = logging.DEBUG
     DEFAULT_FORMAT = u'[%(asctime)s] [%(levelname)-5s] [class=%(filename)s:%(lineno)-3s] %(message)s'
 
     def __init__(self, path_logs):
@@ -26,18 +28,20 @@ class ExecutionLogger:
         self.path_logs = path_logs
         self.logger = logging.getLogger("execution_logger")
         self.logger.setLevel(logging.DEBUG) # set to the lowest level to allow handlers to capture anything
-        # execution logs - only in local logger
         if path_logs:
+            # execution logs - only in local logger
             handler_exec = logging.FileHandler(os.path.join(path_logs, ExecutionLogger.FILE_NAME_EXECUTION))
-            handler_exec.setLevel(logging.INFO)
+            handler_exec.setLevel(ExecutionLogger.EXECUTION_LOG_LEVEL)
             handler_exec.setFormatter(logging.Formatter(ExecutionLogger.DEFAULT_FORMAT))
             self.logger.addHandler(handler_exec)
-        # full logs - attach to a global logger
-        if path_logs:
+
+            # full logs - attach to a global logger
             handler_full = logging.FileHandler(os.path.join(path_logs, ExecutionLogger.FILE_NAME_FULL))
-            handler_full.setLevel(logging.DEBUG)
+            handler_full.setLevel(ExecutionLogger.FULL_LOG_LEVEL)
             handler_full.setFormatter(logging.Formatter(ExecutionLogger.DEFAULT_FORMAT))
+            logging.getLogger().propagate = False
             logging.getLogger().addHandler(handler_full)
+        self.logger.propagate = True
 
     def info(self, msg, *args, **kwargs):
         self.logger.info(msg, *args, **kwargs)
