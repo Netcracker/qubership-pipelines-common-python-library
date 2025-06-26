@@ -59,7 +59,25 @@ class GitClient:
             **kwargs
         )
 
+    def clone_repo_from_commit_hash(self, repo_path: str, commit_hash: str, temp_path: str):
+        """"""
+        repo_path = repo_path.lstrip("/").rstrip("/")
+        if not repo_path:
+            raise Exception("Repository path should be defined")
+        if not commit_hash:
+            raise Exception("Commit hash should be defined")
+        if not temp_path:
+            raise Exception("Temporary path should be defined")
+        self._cleanup_resources()
+        self.repo_path = repo_path
+        self.temp_path = temp_path
+        self.repo = Repo.init(path=temp_path)
+        self.repo.create_remote(name="origin", url=self._gen_repo_auth_url(self.host, self.username, self.password, self.repo_path))
+        self.repo.git.fetch("--depth", "1", "origin", commit_hash)
+        self.repo.git.checkout("FETCH_HEAD")
+
     def commit_and_push(self, commit_message: str):
+        """"""
         self.commit(commit_message)
         self.push()
 
