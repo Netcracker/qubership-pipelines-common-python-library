@@ -9,6 +9,7 @@ theme:
 nav:
   - Home: index.md
   - Clients: clients.md
+  - Commands: commands.md
 
 plugins:
   - search

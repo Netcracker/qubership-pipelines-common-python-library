@@ -23,6 +23,11 @@ class ExecutionLogger:
     DEFAULT_FORMAT = u'[%(asctime)s] [%(levelname)-5s] [class=%(filename)s:%(lineno)-3s] %(message)s'
 
     def __init__(self, path_logs):
+        """
+        Default logger used by `ExecutionCommands`, implicitly initialized when using Context.
+        Reference to it is available from instance of `ExecutionContext`.
+        Provides common logging methods of different log levels - e.g. `debug`, `info`, `error`
+        """
         # todo: Currently all commands (if more than one are invoked in one go) will reuse same logger
         #  Also, file handlers are never removed
         self.path_logs = path_logs

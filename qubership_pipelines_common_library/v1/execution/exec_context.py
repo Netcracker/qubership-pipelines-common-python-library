@@ -23,6 +23,11 @@ from qubership_pipelines_common_library.v1.execution.exec_logger import Executio
 class ExecutionContext:
 
     def __init__(self, context_path: str):
+        """
+        Interface that provides references and shortcuts to navigating provided input params, storing any output params, and logging messages.
+        Arguments:
+            context_path (str): Path to context-describing yaml, that should contain references to input/output param file locations
+        """
         full_path = os.path.abspath(context_path)
         self.context_path = full_path
         self.context = ExecutionContextFile(full_path)
@@ -47,6 +52,7 @@ class ExecutionContext:
         self.__input_params_load()
 
     def output_params_save(self):
+        """Stores output_param files to disk"""
         if self.context.get("paths.output.params"):
             logging.info(f"Writing insecure param file '{self.context.get('paths.output.params')}'")
             self.output_params.save(self.context.get("paths.output.params"))
@@ -55,6 +61,7 @@ class ExecutionContext:
             self.output_params_secure.save(self.context.get("paths.output.params_secure"))
 
     def input_param_get(self, path, def_value=None):
+        """Gets parameter from provided params files by its param path, supporting dot-separated nested keys (e.g. 'parent_obj.child_obj.param_name')"""
         value = self.input_params.get(path, def_value)
         if value == def_value:
             value = self.input_params_secure.get(path, def_value)
@@ -63,12 +70,15 @@ class ExecutionContext:
         return value
 
     def output_param_set(self, path, value):
+        """Sets param by path in non-secure output params"""
         return self.output_params.set(path, value)
 
     def output_param_secure_set(self, path, value):
+        """Sets param by path in secure output params"""
         return self.output_params_secure.set(path, value)
 
     def validate(self, names, silent=False):
+        """Validates that all provided param `names` are preset among provided param files"""
         valid = True
         for key in names:
             if not self.__validate_param(key):

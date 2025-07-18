@@ -35,6 +35,10 @@ class ExecutionContextFile:
     SUPPORTED_API_VERSIONS = [API_VERSION_V1]
 
     def __init__(self, path=None):
+        """
+        Interface to work with `params` and `context` files, used in `ExecutionContext`.
+        Provides methods to init default content for different types of descriptors (e.g. `init_context_descriptor`, `init_params`)
+        """
         self.content = {
             "kind": "",
             "apiVersion": ""
@@ -44,12 +48,14 @@ class ExecutionContextFile:
             self.load(path)
 
     def init_empty(self):
+        """"""
         self.content = {
             "kind": "",
             "apiVersion": ""
         }
 
     def init_context_descriptor(self, context_folder_path: str = None):
+        """"""
         if context_folder_path is None:
             context_folder_path = ""
         ctx_path = Path(context_folder_path)
@@ -87,6 +93,7 @@ class ExecutionContextFile:
         return self
 
     def init_params(self):
+        """"""
         self.content = {
             "kind": ExecutionContextFile.KIND_PARAMS_INSECURE,
             "apiVersion": ExecutionContextFile.API_VERSION_V1,
@@ -103,6 +110,7 @@ class ExecutionContextFile:
         return self
 
     def init_params_secure(self):
+        """"""
         self.content = {
             "kind": ExecutionContextFile.KIND_PARAMS_SECURE,
             "apiVersion": ExecutionContextFile.API_VERSION_V1,
@@ -119,6 +127,7 @@ class ExecutionContextFile:
         return self
 
     def load(self, path):
+        """Loads and validates file as one of supported types of descriptors"""
         full_path = os.path.abspath(path)
         try:
             self.content = UtilsFile.read_yaml(full_path)
@@ -135,17 +144,21 @@ class ExecutionContextFile:
             self.init_empty()
 
     def save(self, path):
+        """Writes current file content from memory to disk"""
         # TODO: support encryption with SOPS
         UtilsFile.write_yaml(path, self.content)
 
     def get(self, path, def_value=None):
+        """Gets parameter from current file content by its param path, supporting dot-separated nested keys (e.g. 'parent_obj.child_obj.param_name')"""
         return UtilsDictionary.get_by_path(self.content, path, def_value)
 
     def set(self, path, value):
+        """Sets parameter in current file content"""
         UtilsDictionary.set_by_path(self.content, path, value)
         return self
 
     def set_multiple(self, dict):
+        """Sets multiple parameters in current file content"""
         for key in dict:
             UtilsDictionary.set_by_path(self.content, key, dict[key])
         return self
