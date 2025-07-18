@@ -40,7 +40,10 @@ def init_context(context_path):
 
 def create_execution_context(input_params: dict = None, input_params_secure: dict = None, folder_path: str = None,
                              parent_context_to_reuse: ExecutionContext = None):
-    """params:
+    """
+    Dynamically creates **`ExecutionContext`** using provided params.
+
+    Arguments:
         input_params: dict (will be merged into created input params)
         input_params_secure: dict (will be merged into created secure input params)
         folder_path: str (optional, will generate new temp)

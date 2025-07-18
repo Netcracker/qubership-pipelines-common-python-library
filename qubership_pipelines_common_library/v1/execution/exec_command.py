@@ -27,12 +27,27 @@ class ExecutionCommand:
 
     def __init__(self, context_path: str = None, input_params: dict = None, input_params_secure: dict = None,
                  folder_path: str = None, parent_context_to_reuse: ExecutionContext = None):
+        """
+        Extendable interface intended to simplify working with input/output params and passing them between commands in different Pipeline Executors
+
+        Implementations are expected to override **`_validate`** and **`_execute`** methods
+
+        If **`context_path`** is not provided - context will be created dynamically using other provided params
+
+        Arguments:
+            context_path (str): Path to context-describing yaml, that should contain references to input/output param file locations
+            input_params (dict): Non-secure parameters that will be merged into dynamically created params
+            input_params_secure (dict): Secure parameters that will be merged into dynamically created params
+            folder_path (str): Folder path where dynamically-created context will be stored. Optional, will create new temp folder if missing.
+            parent_context_to_reuse (ExecutionContext): Optional, existing context to propagate input params from.
+        """
         if not context_path:
             context_path = create_execution_context(input_params=input_params, input_params_secure=input_params_secure,
                                                     folder_path=folder_path, parent_context_to_reuse=parent_context_to_reuse)
         self.context = ExecutionContext(context_path)
 
     def run(self):
+        """Runs command following its lifecycle"""
         try:
             if not self._validate():
                 logging.error(ExecutionCommand.FAILURE_MSG)

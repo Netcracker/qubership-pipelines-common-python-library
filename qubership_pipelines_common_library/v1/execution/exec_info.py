@@ -31,6 +31,9 @@ class ExecutionInfo:
     STATUSES_COMPLETE = [STATUS_SUCCESS, STATUS_UNSTABLE, STATUS_FAILED, STATUS_ABORTED]
 
     def __init__(self):
+        """
+        Describes trackable running processes (e.g. triggered GitHub workflow)
+        """
         self.url = ""  # url to pipeline execution
         self.id = ""  # unique id of the execution
         self.status = ExecutionInfo.STATUS_UNKNOWN  # current status of the pipeline
@@ -40,11 +43,13 @@ class ExecutionInfo:
         self.params = {}  # optional params used to run the pipe
 
     def start(self):
+        """Records start time for described process and transitions its status to **`IN_PROGRESS`**"""
         self.time_start = datetime.now()
         self.status = ExecutionInfo.STATUS_IN_PROGRESS
         return self
 
     def stop(self, status: str = None):
+        """Records finish time for described process, and optionally transitions its status to passed value"""
         if status:
             self.with_status(status)
         self.time_stop = datetime.now()
@@ -66,9 +71,11 @@ class ExecutionInfo:
         return self.time_stop
 
     def get_duration(self):
+        """Returns duration of this process after it's finished"""
         return self.time_stop - self.time_start
-    
+
     def get_duration_str(self):
+        """Returns formatted duration of this process as `hh:mm:ss` string after it's finished """
         seconds = int(self.get_duration().total_seconds())
         parts = [seconds / 3600, (seconds % 3600) / 60, seconds % 60]
         strings = list(map(lambda x: str(int(x)).zfill(2), parts))

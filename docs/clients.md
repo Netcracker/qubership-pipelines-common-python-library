@@ -1,3 +1,4 @@
+
 ---
 ::: qubership_pipelines_common_library.v1.artifactory_client.ArtifactoryClient
 ---
