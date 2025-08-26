@@ -7,6 +7,10 @@
 
 ---
 
+::: qubership_pipelines_common_library.v1.github_client.GithubClient
+
+---
+
 ::: qubership_pipelines_common_library.v1.gitlab_client.GitlabClient
 
 ---
@@ -19,14 +23,14 @@
 
 ---
 
+::: qubership_pipelines_common_library.v1.maven_client.MavenArtifactSearcher
+
+---
+
 ::: qubership_pipelines_common_library.v1.minio_client.MinioClient
 
 ---
 
 ::: qubership_pipelines_common_library.v1.webex_client.WebexClient
-
----
-
-::: qubership_pipelines_common_library.v1.github_client.GithubClient
 
 ---

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "qubership-pipelines-common-library"
-version = "0.1.10"
+version = "0.2.0"
 description = "Qubership Pipelines common library"
 authors = ["Igor Lebedev <lebedev.light@gmail.com>"]
 readme = "README.md"
@@ -21,6 +21,8 @@ minio = "^7.2.12"
 kubernetes = "^29.0.0"
 webexpythonsdk = "2.0.1"
 ghapi = "^1.0.6"
+boto3 = "^1.39.4"
+google-cloud-artifact-registry = "^1.16.1"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^6.0.0"
