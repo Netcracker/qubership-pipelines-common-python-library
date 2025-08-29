@@ -74,7 +74,7 @@ class GitlabClient:
             logging.debug(f"Updating file {file_path} on branch {ref}...")
             file = self.gl.projects.get(project_id, lazy=True).files.get(file_path=file_path, ref=ref)
             file.content = content
-            file.save(branch=ref, commit_message=commit_message)
+            file.save(branch=ref, commit_message=commit_message, author_email=self.email)
         except GitlabGetError as e:
             if e.response_code == 404 and create_if_not_exists:
                 self.create_file(project_id=project_id, file_path=file_path, content=content, ref=ref,
