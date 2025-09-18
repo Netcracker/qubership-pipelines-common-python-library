@@ -1,4 +1,4 @@
-name: Publish Python Module to PyPI
+name: Build and Release
 
 on:
   workflow_dispatch:
@@ -23,12 +23,23 @@ permissions:
   contents: write
 
 jobs:
-  publish:
+  bump-and-publish:
     runs-on: ubuntu-latest
+    outputs:
+      release_version: ${{ steps.save-release-version.outputs.release_version }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Prepare app token
+        if: ${{ vars.GH_BUMP_VERSION_APP_ID != '' }}
+        uses: actions/create-github-app-token@v1
+        id: app-token
         with:
-          ssh-key: ${{ secrets.PATCH_VERSION_DEPLOY_KEY_SECRET }}
+          app-id: ${{ vars.GH_BUMP_VERSION_APP_ID }}
+          private-key: ${{ secrets.GH_BUMP_VERSION_APP_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -54,6 +65,10 @@ jobs:
         if: ${{ inputs.patch_version && inputs.use_custom_version }}
         run: poetry version ${{ inputs.custom_version }}
 
+      - name: Save release version
+        id: save-release-version
+        run: echo "release_version=$(poetry version --short)" >> "$GITHUB_OUTPUT"
+
       - name: Publish package
         run: |
           poetry config pypi-token.pypi ${{ secrets.PYPI_API_TOKEN }}
@@ -64,5 +79,16 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -a -m "Update version"
+          git commit -a -m "Update version to ${{ steps.save-release-version.outputs.release_version }}"
           git push
+
+  create-github-release:
+    permissions:
+      contents: write
+      pull-requests: write
+    needs: [ bump-and-publish ]
+    uses: Netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@v1.0.1
+    with:
+      version: ${{ needs.bump-and-publish.outputs.release_version }}
+      ref: ${{ github.ref_name }}
+      publish: true

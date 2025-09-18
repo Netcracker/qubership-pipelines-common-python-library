@@ -1,8 +1,19 @@
+[![PyPI](https://img.shields.io/pypi/v/qubership-pipelines-common-library)](https://pypi.org/project/qubership-pipelines-common-library/)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/qubership-pipelines-common-library)
+![Build](https://github.com/Netcracker/qubership-pipelines-common-python-library/actions/workflows/python-publish.yml/badge.svg)
+![Repo Size](https://img.shields.io/github/repo-size/Netcracker/qubership-pipelines-common-python-library)
+
 # Qubership Pipelines Common Library
 
 Open-source python library of clients used by Qubership pipelines/modules.
 
 Library provides easy-to-use clients and wrappers for common devops services (e.g. Jenkins, MiniO, GitLab Pipelines)
+
+## Sample implementation
+
+Sample implementation of CLI commands using this library is available at [qubership-pipelines-cli-command-samples](https://github.com/Netcracker/qubership-pipelines-cli-command-samples)
+
+It includes reference python implementation along with the [Development Guide](https://github.com/Netcracker/qubership-pipelines-cli-command-samples/blob/main/docs/development.md)
 
 ## Structure
 
@@ -33,9 +44,3 @@ You can install it via `pip`:
 ```bash
 pip install qubership-pipelines-common-library-py39
 ```
-
-## Sample implementation
-
-Sample implementation of CLI commands using this library is available at [qubership-pipelines-cli-command-samples](https://github.com/Netcracker/qubership-pipelines-cli-command-samples)
-
-It includes reference python implementation along with the [Development Guide](https://github.com/Netcracker/qubership-pipelines-cli-command-samples/blob/main/docs/development.md)
