@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "qubership-pipelines-common-library"
-version = "0.2.1"
+version = "0.2.3"
 description = "Qubership Pipelines common library"
 authors = ["Qubership"]
 readme = "README.md"
