@@ -58,6 +58,8 @@ class WebexClient:
                 start or reply to a thread.
             **request_parameters: Additional request parameters (provides
                 support for parameters that may be added in the future).
+            Returns:
+                dict: The API response containing details of the created message.
         """
         response = self.webex.messages.create(roomId=room_id, text=msg, files=[attachment_path] if attachment_path else None,
                                    parentId=parent_id, toPersonId=to_person_id, toPersonEmail=to_person_email,
