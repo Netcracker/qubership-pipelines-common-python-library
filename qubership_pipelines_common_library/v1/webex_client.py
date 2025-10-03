@@ -15,7 +15,6 @@
 import logging
 from webexpythonsdk import WebexAPI
 
-
 class WebexClient:
     def __init__(self, bot_token: str, proxies: dict = None):
         """ **`proxies`** dict for different protocols is passed to requests session.
@@ -58,7 +57,10 @@ class WebexClient:
                 start or reply to a thread.
             **request_parameters: Additional request parameters (provides
                 support for parameters that may be added in the future).
+            Returns:
+                dict: The API response containing details of the created message.
         """
-        self.webex.messages.create(roomId=room_id, text=msg, files=[attachment_path] if attachment_path else None,
+        response = self.webex.messages.create(roomId=room_id, text=msg, files=[attachment_path] if attachment_path else None,
                                    parentId=parent_id, toPersonId=to_person_id, toPersonEmail=to_person_email,
                                    markdown=markdown, **request_parameters)
+        return response
