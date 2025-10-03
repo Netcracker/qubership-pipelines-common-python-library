@@ -15,7 +15,6 @@
 import logging
 from webexpythonsdk import WebexAPI
 
-
 class WebexClient:
     def __init__(self, bot_token: str, proxies: dict = None):
         """ **`proxies`** dict for different protocols is passed to requests session.
