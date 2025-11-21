@@ -15,6 +15,8 @@ def utils_cli(func):
     @click.option('--context_path', required=True, default=DEFAULT_CONTEXT_FILE_PATH, type=str, help="Path to context")
     @click.option("--input_params", "-p", multiple=True, callback=_input_params_to_dict,
                   help="Params to use instead of context as key-values. Nested keys are supported with double-underscores or dots as separators, e.g. -p params__group__key=value")
+    @click.option("--input_params_secure", "-s", multiple=True, callback=_input_params_to_dict,
+                  help="Params to use instead of context as key-values. Nested keys are supported with double-underscores or dots as separators, e.g. -p params__group__key=value")
     @click.pass_context
     def wrapper(ctx, *args, log_level, **kwargs):
         ExecutionLogger.EXECUTION_LOG_LEVEL = getattr(logging, log_level.upper(), logging.INFO)
@@ -38,7 +40,7 @@ def _configure_global_logger(global_logger: logging.Logger, log_level: str, form
 
 
 def _transform_kwargs(kwargs):
-    if kwargs.get("input_params"):
+    if kwargs.get("input_params") or kwargs.get("input_params_secure"):
         kwargs.pop("context_path")
 
 
