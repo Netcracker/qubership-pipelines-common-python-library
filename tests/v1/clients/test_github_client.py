@@ -50,7 +50,7 @@ class TestGithubClientV1(unittest.TestCase):
         artifacts_mock = MagicMock()
         artifacts_mock.artifacts = [artifact_mock]
         ghapi_mock.return_value = artifacts_mock
-        self.gh_client._save_artifact_to_dir = MagicMock(return_value = f"./tests/data/{GithubClient.DEFAULT_UUID_ARTIFACT_NAME}.zip")
+        self.gh_client._save_artifact_to_dir = MagicMock(return_value = f"./tests/v1/data/{GithubClient.DEFAULT_UUID_ARTIFACT_NAME}.zip")
 
         params = self.gh_client.get_workflow_run_input_params(ghapi_mock)
 
