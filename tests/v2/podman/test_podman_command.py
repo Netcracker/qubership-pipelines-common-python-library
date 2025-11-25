@@ -18,4 +18,5 @@ class TestPodmanRunImage:
             cmd.run()
 
         assert exit_result.value.code == 1
+        # Initially planned to test absence of 'podman', but GitHub runner does have it
         assert "StatusCode: 404" in caplog.text
