@@ -26,7 +26,9 @@ class TestGitlabIntegration(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.client = GitlabClient("https://gitlab.com", username=None, password=os.getenv('GITLAB_QUBER_TOKEN', "UNKNOWN"))
+        cls.host = "https://gitlab.com"
+        cls.token = os.getenv('GITLAB_QUBER_TOKEN', "UNKNOWN")
+        cls.client = GitlabClient(cls.host, username=None, password=cls.token)
         cls.project_id = "quber-test/quber-pipeline"
         cls.ref = "tests"
 
@@ -45,6 +47,18 @@ class TestGitlabIntegration(unittest.TestCase):
             wait_seconds=5,
         )
         self.assertEqual(ExecutionInfo.STATUS_SUCCESS, execution.get_status())
+
+    def test_project_exists(self):
+        result = GitlabClient.is_gitlab_project_exist(
+            TestGitlabIntegration.host, TestGitlabIntegration.project_id, TestGitlabIntegration.token
+        )
+        self.assertTrue(result)
+
+    def test_search_group_id(self):
+        group_id = GitlabClient.search_group_id(
+            TestGitlabIntegration.host, "quber-test", TestGitlabIntegration.token
+        )
+        self.assertEqual(group_id, 101373774)
 
 
 if __name__ == '__main__':

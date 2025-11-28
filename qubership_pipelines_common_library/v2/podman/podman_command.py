@@ -242,9 +242,14 @@ class PodmanRunImage(ExecutionCommand):
         (self.output_files_path / "container_stdout.txt").write_text(stdout, encoding='utf-8')
         (self.output_files_path / "container_stderr.txt").write_text(stderr, encoding='utf-8')
 
-    def _post_execute(self, output: subprocess.CompletedProcess):
+    def _process_output(self, output: subprocess.CompletedProcess):
         self.context.output_param_set("params.execution_time", f"{self.execution_time:0.3f}s")
         self.context.output_param_set("params.return_code", output.returncode)
+
+        if output.stdout and isinstance(output.stdout, bytes):
+            output.stdout = output.stdout.decode('utf-8', errors='replace')
+        if output.stderr and isinstance(output.stderr, bytes):
+            output.stderr = output.stderr.decode('utf-8', errors='replace')
 
         if self.save_stdout_to_logs:
             if output.stdout:
@@ -278,7 +283,7 @@ class PodmanRunImage(ExecutionCommand):
                 f"Container finished with code: {output.returncode}"
                 f"\nExecution time: {self.execution_time:0.3f}s"
             )
-            self._post_execute(output)
+            self._process_output(output)
 
         except subprocess.TimeoutExpired:
             self.context.logger.error(f"Container execution timed out after {self.timeout} seconds")

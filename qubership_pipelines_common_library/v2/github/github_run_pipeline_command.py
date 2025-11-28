@@ -4,7 +4,6 @@ from qubership_pipelines_common_library.v1.utils.utils_string import UtilsString
 from qubership_pipelines_common_library.v2.extensions.pipeline_data_importer import PipelineDataImporter
 from qubership_pipelines_common_library.v2.github.github_pipeline_data_importer import DefaultGithubPipelineDataImporter
 from qubership_pipelines_common_library.v2.github.safe_github_client import SafeGithubClient
-from qubership_pipelines_common_library.v2.utils.crypto_utils import CryptoUtils
 
 
 class GithubRunPipeline(ExecutionCommand):
@@ -28,7 +27,7 @@ class GithubRunPipeline(ExecutionCommand):
         "import_artifacts": false,                               # OPTIONAL: Whether to import workflow artifacts (default: false)
         "use_existing_pipeline": 123456789,                      # OPTIONAL: Use existing workflow run ID instead of starting new one (debug feature)
         "timeout_seconds": 1800,                                 # OPTIONAL: Maximum wait time for workflow completion in seconds (default: 1800, 0 for async execution)
-        "wait_seconds": 5,                                       # OPTIONAL: Wait interval between status checks in seconds (default: 5)
+        "wait_seconds": 1,                                       # OPTIONAL: Wait interval between status checks in seconds (default: 1)
         "retry_timeout_seconds": 180,                            # OPTIONAL: Timeout for GitHub client initialization and workflow start retries in seconds (default: 180)
         "retry_wait_seconds": 1,                                 # OPTIONAL: Wait interval between retries in seconds (default: 1)
         "success_statuses": "SUCCESS,UNSTABLE"                   # OPTIONAL: Comma-separated list of acceptable completion statuses (default: SUCCESS)
@@ -72,9 +71,6 @@ class GithubRunPipeline(ExecutionCommand):
             raise TypeError(f"Class {type(pipeline_data_importer)} must inherit from PipelineDataImporter")
 
     def _validate(self):
-        secure_params_yaml = CryptoUtils.get_parameters_for_print(self.context.input_params_secure.content, True)
-        insecure_params_yaml = CryptoUtils.get_parameters_for_print(self.context.input_params.content, False)
-        self.context.logger.info("Input context parameters:\n%s\n%s", secure_params_yaml, insecure_params_yaml)
         names = [
             "paths.input.params",
             "paths.output.params",
@@ -94,7 +90,7 @@ class GithubRunPipeline(ExecutionCommand):
         self.retry_wait_seconds = int(self.context.input_param_get("params.retry_wait_seconds", self.RETRY_WAIT_SECONDS))
 
         if self.timeout_seconds == 0:
-            self.context.logger.info(f"Timeout is set to: {self.timeout_seconds}. This means that pipeline will be started asynchronously")
+            self.context.logger.info(f"Timeout is set to: {self.timeout_seconds}. This means that the pipeline will be started asynchronously")
 
         self.pipeline_owner = self.context.input_param_get("params.pipeline_owner")
         self.pipeline_repo_name = self.context.input_param_get("params.pipeline_repo_name")
@@ -102,9 +98,9 @@ class GithubRunPipeline(ExecutionCommand):
         self.pipeline_branch = self.context.input_param_get("params.pipeline_branch")
         self.pipeline_params = self.context.input_param_get("params.pipeline_params", {})
         if not self.pipeline_params:
-            self.context.logger.info(f"Pipeline parameters was not specified. This means that pipeline will be started with its default values")
+            self.context.logger.info(f"Pipeline parameters were not specified. This means that pipeline will be started with its default values")
         if not isinstance(self.pipeline_params, dict):
-            self.context.logger.error(f"Pipeline parameters was not loaded correctly. Probably mistake in the params definition")
+            self.context.logger.error(f"Pipeline parameters were not loaded correctly. Probably mistake in the params definition")
             return False
         self.import_artifacts = UtilsString.convert_to_bool(self.context.input_param_get("params.import_artifacts", False))
         self.success_statuses = [x.strip() for x in self.context.input_param_get("params.success_statuses", ExecutionInfo.STATUS_SUCCESS).split(",")]
@@ -146,7 +142,7 @@ class GithubRunPipeline(ExecutionCommand):
             self._exit(False, f"Pipeline was not started. Status {execution.get_status()}")
         elif self.timeout_seconds < 1:
             self.context.logger.info("Pipeline was started in asynchronous mode. Pipeline status and artifacts will not be processed")
-            self._exit(True, f"Status: {execution.get_status()}")
+            return
 
         execution = self.github_client.wait_workflow_run_execution(execution=execution,
                                                                    timeout_seconds=self.timeout_seconds,
@@ -161,7 +157,8 @@ class GithubRunPipeline(ExecutionCommand):
                 self.context.logger.error(f"Exception during pipeline_data_importer execution: {e}")
 
         self._save_execution_info(execution)
-        self._exit(execution.get_status() in self.success_statuses, f"Status: {execution.get_status()}")
+        if execution.get_status() not in self.success_statuses:
+            self._exit(False, f"Status: {execution.get_status()}")
 
     def _save_execution_info(self, execution: ExecutionInfo):
         self.context.logger.info(f"Writing GitHub workflow execution status")

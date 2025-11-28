@@ -71,5 +71,6 @@ class TestExecCommandV1(unittest.TestCase):
             result = yaml.safe_load(result_file)
             self.assertEqual(123, int(result["params"]["result"]))
 
+
 if __name__ == '__main__':
     unittest.main()
