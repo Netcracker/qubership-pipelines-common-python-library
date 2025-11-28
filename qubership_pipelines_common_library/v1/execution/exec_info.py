@@ -108,3 +108,7 @@ class ExecutionInfo:
     def with_params(self, params: dict):
         self.params = params
         return self
+
+    def __str__(self):
+        return (f"ExecutionInfo(id='{self.id}', url='{self.url}', status='{self.status}', "
+                f"time_start={self.time_start.isoformat()})")

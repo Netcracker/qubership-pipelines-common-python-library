@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging, gitlab
-from time import sleep
+import logging, gitlab, time
+
 from gitlab import GitlabGetError
 from qubership_pipelines_common_library.v1.execution.exec_info import ExecutionInfo
 
@@ -120,7 +120,7 @@ class GitlabClient:
         while counter < timeout:
             counter += 1
             logging.info("Waiting pipeline execution timeout 1 second")
-            sleep(1)
+            time.sleep(1)
             continue
         pipeline.cancel()
         return execution.stop(ExecutionInfo.STATUS_ABORTED)
@@ -136,14 +136,17 @@ class GitlabClient:
             logging.error("Can't get pipeline status")
         return execution
 
-    def wait_pipeline_execution(self, execution: ExecutionInfo, timeout_seconds: float = 10.0,
+    def wait_pipeline_execution(self, execution: ExecutionInfo, timeout_seconds: float = 180.0,
                                 break_status_list: list = None, wait_seconds: float = 1.0):
         """"""
         if break_status_list is None:
             break_status_list = self.BREAK_STATUS_LIST
-        timeout = 0
+        count_seconds = 0
+        last_log_time = time.perf_counter()
+        estimated_max_attempts = timeout_seconds // wait_seconds
+        retries = 0
         execution.with_status(execution.get_status())
-        while timeout < timeout_seconds:
+        while count_seconds < timeout_seconds:
             try:
                 project = self.gl.projects.get(execution.get_name(), lazy=True)
                 pipeline = project.pipelines.get(execution.get_id())
@@ -154,10 +157,13 @@ class GitlabClient:
                     break
             except:
                 pass
-            timeout += wait_seconds
-            logging.info(f"Waiting pipeline execution timeout {wait_seconds} seconds")
-            sleep(wait_seconds)
-            continue
+            now = time.perf_counter()
+            retries += 1
+            if now - last_log_time >= 10.0:
+                logging.info(f"Made [{retries} of {estimated_max_attempts}] retries. Waiting pipeline execution {count_seconds} of {timeout_seconds}")
+                last_log_time = now
+            count_seconds += wait_seconds
+            time.sleep(wait_seconds)
         return execution
 
     @staticmethod
@@ -169,6 +175,20 @@ class GitlabClient:
             if pos1 > 0 and pos2 > 0:
                 return {"repo": url[:pos1], "branch": url[pos1 + len(part):pos2], "path": url[pos2 + 1:]}
         return None
+
+    def get_default_branch(self, project_id: str) -> str:
+        return self.gl.projects.get(project_id).default_branch
+
+    def get_latest_pipeline_id(self, project_id: str, ref: str) -> int | str:
+        project = self.gl.projects.get(project_id, lazy=True)
+        return project.pipelines.latest(ref=ref).get_id()
+
+    @staticmethod
+    def _cast_to_string(value) -> str:
+        if isinstance(value, str): return value
+        if value is None: return ''
+        if isinstance(value, bool): return 'true' if value else 'false'
+        return str(value)
 
     def _map_status(self, git_status: str, default_status: str):
         result = default_status
@@ -186,3 +206,88 @@ class GitlabClient:
         elif git_status == GitlabClient.STATUS_MANUAL:
             result = ExecutionInfo.STATUS_MANUAL
         return result
+
+    # Related static methods, with direct REST access
+    @staticmethod
+    def is_gitlab_project_exist(gitlab_url, gitlab_project, gitlab_token):
+        """"""
+        import requests
+        headers = {"PRIVATE-TOKEN": gitlab_token}
+        request = f"{gitlab_url}/api/v4/projects/{requests.utils.quote(gitlab_project, safe='')}"
+        logging.debug(f"Sending '{request}' request...")
+        response = requests.get(request, headers=headers)
+        if response.status_code == 200:
+            return True
+        else:
+            logging.error(f"Error {response.status_code}: {response.text}")
+        return False
+
+    @staticmethod
+    def search_group_id(gitlab_url, gitlab_project, gitlab_token):
+        """"""
+        import requests
+        headers = {"PRIVATE-TOKEN": gitlab_token}
+        request = f"{gitlab_url}/api/v4/groups?search={gitlab_project}"
+        logging.debug(f"Sending '{request}' request...")
+        response = requests.get(request, headers=headers)
+        if response.status_code == 200:
+            groups = response.json()
+            for group in groups:
+                if group.get("full_path") == gitlab_project:
+                    return group["id"]
+        else:
+            logging.error(f"Error {response.status_code}: {response.text}")
+
+    @staticmethod
+    def create_internal_gitlab_project(gitlab_url, gitlab_token, group_id, repo_name, repo_branch, visibility="internal"):
+        """"""
+        import requests
+        headers = {"PRIVATE-TOKEN": gitlab_token, "Content-Type": "application/json"}
+        data = {
+            "name": repo_name,
+            "namespace_id": group_id,
+            "visibility": visibility,
+            "default_branch": repo_branch
+        }
+        request = f"{gitlab_url}/api/v4/projects"
+        logging.debug(f"Sending '{request}' request...")
+        response = requests.post(request, headers=headers, json=data)
+        if response.status_code == 201:
+            response_json = response.json()
+            logging.info(f"Gitlab project was created. Url: '{response_json['web_url']}'")
+            GitlabClient.make_first_commit_to_gitlab_project(
+                gitlab_url=gitlab_url,
+                gitlab_token=gitlab_token,
+                project_id=response_json['id'],
+                repo_branch=repo_branch
+            )
+        else:
+            logging.error(f"Error {response.status_code}: {response.text}")
+
+    @staticmethod
+    def make_first_commit_to_gitlab_project(gitlab_url, gitlab_token, project_id, repo_branch):
+        """"""
+        import requests
+        logging.debug(f"Making first commit...")
+        headers = {"PRIVATE-TOKEN": gitlab_token, "Content-Type": "application/json"}
+        commit_payload = {
+            "branch": repo_branch,
+            "commit_message": "Initial commit",
+            "actions": [
+                {
+                    "action": "create",
+                    "file_path": "README.md",
+                    "content": "# This is an automatically created project"
+                }
+            ]
+        }
+
+        response = requests.post(
+            f"{gitlab_url}/api/v4/projects/{project_id}/repository/commits",
+            headers=headers,
+            json=commit_payload
+        )
+        if response.status_code == 201:
+            logging.info(f"Commit successfull")
+        else:
+            logging.error(f"Error {response.status_code}: {response.text}")

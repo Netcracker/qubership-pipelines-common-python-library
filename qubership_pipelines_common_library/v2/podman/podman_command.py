@@ -3,6 +3,7 @@ import os, subprocess, time, uuid
 from pathlib import Path
 from qubership_pipelines_common_library.v1.execution.exec_command import ExecutionCommand
 from qubership_pipelines_common_library.v1.utils.utils_string import UtilsString
+from qubership_pipelines_common_library.v2.utils.crypto_utils import CryptoUtils
 
 
 class PodmanRunImage(ExecutionCommand):
@@ -71,6 +72,11 @@ class PodmanRunImage(ExecutionCommand):
         """
 
     def _validate(self):
+        self.context.logger.info(
+            "Input context parameters:\n%s\n%s",
+            CryptoUtils.get_parameters_for_print(self.context.input_params_secure.content, True),
+            CryptoUtils.get_parameters_for_print(self.context.input_params.content, False)
+        )
         names = [
             "paths.input.params",
             "paths.output.params",

@@ -72,9 +72,11 @@ class GithubRunPipeline(ExecutionCommand):
             raise TypeError(f"Class {type(pipeline_data_importer)} must inherit from PipelineDataImporter")
 
     def _validate(self):
-        secure_params_yaml = CryptoUtils.get_parameters_for_print(self.context.input_params_secure.content, True)
-        insecure_params_yaml = CryptoUtils.get_parameters_for_print(self.context.input_params.content, False)
-        self.context.logger.info("Input context parameters:\n%s\n%s", secure_params_yaml, insecure_params_yaml)
+        self.context.logger.info(
+            "Input context parameters:\n%s\n%s",
+            CryptoUtils.get_parameters_for_print(self.context.input_params_secure.content, True),
+            CryptoUtils.get_parameters_for_print(self.context.input_params.content, False)
+        )
         names = [
             "paths.input.params",
             "paths.output.params",
