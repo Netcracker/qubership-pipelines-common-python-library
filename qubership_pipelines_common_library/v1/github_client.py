@@ -51,11 +51,20 @@ class GithubClient:
 
     def __init__(self, token: str = None, api_url: str = None, **kwargs):
         """
+        This class is deprecated and will be removed in v3.0.0. Use class from v2 module instead.
         Arguments:
             token (str): Token used in auth request
             api_url (str): Optional Github Enterprise API URL, leave empty if using github.com
             **kwargs (Any): will be passed into Github API constructor
         """
+        if self.__class__ == GithubClient:
+            import warnings
+            warnings.warn(
+                "v1.github_client.GithubClient is deprecated since v2.0.0 and will be removed in v3.0.0. "
+                "Use v2.github.github_client.GithubClient instead.",
+                DeprecationWarning,
+                stacklevel=2
+            )
         self.gh = GhApi(token=token, gh_host=api_url, **kwargs)
         logging.info("Github Client configured")
 

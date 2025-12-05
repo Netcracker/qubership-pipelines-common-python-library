@@ -37,6 +37,7 @@ class GitlabClient:
 
     def __init__(self, host: str, username: str, password: str, email: str = None, **kwargs):
         """
+        This class is deprecated and will be removed in v3.0.0. Use class from v2 module instead.
         Arguments:
             host (str): Gitlab instance URL
             username (str): User used in auth request, might be empty string if no auth is required
@@ -44,6 +45,14 @@ class GitlabClient:
             email (str): Email used when committing changes using API
             **kwargs (Any): will be passed into Gitlab API constructor
         """
+        if self.__class__ == GitlabClient:
+            import warnings
+            warnings.warn(
+                "v1.gitlab_client.GitlabClient is deprecated since v2.0.0 and will be removed in v3.0.0. "
+                "Use v2.gitlab.gitlab_client.GitlabClient instead.",
+                DeprecationWarning,
+                stacklevel=2
+            )
         self.host = host.rstrip("/")
         self.username = username
         self.email = email
