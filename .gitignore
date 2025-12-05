@@ -11,4 +11,5 @@ poetry.lock
 tests/**/logs/
 tests/**/temp/
 x_devtest_dir
+x_local_debug
 dynamic_test_context_dir
