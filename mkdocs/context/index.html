@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Context - Qubership Pipelines Common Library</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">Qubership Pipelines Common Library</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../" class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../clients/" class="nav-link">Clients</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="./" class="nav-link active" aria-current="page">Context</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../commands/" class="nav-link">Commands</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../maven_auth/" class="nav-link">Maven</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../clients/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../commands/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item dropdown">
+                              <button id="theme-menu" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static" aria-label="Toggle theme" class="nav-link dropdown-toggle">
+                                <i class="fa-solid fa-circle-half-stroke fa-fw"></i>
+                                <span class="d-lg-none ms-2">Toggle theme</span>
+                              </button>
+                              <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                  <button class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" aria-pressed="true">
+                                    <i class="fa-solid fa-sun fa-fw"></i>
+                                    <span class="ms-2">Light</span>
+                                    <i class="fa-solid fa-check ms-auto"></i>
+                                  </button>
+                                </li>
+                                <li>
+                                  <button class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" aria-pressed="false">
+                                    <i class="fa-solid fa-moon fa-fw"></i>
+                                    <span class="ms-2">Dark</span>
+                                    <i class="fa-solid fa-check ms-auto d-none"></i>
+                                  </button>
+                                </li>
+                                <li>
+                                  <button class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto" aria-pressed="false">
+                                    <i class="fa-solid fa-circle-half-stroke fa-fw"></i>
+                                    <span class="ms-2">Auto</span>
+                                    <i class="fa-solid fa-check ms-auto d-none"></i>
+                                  </button>
+                                </li>
+                              </ul>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <script src="../../js/darkmode.js"></script>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ExecutionCommand</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ExecutionContext</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v1.execution.exec_context_file.ExecutionContextFile" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ExecutionContextFile</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ExecutionInfo</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v1.execution.exec_logger.ExecutionLogger" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ExecutionLogger</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v1.utils.utils_cli.utils_cli" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;utils_cli</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v1.utils.utils_context.create_execution_context" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-function"></code>&nbsp;create_execution_context</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">ExecutionCommand</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">ExecutionCommand(context_path: <span title="str">str</span> = None, input_params: <span title="dict">dict</span> = None, input_params_secure: <span title="dict">dict</span> = None, folder_path: <span title="str">str</span> = None, parent_context_to_reuse: <a class="autorefs autorefs-internal" title="            ExecutionContext (qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext)" href="#qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext">ExecutionContext</a> = None, pre_execute_actions: <span title="list">list</span>[<span title="qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommandExtension">ExecutionCommandExtension</span>] = None, post_execute_actions: <span title="list">list</span>[<span title="qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommandExtension">ExecutionCommandExtension</span>] = None)</code></pre>
+
+    <div class="doc doc-contents first">
+
+
+
+        <p>Extendable interface intended to simplify working with input/output params and passing them between commands in different Pipeline Executors</p>
+<p>Implementations are expected to override <strong><code>_validate</code></strong> and <strong><code>_execute</code></strong> methods</p>
+<p>If <strong><code>context_path</code></strong> is not provided - context will be created dynamically using other provided params</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>context_path</code></b>
+              (<code><span title="str">str</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Path to context-describing yaml, that should contain references to input/output param file locations</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>input_params</code></b>
+              (<code><span title="dict">dict</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Non-secure parameters that will be merged into dynamically created params</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>input_params_secure</code></b>
+              (<code><span title="dict">dict</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Secure parameters that will be merged into dynamically created params</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>folder_path</code></b>
+              (<code><span title="str">str</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Folder path where dynamically-created context will be stored. Optional, will create new temp folder if missing.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>parent_context_to_reuse</code></b>
+              (<code><a class="autorefs autorefs-internal" title="            ExecutionContext (qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext)" href="#qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext">ExecutionContext</a></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Optional, existing context to propagate input params from.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>pre_execute_actions</code></b>
+              (<code><span title="list">list</span>[<span title="qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommandExtension">ExecutionCommandExtension</span>]</code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Optional, list of actions, implementing ExecutionCommandExtension, to be executed before command</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>post_execute_actions</code></b>
+              (<code><span title="list">list</span>[<span title="qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommandExtension">ExecutionCommandExtension</span>]</code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Optional, list of actions, implementing ExecutionCommandExtension, to be executed after command</p>
+          </div>
+        </li>
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand.run" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">run</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">run()</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Runs command following its lifecycle</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">ExecutionContext</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">ExecutionContext(context_path: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents first">
+
+
+
+        <p>Interface that provides references and shortcuts to navigating provided input params, storing any output params, and logging messages.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>context_path</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>Path to context-describing yaml, that should contain references to input/output param file locations</p>
+          </div>
+        </li>
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext.output_params_save" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">output_params_save</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">output_params_save()</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Stores output_param files to disk</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext.input_param_get" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">input_param_get</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">input_param_get(path, def_value=None)</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Gets parameter from provided params files by its param path, supporting dot-separated nested keys (e.g. 'parent_obj.child_obj.param_name')</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext.output_param_set" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">output_param_set</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">output_param_set(path, value)</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Sets param by path in non-secure output params</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext.output_param_secure_set" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">output_param_secure_set</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">output_param_secure_set(path, value)</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Sets param by path in secure output params</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext.validate" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">validate</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">validate(names, silent=False)</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Validates that all provided param <code>names</code> are present among provided param files</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v1.execution.exec_context_file.ExecutionContextFile" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">ExecutionContextFile</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">ExecutionContextFile(path=None)</code></pre>
+
+    <div class="doc doc-contents first">
+
+
+
+        <p>Interface to work with <strong><code>params</code></strong> and <strong><code>context</code></strong> files, used in <strong><code>ExecutionContext</code></strong>.</p>
+<p>Provides methods to init default content for different types of descriptors (e.g. <strong><code>init_context_descriptor</code></strong>, <strong><code>init_params</code></strong>)</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.execution.exec_context_file.ExecutionContextFile.init_empty" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">init_empty</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">init_empty()</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.execution.exec_context_file.ExecutionContextFile.init_context_descriptor" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">init_context_descriptor</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">init_context_descriptor(context_folder_path: <span title="str">str</span> = None)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.execution.exec_context_file.ExecutionContextFile.init_params" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">init_params</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">init_params()</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.execution.exec_context_file.ExecutionContextFile.init_params_secure" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">init_params_secure</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">init_params_secure()</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.execution.exec_context_file.ExecutionContextFile.load" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">load</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">load(path)</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Loads and validates file as one of supported types of descriptors</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.execution.exec_context_file.ExecutionContextFile.save" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">save</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">save(path)</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Writes current file content from memory to disk</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.execution.exec_context_file.ExecutionContextFile.get" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get(path, def_value=None)</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Gets parameter from current file content by its param path, supporting dot-separated nested keys (e.g. 'parent_obj.child_obj.param_name')</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.execution.exec_context_file.ExecutionContextFile.set" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">set</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">set(path, value)</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Sets parameter in current file content</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.execution.exec_context_file.ExecutionContextFile.set_multiple" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">set_multiple</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">set_multiple(dict)</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Sets multiple parameters in current file content</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">ExecutionInfo</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">ExecutionInfo()</code></pre>
+
+    <div class="doc doc-contents first">
+
+
+
+        <p>Describes trackable running processes (e.g. triggered GitHub workflow)</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo.start" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">start</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">start()</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Records start time for described process and transitions its status to <strong><code>IN_PROGRESS</code></strong></p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo.stop" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">stop</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">stop(status: <span title="str">str</span> = None)</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Records finish time for described process, and optionally transitions its status to passed value</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo.get_duration" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_duration</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_duration()</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Returns duration of this process after it's finished</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo.get_duration_str" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_duration_str</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_duration_str()</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Returns formatted duration of this process as <code>hh:mm:ss</code> string after it's finished</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v1.execution.exec_logger.ExecutionLogger" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">ExecutionLogger</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">ExecutionLogger(path_logs)</code></pre>
+
+    <div class="doc doc-contents first">
+
+
+
+        <p>Default logger used by <strong><code>ExecutionCommands</code></strong>, implicitly initialized when using Context.</p>
+<p>Reference to it is available from instance of <strong><code>ExecutionContext</code></strong>.</p>
+<p>Provides common logging methods of different log levels - e.g. <strong><code>debug</code></strong>, <strong><code>info</code></strong>, <strong><code>error</code></strong></p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="qubership_pipelines_common_library.v1.utils.utils_cli.utils_cli" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">utils_cli</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">utils_cli(func)</code></pre>
+
+    <div class="doc doc-contents first">
+
+        <p>Decorator to add CLI options for logging level, context path and custom input params.</p>
+
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="qubership_pipelines_common_library.v1.utils.utils_context.create_execution_context" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-function"></code>            <span class="doc doc-object-name doc-function-name">create_execution_context</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">create_execution_context(input_params: <span title="dict">dict</span> = None, input_params_secure: <span title="dict">dict</span> = None, folder_path: <span title="str">str</span> = None, parent_context_to_reuse: <a class="autorefs autorefs-internal" title="            ExecutionContext (qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext)" href="#qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext">ExecutionContext</a> = None)</code></pre>
+
+    <div class="doc doc-contents first">
+
+        <p>Dynamically creates <strong><code>ExecutionContext</code></strong> using provided params.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>input_params</code></b>
+              (<code><span title="dict">dict</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>dict (will be merged into created input params)</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>input_params_secure</code></b>
+              (<code><span title="dict">dict</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>dict (will be merged into created secure input params)</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>folder_path</code></b>
+              (<code><span title="str">str</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>str (optional, will generate new temp)</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>parent_context_to_reuse</code></b>
+              (<code><a class="autorefs autorefs-internal" title="            ExecutionContext (qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext)" href="#qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext">ExecutionContext</a></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>ExecutionContext (optional, to propagate existing input params)</p>
+          </div>
+        </li>
+    </ul>
+
+
+    </div>
+
+</div><hr /></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
