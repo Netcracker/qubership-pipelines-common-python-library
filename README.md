@@ -19,7 +19,7 @@ It includes reference python implementation along with the [Development Guide](h
 
 Library is presented as a set of clients with predefined operations
 
-Auto-generated reference (via mkdocs) is available on [this repo's GitHub Pages](https://netcracker.github.io/qubership-pipelines-common-python-library) 
+Auto-generated reference (via mkdocs) is available on [this repo's GitHub Pages](https://netcracker.github.io/qubership-pipelines-common-python-library/mkdocs) 
 
 ## Installation
 
