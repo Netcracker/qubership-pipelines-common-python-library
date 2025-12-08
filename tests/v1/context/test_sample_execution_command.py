@@ -49,27 +49,28 @@ class TestExecCommandV1(unittest.TestCase):
 
     def test_cmd_execution_with_existing_context(self):
         with self.assertRaises(SystemExit) as exit_result:
-            cmd = SampleExecutionCommand('./tests/data/generic-execution-command/valid/context.yaml')
+            cmd = SampleExecutionCommand('./tests/v1/data/generic-execution-command/valid/context.yaml')
             cmd.run()
         self.assertEqual(0, exit_result.exception.code)
-        with open('./tests/data/generic-execution-command/valid/result.yaml', 'r', encoding='utf-8') as result_file:
+        with open('./tests/v1/data/generic-execution-command/valid/result.yaml', 'r', encoding='utf-8') as result_file:
             result = yaml.safe_load(result_file)
             self.assertEqual(19, int(result["params"]["result"]))
 
     def test_cmd_execution_with_invalid_params(self):
         with self.assertRaises(SystemExit) as exit_result:
-            cmd = SampleExecutionCommand('./tests/data/generic-execution-command/invalid/context.yaml')
+            cmd = SampleExecutionCommand('./tests/v1/data/generic-execution-command/invalid/context.yaml')
             cmd.run()
         self.assertEqual(1, exit_result.exception.code)
 
     def test_cmd_execution_with_empty_param_in_context(self):
         with self.assertRaises(SystemExit) as exit_result:
-            cmd = ExecutionCommandWithOptionalParams('./tests/data/generic-execution-command/valid/context.yaml')
+            cmd = ExecutionCommandWithOptionalParams('./tests/v1/data/generic-execution-command/valid/context.yaml')
             cmd.run()
         self.assertEqual(0, exit_result.exception.code)
-        with open('./tests/data/generic-execution-command/valid/result.yaml', 'r', encoding='utf-8') as result_file:
+        with open('./tests/v1/data/generic-execution-command/valid/result.yaml', 'r', encoding='utf-8') as result_file:
             result = yaml.safe_load(result_file)
             self.assertEqual(123, int(result["params"]["result"]))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,0 +1,18 @@
+apiVersion: v2
+kind: atlasConfigSecure
+systems:
+  argocd:
+    auth:
+      argo_local_user:
+        username: admin
+        password: admin
+  registry:
+    username: admin
+    password: admin
+security:
+  ssl_certificates_bundle: ssl_certificates_bundle
+common:
+  environment:
+    namespaces:
+      dev-3-core:
+          k8s_token: token1
