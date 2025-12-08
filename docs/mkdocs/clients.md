@@ -7,11 +7,11 @@
 
 ---
 
-::: qubership_pipelines_common_library.v1.github_client.GithubClient
+::: qubership_pipelines_common_library.v2.github.github_client.GithubClient
 
 ---
 
-::: qubership_pipelines_common_library.v1.gitlab_client.GitlabClient
+::: qubership_pipelines_common_library.v2.gitlab.gitlab_client.GitlabClient
 
 ---
 

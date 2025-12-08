@@ -13,6 +13,7 @@ class PodmanRunImage(ExecutionCommand):
         environment variable management, file mounting, and output extraction.
 
         Input Parameters Structure (this structure is expected inside "input_params.params" block):
+        ```
         {
             "image": "docker.io/library/hello-world:latest",  # REQUIRED: Container image to run
             "command": "python -m pipelines_declarative_executor run --pipeline_dir=\"/WORK/EXEC_DIR\"",  # OPTIONAL: Command to execute in container
@@ -57,17 +58,18 @@ class PodmanRunImage(ExecutionCommand):
                 }
             }
         }
+        ```
 
         Output Parameters:
-        - params.execution_time: Total execution time in seconds
-        - params.return_code: Container exit code
-        - params.stdout: Container stdout (if save_stdout_to_params enabled)
-        - params.stderr: Container stderr (if save_stdout_to_params enabled)
-        - params.extracted_output.*: Extracted parameters from files (if extract_params_from_files configured)
+            - params.execution_time: Total execution time in seconds
+            - params.return_code: Container exit code
+            - params.stdout: Container stdout (if save_stdout_to_params enabled)
+            - params.stderr: Container stderr (if save_stdout_to_params enabled)
+            - params.extracted_output.*: Extracted parameters from files (if extract_params_from_files configured)
 
         Notes:
-        - The command automatically handles container lifecycle including start, execution, and cleanup
-        - All host-paths (including mount paths) are resolved relative to context directory.
+            - The command automatically handles container lifecycle including start, execution, and cleanup
+            - All host-paths (including mount paths) are resolved relative to context directory.
         """
 
     def _validate(self):

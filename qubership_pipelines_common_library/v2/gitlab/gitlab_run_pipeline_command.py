@@ -15,6 +15,7 @@ class GitlabRunPipeline(ExecutionCommand):
     importers.
 
     Input Parameters Structure (this structure is expected inside "input_params.params" block):
+    ```
     {
         "pipeline_path": "path/to/gitlab_project",               # REQUIRED: Full pipeline path (e.g. "group/subgroup/repo")
         "pipeline_branch": "main",                               # OPTIONAL: Branch to run pipeline from (default: repo's default branch)
@@ -31,30 +32,33 @@ class GitlabRunPipeline(ExecutionCommand):
         "retry_wait_seconds": 1,                                 # OPTIONAL: Wait interval between retries in seconds (default: 1)
         "success_statuses": "SUCCESS,UNSTABLE"                   # OPTIONAL: Comma-separated list of acceptable completion statuses (default: SUCCESS)
     }
+    ```
 
     Systems Configuration (expected in "systems.gitlab" block):
+    ```
     {
         "url": "https://github.com",                             # OPTIONAL: GitLab URL for self-hosted instances (default: https://gitlab.com)
         "password": "<gitlab_token>"                             # REQUIRED: GitLab access token with CI/CD permissions
         "trigger_token": "<gitlab_trigger_token>"                # OPTIONAL: Special token issued for triggering pipeline. If not provided - will try to use CI_JOB_TOKEN
     }
+    ```
 
     Output Parameters:
-    - params.build.url: URL to view the pipeline run in GitLab
-    - params.build.id: ID of the executed pipeline
-    - params.build.status: Final status of the pipeline execution
-    - params.build.date: Workflow start time in ISO format
-    - params.build.duration: Total execution duration in human-readable format
-    - params.build.name: Name of the pipeline execution
+        - params.build.url: URL to view the pipeline run in GitLab
+        - params.build.id: ID of the executed pipeline
+        - params.build.status: Final status of the pipeline execution
+        - params.build.date: Workflow start time in ISO format
+        - params.build.duration: Total execution duration in human-readable format
+        - params.build.name: Name of the pipeline execution
 
     Extension Points:
-    - Custom pipeline data importers can be implemented by extending PipelineDataImporter interface
-    - PipelineDataImporter is passed into constructor of command via "pipeline_data_importer" arg
+        - Custom pipeline data importers can be implemented by extending PipelineDataImporter interface
+        - PipelineDataImporter is passed into constructor of command via "pipeline_data_importer" arg
 
     Notes:
-    - Setting timeout_seconds to 0 enables asynchronous execution (workflow starts but command doesn't wait for completion)
-    - For self-hosted GitLab instances, configure "systems.github.url"
-    - Custom data importers receive the command context and can implement advanced processing logic
+        - Setting timeout_seconds to 0 enables asynchronous execution (workflow starts but command doesn't wait for completion)
+        - For self-hosted GitLab instances, configure "systems.github.url"
+        - Custom data importers receive the command context and can implement advanced processing logic
     """
 
     # default timeout values

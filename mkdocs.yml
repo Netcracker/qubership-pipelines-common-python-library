@@ -7,9 +7,11 @@ theme:
   user_color_mode_toggle: true
 
 nav:
-  - Home: index.md
-  - Clients: clients.md
-  - Commands: commands.md
+  - Home: mkdocs/index.md
+  - Clients: mkdocs/clients.md
+  - Context: mkdocs/context.md
+  - Commands: mkdocs/commands.md
+  - Maven: maven_auth.md
 
 plugins:
   - search
@@ -41,3 +43,6 @@ markdown_extensions:
   - pymdownx.snippets:
       base_path: [!relative $config_dir]
       check_paths: true
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.extra

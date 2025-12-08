@@ -15,6 +15,7 @@ class GithubRunPipeline(ExecutionCommand):
     importers.
 
     Input Parameters Structure (this structure is expected inside "input_params.params" block):
+    ```
     {
         "pipeline_owner": "Netcracker",                          # REQUIRED: Repository owner/organization
         "pipeline_repo_name": "qubership-test-pipelines",        # REQUIRED: Repository name
@@ -32,30 +33,33 @@ class GithubRunPipeline(ExecutionCommand):
         "retry_wait_seconds": 1,                                 # OPTIONAL: Wait interval between retries in seconds (default: 1)
         "success_statuses": "SUCCESS,UNSTABLE"                   # OPTIONAL: Comma-separated list of acceptable completion statuses (default: SUCCESS)
     }
+    ```
 
     Systems Configuration (expected in "systems.github" block):
+    ```
     {
         "url": "https://github.com",                             # OPTIONAL: GitHub UI URL for self-hosted instances (default: https://github.com)
         "api_url": "https://api.github.com",                     # OPTIONAL: GitHub API URL for self-hosted instances (default: https://api.github.com)
         "password": "<github_token>"                             # REQUIRED: GitHub access token with workflow permissions
     }
+    ```
 
     Output Parameters:
-    - params.build.url: URL to view the workflow run in GitHub
-    - params.build.id: ID of the executed workflow run
-    - params.build.status: Final status of the workflow execution
-    - params.build.date: Workflow start time in ISO format
-    - params.build.duration: Total execution duration in human-readable format
-    - params.build.name: Name of the workflow run
+        - params.build.url: URL to view the workflow run in GitHub
+        - params.build.id: ID of the executed workflow run
+        - params.build.status: Final status of the workflow execution
+        - params.build.date: Workflow start time in ISO format
+        - params.build.duration: Total execution duration in human-readable format
+        - params.build.name: Name of the workflow run
 
     Extension Points:
-    - Custom pipeline data importers can be implemented by extending PipelineDataImporter interface
-    - PipelineDataImporter is passed into constructor of command via "pipeline_data_importer" arg
+        - Custom pipeline data importers can be implemented by extending PipelineDataImporter interface
+        - PipelineDataImporter is passed into constructor of command via "pipeline_data_importer" arg
 
     Notes:
-    - Setting timeout_seconds to 0 enables asynchronous execution (workflow starts but command doesn't wait for completion)
-    - For self-hosted GitHub Enterprise, configure both "systems.github.url" and "systems.github.api_url"
-    - Custom data importers receive the command context and can implement advanced processing logic
+        - Setting timeout_seconds to 0 enables asynchronous execution (workflow starts but command doesn't wait for completion)
+        - For self-hosted GitHub Enterprise, configure both "systems.github.url" and "systems.github.api_url"
+        - Custom data importers receive the command context and can implement advanced processing logic
     """
 
     # default timeout values
