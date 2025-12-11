@@ -8,6 +8,10 @@
     options:
         inherited_members: []
 ---
+::: qubership_pipelines_common_library.v2.jenkins.jenkins_run_pipeline_command.JenkinsRunPipeline
+    options:
+        inherited_members: []
+---
 ::: qubership_pipelines_common_library.v2.podman.podman_command.PodmanRunImage
     options:
         inherited_members: []

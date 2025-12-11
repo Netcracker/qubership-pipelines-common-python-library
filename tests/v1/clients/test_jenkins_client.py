@@ -16,10 +16,10 @@ import unittest
 from unittest.mock import patch
 
 from qubership_pipelines_common_library.v1.execution.exec_info import ExecutionInfo
-from qubership_pipelines_common_library.v1.jenkins_client import JenkinsClient
+from qubership_pipelines_common_library.v2.jenkins.jenkins_client import JenkinsClient
 
 
-class TestJenkinsClientV1(unittest.TestCase):
+class TestJenkinsClientV2(unittest.TestCase):
 
     def setUp(self):
         self.url = "http://jenkins.qubership.org"
