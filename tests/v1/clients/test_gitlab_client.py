@@ -16,10 +16,10 @@ import unittest
 from unittest.mock import patch
 
 from qubership_pipelines_common_library.v1.execution.exec_info import ExecutionInfo
-from qubership_pipelines_common_library.v1.gitlab_client import GitlabClient
+from qubership_pipelines_common_library.v2.gitlab.gitlab_client import GitlabClient
 
 
-class TestGitlabClientV1(unittest.TestCase):
+class TestGitlabClientV2(unittest.TestCase):
 
     def setUp(self):
         self.url = "https://git.qubership.org"
@@ -36,14 +36,14 @@ class TestGitlabClientV1(unittest.TestCase):
         self.assertEqual("kind: AtlasConfig", result)
 
     @patch("gitlab.v4.objects.projects.ProjectManager.get")
-    def test_trigger_pipeline_fills_execution_params(self, get_project_mock):
+    def test_create_pipeline_fills_execution_params(self, get_project_mock):
         project = "quber/test"
         pipeline_id = "pipeline_1"
         pipeline_url = f"{self.url}/{project}/{pipeline_id}"
         get_project_mock().pipelines.create().web_url = pipeline_url
         get_project_mock().pipelines.create().get_id.return_value = pipeline_id
 
-        execution = self.client.trigger_pipeline(project_id=project, pipeline_params={'ref': "main"})
+        execution = self.client.create_pipeline(project_id=project, ref="main", variables={})
 
         self.assertEqual(project, execution.get_name())
         self.assertEqual(pipeline_id, execution.get_id())

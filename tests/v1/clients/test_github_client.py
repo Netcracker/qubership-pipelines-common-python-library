@@ -15,13 +15,13 @@
 import unittest
 from unittest.mock import patch, MagicMock
 from qubership_pipelines_common_library.v1.execution.exec_info import ExecutionInfo
-from qubership_pipelines_common_library.v1.github_client import GithubClient
+from qubership_pipelines_common_library.v2.github.github_client import GithubClient
 
 
-class TestGithubClientV1(unittest.TestCase):
+class TestGithubClientV2(unittest.TestCase):
 
     def setUp(self):
-        self.gh_client = GithubClient()
+        self.gh_client = GithubClient(token="test_token")
 
     @patch("ghapi.core.GhApi.__call__")
     def test_get_workflow_run_status__returns_success_status(self, get_workflow_run_mock):

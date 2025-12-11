@@ -15,7 +15,7 @@
 
 ---
 
-::: qubership_pipelines_common_library.v1.jenkins_client.JenkinsClient
+::: qubership_pipelines_common_library.v2.jenkins.jenkins_client.JenkinsClient
 
 ---
 

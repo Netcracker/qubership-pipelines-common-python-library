@@ -18,7 +18,7 @@ import unittest
 import pytest
 
 from qubership_pipelines_common_library.v1.execution.exec_info import ExecutionInfo
-from qubership_pipelines_common_library.v1.gitlab_client import GitlabClient
+from qubership_pipelines_common_library.v2.gitlab.gitlab_client import GitlabClient
 
 
 @pytest.mark.integration
@@ -38,9 +38,10 @@ class TestGitlabIntegration(unittest.TestCase):
                                                                           "response_data/response.json")
         self.assertEqual(42, json.loads(test_file_content)["answer"])
 
-    def test_trigger_and_wait_pipeline(self):
-        execution = TestGitlabIntegration.client.trigger_pipeline(TestGitlabIntegration.project_id,
-                                                                  pipeline_params={"ref": TestGitlabIntegration.ref})
+    def test_create_and_wait_pipeline(self):
+        execution = TestGitlabIntegration.client.create_pipeline(TestGitlabIntegration.project_id,
+                                                                 ref=TestGitlabIntegration.ref,
+                                                                 variables={})
         execution = TestGitlabIntegration.client.wait_pipeline_execution(
             execution=execution,
             timeout_seconds=60,
