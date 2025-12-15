@@ -4,6 +4,9 @@ All existing maven repositories support basic authorization, the only difference
 
 Authorization is required when accessing private repositories, and the same username/token pair could be used in Maven or Gradle
 
+There's also now another way of working with Maven and Generic repositories - `ArtifactFinder` client, that supports plug-ins for different providers,
+and separate Cloud Authentication/Credentials abstraction.
+
 
 ### JFrog Artifactory
 

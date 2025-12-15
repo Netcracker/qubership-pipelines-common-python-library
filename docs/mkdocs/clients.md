@@ -3,6 +3,10 @@
 ::: qubership_pipelines_common_library.v1.artifactory_client.ArtifactoryClient
 ---
 
+::: qubership_pipelines_common_library.v2.artifacts_finder.artifact_finder.ArtifactFinder
+
+---
+
 ::: qubership_pipelines_common_library.v1.git_client.GitClient
 
 ---
@@ -20,10 +24,6 @@
 ---
 
 ::: qubership_pipelines_common_library.v1.kube_client.KubeClient
-
----
-
-::: qubership_pipelines_common_library.v1.maven_client.MavenArtifactSearcher
 
 ---
 
