@@ -14,6 +14,9 @@
 
 import logging, os
 
+from rich.console import Console
+from rich.logging import RichHandler
+
 
 class ExecutionLogger:
     FILE_NAME_EXECUTION = "execution.log"
@@ -35,6 +38,25 @@ class ExecutionLogger:
         self.path_logs = path_logs
         self.logger = logging.getLogger("execution_logger")
         self.logger.setLevel(logging.DEBUG) # set to the lowest level to allow handlers to capture anything
+
+        self._rich_console = Console(
+            force_terminal=True,
+            no_color=False,
+            highlight=True,
+            width=200,
+        )
+
+        rich_handler = RichHandler(
+            console=self._rich_console,
+            show_time=False,
+            show_level=False,
+            show_path=False,
+            rich_tracebacks=True,
+            tracebacks_show_locals=False,
+        )
+        rich_handler.setFormatter(logging.Formatter(ExecutionLogger.DEFAULT_FORMAT))
+        self.logger.addHandler(rich_handler)
+
         if path_logs:
             # execution logs - only in local logger
             handler_exec = logging.FileHandler(os.path.join(path_logs, ExecutionLogger.FILE_NAME_EXECUTION))
@@ -70,3 +92,8 @@ class ExecutionLogger:
 
     def fatal(self, msg, *args, **kwargs):
         self.logger.fatal(msg, *args, **kwargs)
+
+    def print(self, msg):
+        self._rich_console.print()
+        self._rich_console.print(msg)
+        self._rich_console.print()
