@@ -40,7 +40,7 @@ class ExecutionContext:
         self.__init_temp_folder()
         self.__init_logger()
         # load context from files
-        logging.info(f"""Execution context params:
+        self.logger.info(f"""Execution context params:
             paths.logs: {self.context.get("paths.logs")}
             paths.temp: {self.context.get("paths.temp")}
             paths.input.params: {self.context.get("paths.input.params")}

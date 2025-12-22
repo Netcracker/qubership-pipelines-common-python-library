@@ -74,11 +74,10 @@ class ExecutionCommand:
             self._exit(False, ExecutionCommand.FAILURE_MSG)
 
     def _log_input_params(self):
-        self.context.logger.info("Input context parameters:")
-        self.context.logger.print(
-            CryptoUtils.get_parameters_for_print(self.context.input_params_secure.content, True))
-        self.context.logger.print(
-            CryptoUtils.get_parameters_for_print(self.context.input_params.content, False))
+        self.context.logger.info(
+            f"Input context parameters:"
+            f"\n{CryptoUtils.get_parameters_for_print(self.context.input_params_secure.content, True)}"
+            f"\n{CryptoUtils.get_parameters_for_print(self.context.input_params.content, False)}")
 
     def _validate(self):
         return self.context.validate(["paths.input.params"])

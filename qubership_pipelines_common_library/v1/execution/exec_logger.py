@@ -12,10 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging, os
-
-from rich.console import Console
-from rich.logging import RichHandler
+import logging
+import os
 
 
 class ExecutionLogger:
@@ -37,25 +35,8 @@ class ExecutionLogger:
         #  Also, file handlers are never removed
         self.path_logs = path_logs
         self.logger = logging.getLogger("execution_logger")
-        self.logger.setLevel(logging.DEBUG) # set to the lowest level to allow handlers to capture anything
-
-        self._rich_console = Console(
-            force_terminal=True,
-            no_color=False,
-            highlight=True,
-            width=200,
-        )
-
-        rich_handler = RichHandler(
-            console=self._rich_console,
-            show_time=False,
-            show_level=False,
-            show_path=False,
-            rich_tracebacks=True,
-            tracebacks_show_locals=False,
-        )
-        rich_handler.setFormatter(logging.Formatter(ExecutionLogger.DEFAULT_FORMAT))
-        self.logger.addHandler(rich_handler)
+        self.logger.setLevel(logging.DEBUG)  # set to the lowest level to allow handlers to capture anything
+        self.logger.propagate = True
 
         if path_logs:
             # execution logs - only in local logger
@@ -68,9 +49,7 @@ class ExecutionLogger:
             handler_full = logging.FileHandler(os.path.join(path_logs, ExecutionLogger.FILE_NAME_FULL))
             handler_full.setLevel(ExecutionLogger.FULL_LOG_LEVEL)
             handler_full.setFormatter(logging.Formatter(ExecutionLogger.DEFAULT_FORMAT))
-            logging.getLogger().propagate = False
             logging.getLogger().addHandler(handler_full)
-        self.logger.propagate = True
 
     def info(self, msg, *args, **kwargs):
         self.logger.info(msg, *args, **kwargs)
@@ -92,8 +71,3 @@ class ExecutionLogger:
 
     def fatal(self, msg, *args, **kwargs):
         self.logger.fatal(msg, *args, **kwargs)
-
-    def print(self, msg):
-        self._rich_console.print()
-        self._rich_console.print(msg)
-        self._rich_console.print()

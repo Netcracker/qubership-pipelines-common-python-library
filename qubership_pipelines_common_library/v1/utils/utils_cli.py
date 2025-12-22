@@ -1,14 +1,42 @@
-import re
-import click
 import logging
-import sys, os
+import re
+
+import click
+from rich import box
+from rich.console import Console
+from rich.logging import RichHandler
+from rich.panel import Panel
+
 from qubership_pipelines_common_library.v1.execution.exec_logger import ExecutionLogger
 
 DEFAULT_CONTEXT_FILE_PATH = 'context.yaml'
 
+rich_console = Console(
+    force_terminal=True,
+    no_color=False,
+    highlight=True,
+    width=200,
+)
+
+
+class LevelColorFilter(logging.Filter):
+    LEVEL_COLORS = {
+        logging.DEBUG: "cyan",
+        logging.INFO: "green",
+        logging.WARNING: "yellow",
+        logging.ERROR: "red",
+        logging.CRITICAL: "red reverse",
+    }
+
+    def filter(self, record):
+        color = self.LEVEL_COLORS.get(record.levelno, "default")
+        record.levelname_colored = f"[{color}]{record.levelname}[/]"
+        return True
+
 
 def utils_cli(func):
     """Decorator to add CLI options for logging level, context path and custom input params."""
+
     @click.option('--log-level', default='INFO', show_default=True,
                   type=click.Choice(['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], case_sensitive=False),
                   help="Set the logging level")
@@ -20,9 +48,13 @@ def utils_cli(func):
     @click.pass_context
     def wrapper(ctx, *args, log_level, **kwargs):
         ExecutionLogger.EXECUTION_LOG_LEVEL = getattr(logging, log_level.upper(), logging.INFO)
-        _configure_global_logger(logging.getLogger(), log_level, ExecutionLogger.DEFAULT_FORMAT)
+        _configure_global_logger(
+            logging.getLogger(), log_level,
+            u'[%(asctime)s] [%(levelname_colored)-5s] [class=%(filename)s:%(lineno)-3s] %(message)s')
+        _print_command_name()
         _transform_kwargs(kwargs)
         return ctx.invoke(func, *args, **kwargs)
+
     return wrapper
 
 
@@ -33,10 +65,33 @@ def _configure_global_logger(global_logger: logging.Logger, log_level: str, form
     if global_logger.hasHandlers():
         global_logger.handlers.clear()
     global_logger.propagate = True
-    stdout_handler = logging.StreamHandler(sys.stdout)
-    stdout_handler.setLevel(log_level_value)
-    stdout_handler.setFormatter(logging.Formatter(formatter_str))
-    global_logger.addHandler(stdout_handler)
+    rich_handler = RichHandler(
+        console=rich_console,
+        show_time=False,
+        show_level=False,
+        show_path=False,
+        rich_tracebacks=True,
+        tracebacks_show_locals=False,
+        markup=True,
+    )
+    rich_handler.addFilter(LevelColorFilter())
+    rich_handler.setFormatter(logging.Formatter(formatter_str))
+    rich_handler.setLevel(log_level_value)
+    global_logger.addHandler(rich_handler)
+
+
+def _print_command_name():
+    try:
+        click_context = click.get_current_context()
+        command_name = click_context.command.name or click_context.info_name
+    except RuntimeError:
+        logging.getLogger().warning(f"Can't find command name.")
+        command_name = ""
+
+    command_panel = Panel(f"command_name = {command_name}", expand=False, padding=(0, 1), box=box.ROUNDED, )
+    rich_console.print()
+    rich_console.print(command_panel)
+    rich_console.print()
 
 
 def _transform_kwargs(kwargs):
@@ -62,6 +117,8 @@ def _transform_value(value):
 
 
 _KEY_PARTS_DELIMITER_PATTERN = re.compile(r'\.|__')
+
+
 def _set_item_by_path(target_dict: dict, path, value):
     current_dict = target_dict
     key_parts = _KEY_PARTS_DELIMITER_PATTERN.split(path)
