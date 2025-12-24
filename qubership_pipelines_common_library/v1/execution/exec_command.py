@@ -92,9 +92,9 @@ class ExecutionCommand:
             CryptoUtils.get_parameters_for_print(self.context.input_params.content, False),
         )
         if self._is_child:
-            self.context.logger.debug(log_message, log_message_arguments)
+            self.context.logger.debug(log_message, *log_message_arguments)
         else:
-            self.context.logger.info(log_message, log_message_arguments)
+            self.context.logger.info(log_message, *log_message_arguments)
 
     def _validate(self):
         return self.context.validate(["paths.input.params"])
