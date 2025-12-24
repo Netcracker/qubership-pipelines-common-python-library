@@ -80,21 +80,21 @@ class ExecutionCommand:
             self._log_border_line()
 
     def _log_command_class_name(self):
-        command_name = f"command_class_name = {type(self).__name__}"
-        self.context.logger.info(command_name)
+        self.context.logger.info("command_class_name = %s", type(self).__name__)
 
     def _log_border_line(self):
         self.context.logger.info("=" * 60)
 
     def _log_input_params(self):
-        input_context_parameters = (
-            f"Input context parameters:"
-            f"\n{CryptoUtils.get_parameters_for_print(self.context.input_params_secure.content, True)}"
-            f"\n{CryptoUtils.get_parameters_for_print(self.context.input_params.content, False)}")
+        log_message = "Input context parameters:\n%s\n%s"
+        log_message_arguments = (
+            CryptoUtils.get_parameters_for_print(self.context.input_params_secure.content, True),
+            CryptoUtils.get_parameters_for_print(self.context.input_params.content, False),
+        )
         if self._is_child:
-            self.context.logger.debug(input_context_parameters)
+            self.context.logger.debug(log_message, log_message_arguments)
         else:
-            self.context.logger.info(input_context_parameters)
+            self.context.logger.info(log_message, log_message_arguments)
 
     def _validate(self):
         return self.context.validate(["paths.input.params"])
