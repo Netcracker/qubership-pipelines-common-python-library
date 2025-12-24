@@ -28,7 +28,7 @@ class ExecutionCommand:
     FAILURE_MSG = "Status: FAILURE"
 
     def __init__(self, context_path: str = None, input_params: dict = None, input_params_secure: dict = None,
-                 folder_path: str = None, parent_context_to_reuse: ExecutionContext = None,
+                 folder_path: str = None, parent_context_to_reuse: ExecutionContext = None, is_child: bool = False,
                  pre_execute_actions: list['ExecutionCommandExtension'] = None,
                  post_execute_actions: list['ExecutionCommandExtension'] = None):
         """
@@ -44,6 +44,7 @@ class ExecutionCommand:
             input_params_secure (dict): Secure parameters that will be merged into dynamically created params
             folder_path (str): Folder path where dynamically-created context will be stored. Optional, will create new temp folder if missing.
             parent_context_to_reuse (ExecutionContext): Optional, existing context to propagate input params from.
+            is_child (bool): Optional, command is invoked as a child by another command.
             pre_execute_actions: Optional, list of actions, implementing ExecutionCommandExtension, to be executed before command
             post_execute_actions: Optional, list of actions, implementing ExecutionCommandExtension, to be executed after command
         """
@@ -51,6 +52,7 @@ class ExecutionCommand:
             context_path = create_execution_context(input_params=input_params, input_params_secure=input_params_secure,
                                                     folder_path=folder_path, parent_context_to_reuse=parent_context_to_reuse)
         self.context = ExecutionContext(context_path)
+        self._is_child = is_child
         self._pre_execute_actions = []
         if pre_execute_actions:
             self._pre_execute_actions.extend(pre_execute_actions)
@@ -61,6 +63,8 @@ class ExecutionCommand:
     def run(self):
         """Runs command following its lifecycle"""
         try:
+            self._log_command_class_name()
+            self._log_border_line()
             self._log_input_params()
             if not self._validate():
                 logging.error(ExecutionCommand.FAILURE_MSG)
@@ -72,12 +76,25 @@ class ExecutionCommand:
         except Exception as e:
             logging.error(traceback.format_exc())
             self._exit(False, ExecutionCommand.FAILURE_MSG)
+        finally:
+            self._log_border_line()
+
+    def _log_command_class_name(self):
+        command_name = f"command_class_name = {type(self).__name__}"
+        self.context.logger.info(command_name)
+
+    def _log_border_line(self):
+        self.context.logger.info("=" * 60)
 
     def _log_input_params(self):
-        self.context.logger.info(
+        input_context_parameters = (
             f"Input context parameters:"
             f"\n{CryptoUtils.get_parameters_for_print(self.context.input_params_secure.content, True)}"
             f"\n{CryptoUtils.get_parameters_for_print(self.context.input_params.content, False)}")
+        if self._is_child:
+            self.context.logger.debug(input_context_parameters)
+        else:
+            self.context.logger.info(input_context_parameters)
 
     def _validate(self):
         return self.context.validate(["paths.input.params"])
