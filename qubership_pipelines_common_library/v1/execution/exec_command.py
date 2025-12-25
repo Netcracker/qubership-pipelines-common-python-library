@@ -61,6 +61,8 @@ class ExecutionCommand:
     def run(self):
         """Runs command following its lifecycle"""
         try:
+            self._log_command_class_name()
+            self._log_border_line()
             self._log_input_params()
             if not self._validate():
                 logging.error(ExecutionCommand.FAILURE_MSG)
@@ -72,6 +74,14 @@ class ExecutionCommand:
         except Exception as e:
             logging.error(traceback.format_exc())
             self._exit(False, ExecutionCommand.FAILURE_MSG)
+        finally:
+            self._log_border_line()
+
+    def _log_command_class_name(self):
+        self.context.logger.info("command_class_name = %s", type(self).__name__)
+
+    def _log_border_line(self):
+        self.context.logger.info("=" * 60)
 
     def _log_input_params(self):
         self.context.logger.info(

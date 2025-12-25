@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os, logging
+import os
 
 from pathlib import Path
 from qubership_pipelines_common_library.v1.utils.utils_file import UtilsFile
@@ -40,7 +40,7 @@ class ExecutionContext:
         self.__init_temp_folder()
         self.__init_logger()
         # load context from files
-        logging.info(f"""Execution context params:
+        self.logger.debug(f"""Execution context params:
             paths.logs: {self.context.get("paths.logs")}
             paths.temp: {self.context.get("paths.temp")}
             paths.input.params: {self.context.get("paths.input.params")}
@@ -55,10 +55,10 @@ class ExecutionContext:
     def output_params_save(self):
         """Stores output_param files to disk"""
         if self.context.get("paths.output.params"):
-            logging.info(f"Writing insecure param file '{self.context.get('paths.output.params')}'")
+            self.logger.info(f"Writing insecure param file '{self.context.get('paths.output.params')}'")
             self.output_params.save(self.context.get("paths.output.params"))
         if self.context.get("paths.output.params_secure"):
-            logging.info(f"Writing secure param file '{self.context.get('paths.output.params_secure')}'")
+            self.logger.info(f"Writing secure param file '{self.context.get('paths.output.params_secure')}'")
             self.output_params_secure.save(self.context.get("paths.output.params_secure"))
 
     def input_param_get(self, path, def_value=None):
@@ -85,7 +85,7 @@ class ExecutionContext:
             if not self.__validate_param(key):
                 valid = False
                 if not silent:
-                    logging.error(f"Parameter '{key}' is mandatory but not defined")
+                    self.logger.error(f"Parameter '{key}' is mandatory but not defined")
         return valid
 
     def __validate_param(self, name):

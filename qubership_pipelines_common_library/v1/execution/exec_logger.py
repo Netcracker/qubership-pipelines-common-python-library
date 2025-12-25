@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging, os
+import logging
+import os
 
 
 class ExecutionLogger:
@@ -20,7 +21,8 @@ class ExecutionLogger:
     FILE_NAME_FULL = "full.log"
     EXECUTION_LOG_LEVEL = logging.INFO
     FULL_LOG_LEVEL = logging.DEBUG
-    DEFAULT_FORMAT = u'[%(asctime)s] [%(levelname)-5s] [class=%(filename)s:%(lineno)-3s] %(message)s'
+    DEFAULT_FORMAT = u'[%(asctime)s] [%(levelname)-7s] [class=%(filename)s:%(lineno)-3s] %(message)s'
+    LEVELNAME_COLORED_FORMAT = u'[%(asctime)s] [%(levelname_color_open_tag)s%(levelname)-7s%(levelname_color_close_tag)s] \\[class=%(filename)s:%(lineno)-3s] %(message)s'
 
     def __init__(self, path_logs):
         """
@@ -34,7 +36,9 @@ class ExecutionLogger:
         #  Also, file handlers are never removed
         self.path_logs = path_logs
         self.logger = logging.getLogger("execution_logger")
-        self.logger.setLevel(logging.DEBUG) # set to the lowest level to allow handlers to capture anything
+        self.logger.setLevel(logging.DEBUG)  # set to the lowest level to allow handlers to capture anything
+        self.logger.propagate = True
+
         if path_logs:
             # execution logs - only in local logger
             handler_exec = logging.FileHandler(os.path.join(path_logs, ExecutionLogger.FILE_NAME_EXECUTION))
@@ -46,9 +50,7 @@ class ExecutionLogger:
             handler_full = logging.FileHandler(os.path.join(path_logs, ExecutionLogger.FILE_NAME_FULL))
             handler_full.setLevel(ExecutionLogger.FULL_LOG_LEVEL)
             handler_full.setFormatter(logging.Formatter(ExecutionLogger.DEFAULT_FORMAT))
-            logging.getLogger().propagate = False
             logging.getLogger().addHandler(handler_full)
-        self.logger.propagate = True
 
     def info(self, msg, *args, **kwargs):
         self.logger.info(msg, *args, **kwargs)
