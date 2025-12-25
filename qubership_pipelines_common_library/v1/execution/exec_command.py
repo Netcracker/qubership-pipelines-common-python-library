@@ -28,7 +28,7 @@ class ExecutionCommand:
     FAILURE_MSG = "Status: FAILURE"
 
     def __init__(self, context_path: str = None, input_params: dict = None, input_params_secure: dict = None,
-                 folder_path: str = None, parent_context_to_reuse: ExecutionContext = None, is_child: bool = False,
+                 folder_path: str = None, parent_context_to_reuse: ExecutionContext = None,
                  pre_execute_actions: list['ExecutionCommandExtension'] = None,
                  post_execute_actions: list['ExecutionCommandExtension'] = None):
         """
@@ -44,7 +44,6 @@ class ExecutionCommand:
             input_params_secure (dict): Secure parameters that will be merged into dynamically created params
             folder_path (str): Folder path where dynamically-created context will be stored. Optional, will create new temp folder if missing.
             parent_context_to_reuse (ExecutionContext): Optional, existing context to propagate input params from.
-            is_child (bool): Optional, command is invoked as a child by another command.
             pre_execute_actions: Optional, list of actions, implementing ExecutionCommandExtension, to be executed before command
             post_execute_actions: Optional, list of actions, implementing ExecutionCommandExtension, to be executed after command
         """
@@ -52,7 +51,6 @@ class ExecutionCommand:
             context_path = create_execution_context(input_params=input_params, input_params_secure=input_params_secure,
                                                     folder_path=folder_path, parent_context_to_reuse=parent_context_to_reuse)
         self.context = ExecutionContext(context_path)
-        self._is_child = is_child
         self._pre_execute_actions = []
         if pre_execute_actions:
             self._pre_execute_actions.extend(pre_execute_actions)
@@ -86,15 +84,11 @@ class ExecutionCommand:
         self.context.logger.info("=" * 60)
 
     def _log_input_params(self):
-        log_message = "Input context parameters:\n%s\n%s"
-        log_message_arguments = (
+        self.context.logger.info(
+            "Input context parameters:\n%s\n%s",
             CryptoUtils.get_parameters_for_print(self.context.input_params_secure.content, True),
-            CryptoUtils.get_parameters_for_print(self.context.input_params.content, False),
+            CryptoUtils.get_parameters_for_print(self.context.input_params.content, False)
         )
-        if self._is_child:
-            self.context.logger.debug(log_message, *log_message_arguments)
-        else:
-            self.context.logger.info(log_message, *log_message_arguments)
 
     def _validate(self):
         return self.context.validate(["paths.input.params"])
