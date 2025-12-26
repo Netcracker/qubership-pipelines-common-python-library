@@ -71,7 +71,7 @@ class ExecutionCommand:
             self._execute()
             self._post_execute()
             self._exit(True, ExecutionCommand.SUCCESS_MSG)
-        except Exception as e:
+        except Exception:
             logging.error(traceback.format_exc())
             self._exit(False, ExecutionCommand.FAILURE_MSG)
         finally:

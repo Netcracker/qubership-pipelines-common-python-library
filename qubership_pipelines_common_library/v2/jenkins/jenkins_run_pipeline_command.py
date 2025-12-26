@@ -96,9 +96,9 @@ class JenkinsRunPipeline(ExecutionCommand):
         self.pipeline_path = self.context.input_param_get("params.pipeline_path").strip("/")
         self.pipeline_params = self.context.input_param_get("params.pipeline_params", {})
         if not self.pipeline_params:
-            self.context.logger.info(f"Pipeline parameters were not specified. This means that pipeline will be started with its default values")
+            self.context.logger.info("Pipeline parameters were not specified. This means that pipeline will be started with its default values")
         if not isinstance(self.pipeline_params, dict):
-            self.context.logger.error(f"Pipeline parameters were not loaded correctly. Probably mistake in the params definition")
+            self.context.logger.error("Pipeline parameters were not loaded correctly. Probably mistake in the params definition")
             return False
 
         self.success_statuses = [x.strip() for x in self.context.input_param_get("params.success_statuses", ExecutionInfo.STATUS_SUCCESS).split(",")]
@@ -117,7 +117,7 @@ class JenkinsRunPipeline(ExecutionCommand):
             retry_timeout_seconds=self.retry_timeout_seconds,
             retry_wait_seconds=self.retry_wait_seconds
         )
-        self.context.logger.info(f"Successfully initialized Jenkins client")
+        self.context.logger.info("Successfully initialized Jenkins client")
 
         if self.use_existing_pipeline:  # work with existing job
             self.context.logger.info(f"Using existing job {self.pipeline_path} - {self.use_existing_pipeline}")
@@ -155,7 +155,7 @@ class JenkinsRunPipeline(ExecutionCommand):
             self._exit(False, f"Status: {execution.get_status()}")
 
     def _save_execution_info(self, execution: ExecutionInfo):
-        self.context.logger.info(f"Writing jenkins job execution status")
+        self.context.logger.info("Writing jenkins job execution status")
         self.context.output_param_set("params.build.url", execution.get_url())
         self.context.output_param_set("params.build.id", execution.get_id())
         self.context.output_param_set("params.build.status", execution.get_status())

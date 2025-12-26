@@ -88,7 +88,7 @@ class SopsClient:
         Returns:
             path to generated `.sops.yaml`
         """
-        self.logger.debug(f"Preparing sops config for encryption")
+        self.logger.debug("Preparing sops config for encryption")
         sops_config_content = {
             "creation_rules": [
                 {
@@ -111,6 +111,6 @@ class SopsClient:
         Returns:
 
         """
-        self.logger.debug(f"Removing sops config")
+        self.logger.debug("Removing sops config")
         if sops_config_folder.exists() and sops_config_folder.is_dir():
             shutil.rmtree(sops_config_folder)

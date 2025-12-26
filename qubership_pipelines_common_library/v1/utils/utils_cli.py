@@ -64,7 +64,7 @@ def _print_command_name():
         click_context = click.get_current_context()
         command_name = click_context.command.name or click_context.info_name
     except RuntimeError:
-        logging.getLogger().warning(f"Can't find command name.")
+        logging.getLogger().warning("Can't find command name.")
         command_name = ""
 
     command_panel = Panel(f"command_name = {command_name}", expand=False, padding=(0, 1), box=box.ROUNDED)

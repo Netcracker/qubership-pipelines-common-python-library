@@ -211,14 +211,14 @@ class PodmanRunImage(ExecutionCommand):
                 import json
                 with open(file_path, 'r', encoding='utf-8') as f:
                     return json.load(f)
-            except:
+            except Exception:
                 pass
 
             try:
                 import yaml
                 with open(file_path, 'r', encoding='utf-8') as f:
                     return yaml.safe_load(f)
-            except:
+            except Exception:
                 pass
 
             try:
@@ -230,7 +230,7 @@ class PodmanRunImage(ExecutionCommand):
                             key, value = line.split('=', 1)
                             key_values[key.strip()] = value.strip()
                 return key_values if key_values else None
-            except:
+            except Exception:
                 pass
 
             with open(file_path, 'r', encoding='utf-8') as f:
@@ -292,7 +292,7 @@ class PodmanRunImage(ExecutionCommand):
             raise
 
         except PodmanException:
-            self.context.logger.error(f"Container exited with unexpected exitcode")
+            self.context.logger.error("Container exited with unexpected exitcode")
             raise
 
         except Exception as e:

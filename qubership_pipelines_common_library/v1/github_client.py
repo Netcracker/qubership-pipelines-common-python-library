@@ -152,7 +152,7 @@ class GithubClient:
                     logging.info(f"Workflow Run status: '{run.status}' is present in input break statuses list. Stop waiting.")
                     execution.stop()
                     break
-            except:
+            except Exception:
                 pass
             timeout += wait_seconds
             logging.info(f"Waiting workflow run execution timeout {wait_seconds} seconds")

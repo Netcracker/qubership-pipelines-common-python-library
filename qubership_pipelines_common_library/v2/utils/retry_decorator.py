@@ -25,7 +25,7 @@ class RetryDecorator:
             last_result = None
             estimated_max_attempts = self.retry_timeout_seconds // self.retry_wait_seconds
 
-            
+
             while count_seconds < self.retry_timeout_seconds and not self.condition_func(last_result):
                 try:
                     last_result = func(*args, **kwargs)
@@ -41,7 +41,7 @@ class RetryDecorator:
                         last_log_time = now
                     else:
                         time.sleep(self.retry_wait_seconds)
-                    
+
                 except Exception as e:
                     retries += 1
                     now = time.perf_counter()
@@ -50,14 +50,14 @@ class RetryDecorator:
                         last_log_time = now
                     else:
                         time.sleep(self.retry_wait_seconds)
-                
+
                 finally:
                     count_seconds += self.retry_wait_seconds
 
             if self.condition_func(last_result):
                 self.logger.debug(f"Function {func.__name__} successfully executed after {retries} attempts in {count_seconds}s")
                 return last_result
-            
+
             self._exit_with_error_message(func.__name__)
         return wrapper
 
@@ -80,7 +80,7 @@ class RetryDecorator:
         else:
             self.logger.debug(
                 f"`retry_wait_seconds` is not found in func {func.__name__} arguments. Using default value = {self.retry_wait_seconds}")
-    
+
     def _process_exception_during_func_execution(self, exception, count_seconds, func_name, retries, estimated_max_attempts):
         if count_seconds < self.retry_timeout_seconds:
             self._sleep_with_warning_log(

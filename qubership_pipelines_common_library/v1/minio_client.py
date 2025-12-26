@@ -68,7 +68,7 @@ class MinioClient:
 
     def put_file(self, bucket_name: str, path: str, local_path: str):
         """"""
-        result = self.minio.fput_object(bucket_name, path, local_path)
+        self.minio.fput_object(bucket_name, path, local_path)
 
     def get_text_file_content(self, bucket_name: str, file_path: str):
         """"""

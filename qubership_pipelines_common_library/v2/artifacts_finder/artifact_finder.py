@@ -42,7 +42,7 @@ class ArtifactFinder:
         if not artifact:
             artifact = Artifact(group_id=group_id, artifact_id=artifact_id, version=version, extension=extension)
         if not artifact.artifact_id or not artifact.version:
-            raise Exception(f"Artifact 'artifact_id' and 'version' must be specified!")
+            raise Exception("Artifact 'artifact_id' and 'version' must be specified!")
         logging.debug(f"Searching for '{artifact.artifact_id}:{artifact.version}' in {self.provider.get_provider_name()}...")
         return self.provider.search_artifacts(artifact=artifact)
 

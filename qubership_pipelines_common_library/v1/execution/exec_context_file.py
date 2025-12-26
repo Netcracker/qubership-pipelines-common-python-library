@@ -141,7 +141,7 @@ class ExecutionContextFile:
                 logging.error(f"Incorrect apiVersion value: {self.content['apiVersion']} in file '{full_path}'. "
                               f"Only '{ExecutionContextFile.SUPPORTED_API_VERSIONS}' are supported")
                 self.init_empty()
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             self.init_empty()
 
     def save(self, path):

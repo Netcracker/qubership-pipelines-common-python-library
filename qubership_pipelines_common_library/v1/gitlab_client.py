@@ -165,7 +165,7 @@ class GitlabClient:
                     logging.info(f"Pipeline status: '{pipeline.status}' contains in input break status list. Stop waiting.")
                     execution.stop()
                     break
-            except:
+            except Exception:
                 pass
             now = time.perf_counter()
             retries += 1
@@ -234,15 +234,19 @@ class GitlabClient:
                 if e.response_code == 404:
                     logging.warning(f"No artifacts for job {job_id}")
                     return None
-                else: raise
+                else:
+                    raise
         logging.info(f"Artifacts downloaded to {local_file}")
         return local_file
 
     @staticmethod
     def _cast_to_string(value) -> str:
-        if isinstance(value, str): return value
-        if value is None: return ''
-        if isinstance(value, bool): return 'true' if value else 'false'
+        if isinstance(value, str):
+            return value
+        if value is None:
+            return ''
+        if isinstance(value, bool):
+            return 'true' if value else 'false'
         return str(value)
 
     def _map_status(self, git_status: str, default_status: str):
@@ -323,7 +327,7 @@ class GitlabClient:
     def make_first_commit_to_gitlab_project(gitlab_url, gitlab_token, project_id, repo_branch):
         """"""
         import requests
-        logging.debug(f"Making first commit...")
+        logging.debug("Making first commit...")
         headers = {"PRIVATE-TOKEN": gitlab_token, "Content-Type": "application/json"}
         commit_payload = {
             "branch": repo_branch,
@@ -343,6 +347,6 @@ class GitlabClient:
             json=commit_payload
         )
         if response.status_code == 201:
-            logging.info(f"Commit successfull")
+            logging.info("Commit successfull")
         else:
             logging.error(f"Error {response.status_code}: {response.text}")
