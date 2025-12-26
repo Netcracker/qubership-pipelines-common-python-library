@@ -1,6 +1,8 @@
 
 ---
+
 ::: qubership_pipelines_common_library.v1.artifactory_client.ArtifactoryClient
+
 ---
 
 ::: qubership_pipelines_common_library.v2.artifacts_finder.artifact_finder.ArtifactFinder
