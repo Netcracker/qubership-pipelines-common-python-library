@@ -7,7 +7,6 @@ Authorization is required when accessing private repositories, and the same user
 There's also now another way of working with Maven and Generic repositories - `ArtifactFinder` client, that supports plug-ins for different providers,
 and separate Cloud Authentication/Credentials abstraction.
 
-
 ### JFrog Artifactory
 
 JFrog Artifactory supports basic password authentication, so you can just use your technical user's login/password pair
@@ -21,12 +20,11 @@ params_jfrog = {
 maven_searcher = MavenArtifactSearcher(params_jfrog.get("registry_url")).with_artifactory(params_jfrog.get("username"), params_jfrog.get("password"))
 ```
 
-
 ### GitHub Packages
 
 To access Maven artifacts stored in GitHub Packages, you need to authenticate with your personal access token.
 
-Official documentation on this process is [here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry)
+Official documentation on [this process is here](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry)
 
 But to recap, you need to go to your (or your technical user's) account settings:
 
@@ -35,7 +33,7 @@ But to recap, you need to go to your (or your technical user's) account settings
 And `Generate new token (classic)` (token looks like `ghp_.....`)
 
 GitHub doesn't have a single maven registry, but rather a registry per User/Organization.
-So for registry URL you need to use either "https://maven.pkg.github.com/Netcracker/*" (to navigate all repositories under specified user) or "https://maven.pkg.github.com/Netcracker/certain_repo_name"
+So for registry URL you need to use either `https://maven.pkg.github.com/Netcracker/*` (to navigate all repositories under specified user) or `https://maven.pkg.github.com/Netcracker/certain_repo_name`
 
 ```python
 registry_connection_params_github = {
@@ -45,14 +43,14 @@ registry_connection_params_github = {
 }
 ```
 
-
 ### Google Cloud GAR (Google Artifact Registry)
 
-Official documentation on this process is [here](https://cloud.google.com/artifact-registry/docs/java/authentication?hl=en)
+Official documentation on [this process is here](https://cloud.google.com/artifact-registry/docs/java/authentication?hl=en)
 
 You need to use service account key as a credential.
 
 So the process is:
+
 - Create new `Service Account` with minimum required roles/permissions to access your Artifact Registry (e.g. "Artifact Registry Reader" role)
 - Create new `Service Account Key` - and download it (it's a `.json` file)
 - base64 encode this file to get your authentication token (e.g. `base64 -w 0 your_key.json > encoded_key.txt`)
@@ -68,10 +66,9 @@ maven_searcher = MavenArtifactSearcher(params_gcp.get("registry_url")).with_gcp_
 
 ```
 
-
 ### AWS Code Artifact
 
-Official AWS documentation is [here](https://docs.aws.amazon.com/codeartifact/latest/ug/get-set-up-for-codeartifact.html)
+Official AWS [documentation is here](https://docs.aws.amazon.com/codeartifact/latest/ug/get-set-up-for-codeartifact.html)
 
 You access `Code Artifact` repositories using special temporary token, but it's only valid for up to 12 hours.
 

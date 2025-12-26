@@ -1,4 +1,4 @@
 kind: "AtlasModuleParamsInsecure"
 apiVersion: "v1"
-params:
-systems:
+params: {}
+systems: {}
