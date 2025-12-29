@@ -18,7 +18,6 @@ soft_theme = Theme({
     "repr.str": "rgb(140,180,140)",
     "repr.tag_name": "rgb(200,170,220)",
     "repr.tag_value": "rgb(170,200,220)",
-
     "repr.time": "rgb(160,190,220) italic",
 })
 
