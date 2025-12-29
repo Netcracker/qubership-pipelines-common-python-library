@@ -54,21 +54,21 @@ class TestExtendableCommand:
         assert 11 == int(self._extract_result(tmp_path)["params"]["result"])
 
     def test_extendable_command_inject_pre_extension(self, tmp_path):
-        with pytest.raises(SystemExit) as exit_result:
+        with pytest.raises(SystemExit):
             cmd = SampleExtendableCommand(folder_path=str(tmp_path), input_params=self.INPUT_PARAMS,
                                           pre_execute_actions=[OverrideParam1PreExt()])
             cmd.run()
         assert 21 == int(self._extract_result(tmp_path)["params"]["result"])
 
     def test_extendable_command_inject_post_extension(self, tmp_path):
-        with pytest.raises(SystemExit) as exit_result:
+        with pytest.raises(SystemExit):
             cmd = SampleExtendableCommand(folder_path=str(tmp_path), input_params=self.INPUT_PARAMS,
                                           post_execute_actions=[OverrideResultPostExt()])
             cmd.run()
         assert 12345 == int(self._extract_result(tmp_path)["params"]["result"])
 
     def test_extendable_command_inject_multiple_pre_extensions(self, tmp_path):
-        with pytest.raises(SystemExit) as exit_result:
+        with pytest.raises(SystemExit):
             cmd = SampleExtendableCommand(folder_path=str(tmp_path), input_params=self.INPUT_PARAMS,
                                           pre_execute_actions=[OverrideParam1PreExt(),
                                                                OverrideParam1PreExt(),

@@ -126,9 +126,9 @@ class JenkinsClient:
                 build_result = build_info["result"]
 
                 if "inProgress" in build_info: # Jenkins version >= 2.375. Use 'inProgress' property
-                    is_job_stopped = build_info["inProgress"] == False and build_result
+                    is_job_stopped = build_info["inProgress"] is False and build_result
                 else:                          # Jenkins version <= 2.369. Use 'building' property
-                    is_job_stopped = build_info["building"] == False and build_result
+                    is_job_stopped = build_info["building"] is False and build_result
 
                 if is_job_stopped:
                     logging.info("Job is stopped with result '%s'", build_result)

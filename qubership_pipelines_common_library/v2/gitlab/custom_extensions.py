@@ -54,7 +54,7 @@ class GitlabModulesOpsPipelineDataImporter(PipelineDataImporter):
             self.context.logger.debug(f"Contents of folder {local_dirpath} (after zip.extractall): {os.listdir(local_dirpath)}")
             self._import_downloaded_data(local_dirpath / self.IMPORTED_CONTEXT_FILE)
         else:
-            self.context.logger.warning(f"No jobs found")
+            self.context.logger.warning("No jobs found")
 
         self.context.output_params.load(self.context.context.get("paths.output.params"))
         self.context.output_params_secure.load(self.context.context.get("paths.output.params_secure"))

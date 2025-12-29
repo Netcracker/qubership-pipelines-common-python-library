@@ -135,6 +135,7 @@ To install and use `podman run` in your Dockerimage (`python:3.11-slim` was used
 ### GitHub
 
 1. `apt-get install podman nftables fuse-overlayfs`
+
 2. ```bash
     RUN cat <<EOF > /etc/containers/storage.conf
     [storage]
@@ -145,8 +146,10 @@ To install and use `podman run` in your Dockerimage (`python:3.11-slim` was used
     mount_program = "/usr/bin/fuse-overlayfs"
     EOF
     ```
+
 3. In your workflow file, need to pass `--privileged` option
-    ```
+
+    ```yaml
    jobs:
       execute-pipeline:
         runs-on: ubuntu-latest
@@ -154,11 +157,13 @@ To install and use `podman run` in your Dockerimage (`python:3.11-slim` was used
           image: ghcr.io/netcracker/qubership-pipelines-declarative-executor:dev_podman_engine
           options: --privileged
     ```
+
 4. Need to run `PodmanRunImage` command with additional flags: `"additional_run_flags": "--cgroups=disabled"`
 
 ### GitLab
 
 1. `apt-get install podman nftables slirp4netns fuse-overlayfs`
+
 2. ```bash
     RUN cat <<EOF > /etc/containers/storage.conf
     [storage]
@@ -169,4 +174,5 @@ To install and use `podman run` in your Dockerimage (`python:3.11-slim` was used
     mount_program = "/usr/bin/fuse-overlayfs"
     EOF
     ```
+
 3. Need to run `PodmanRunImage` command with additional flags: `"additional_run_flags": "--cgroups=disabled --network slirp4netns"`

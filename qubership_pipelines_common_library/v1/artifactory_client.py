@@ -84,7 +84,7 @@ class ArtifactoryAPI:
     def get_files_list(self, artifact_path: str):
         try:
             response = self._get(f"{self.api_url}/api/storage/{artifact_path}?list&deep=1&listFolders=1").json()
-            return [ArtifactListEntry(uri=f['uri'], size=int(f['size']), folder=f['folder'] == True) for f in
+            return [ArtifactListEntry(uri=f['uri'], size=int(f['size']), folder=(f['folder'] is True)) for f in
                     response['files']]
         except requests.exceptions.HTTPError as error:
             raise ArtifactoryError from error

@@ -12,7 +12,7 @@ class JenkinsOutputParamsPipelineDataImporter(PipelineDataImporter):
         extracts output files and params of targeted pipeline into 'output' folder of this command
     """
     def import_pipeline_data(self, execution: ExecutionInfo) -> None:
-        self.context.logger.info(f"Processing jenkins job artifacts")
+        self.context.logger.info("Processing jenkins job artifacts")
         artifact_paths = self.command.jenkins_client.get_pipeline_execution_artifacts(execution)
         if artifact_paths and len(artifact_paths):
             for artifact_path in artifact_paths:
@@ -31,7 +31,7 @@ class JenkinsOutputParamsPipelineDataImporter(PipelineDataImporter):
                     file_path = Path(self.context.input_param_get("paths.output.files")).joinpath(artifact_path)
                     self.command.jenkins_client.save_pipeline_execution_artifact_to_file(execution, artifact_path, file_path)
         else:
-            self.context.logger.info(f"No artifacts found in the job")
+            self.context.logger.info("No artifacts found in the job")
 
 
 class JenkinsSaveInjectedEnvVars(ExecutionCommandExtension):

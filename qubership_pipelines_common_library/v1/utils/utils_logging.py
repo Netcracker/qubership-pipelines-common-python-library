@@ -43,7 +43,7 @@ class LevelColorFilter(logging.Filter):
     def filter(self, record):
         color = level_colors.get(record.levelno, "default")
         record.levelname_color_open_tag = f"[{color}]"
-        record.levelname_color_close_tag = f"[/]"
+        record.levelname_color_close_tag = "[/]"
         return True
 
 

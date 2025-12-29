@@ -91,7 +91,7 @@ class ExecutionContext:
     def __validate_param(self, name):
         try:
             return self.context.get(name) or self.input_param_get(name)  # or self.__dict__.get(name)
-        except:
+        except Exception:
             return False
 
     def __input_params_load(self):

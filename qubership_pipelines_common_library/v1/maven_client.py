@@ -22,7 +22,7 @@ class Artifact:
     def from_string(artifact_str: str):
         parts = artifact_str.split(":")
         if len(parts) == 3:
-            group, artifact, version = parts[0], parts[1], parts[-1]
+            artifact, version = parts[1], parts[-1]
             return Artifact(artifact, version)
 
 
@@ -67,7 +67,7 @@ class MavenArtifactSearcher:
         if not artifact:
             artifact = Artifact(artifact_id=artifact_id, version=version, extension=extension)
         if not artifact.artifact_id or not artifact.version:
-            raise Exception(f"Artifact 'artifact_id' and 'version' must be specified!")
+            raise Exception("Artifact 'artifact_id' and 'version' must be specified!")
         logging.debug(f"Searching for '{artifact.artifact_id}' in {self.registry_url}...")
         return self._search_func(artifact=artifact)
 
