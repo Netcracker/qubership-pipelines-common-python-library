@@ -16,3 +16,11 @@
     options:
         inherited_members: []
 ---
+::: qubership_pipelines_common_library.v2.notifications.send_email_command.SendEmail
+    options:
+        inherited_members: []
+---
+::: qubership_pipelines_common_library.v2.notifications.send_webex_message_command.SendWebexMessage
+    options:
+        inherited_members: []
+---
