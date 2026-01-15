@@ -12,6 +12,18 @@
     options:
         inherited_members: []
 ---
+::: qubership_pipelines_common_library.v2.jira.jira_create_ticket_command.JiraCreateTicket
+    options:
+        inherited_members: []
+---
+::: qubership_pipelines_common_library.v2.jira.jira_add_ticket_comment_command.JiraAddTicketComment
+    options:
+        inherited_members: []
+---
+::: qubership_pipelines_common_library.v2.jira.jira_update_ticket_command.JiraUpdateTicket
+    options:
+        inherited_members: []
+---
 ::: qubership_pipelines_common_library.v2.podman.podman_command.PodmanRunImage
     options:
         inherited_members: []

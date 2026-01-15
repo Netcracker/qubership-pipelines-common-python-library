@@ -24,7 +24,6 @@ ghapi = "^1.0.6"
 boto3 = "^1.39.4"
 google-cloud-artifact-registry = "^1.16.1"
 rich = "^14.2.0"
-# jira = "3.10.5"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^6.0.0"
