@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Maven - Qubership Pipelines Common Library</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <link href="../assets/_mkdocstrings.css" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">Qubership Pipelines Common Library</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../mkdocs/" class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../mkdocs/clients/" class="nav-link">Clients</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../mkdocs/context/" class="nav-link">Context</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../mkdocs/commands/" class="nav-link">Commands</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="./" class="nav-link active" aria-current="page">Maven</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../mkdocs/commands/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" class="nav-link disabled">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item dropdown">
+                              <button id="theme-menu" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static" aria-label="Toggle theme" class="nav-link dropdown-toggle">
+                                <i class="fa-solid fa-circle-half-stroke fa-fw"></i>
+                                <span class="d-lg-none ms-2">Toggle theme</span>
+                              </button>
+                              <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                  <button class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" aria-pressed="true">
+                                    <i class="fa-solid fa-sun fa-fw"></i>
+                                    <span class="ms-2">Light</span>
+                                    <i class="fa-solid fa-check ms-auto"></i>
+                                  </button>
+                                </li>
+                                <li>
+                                  <button class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" aria-pressed="false">
+                                    <i class="fa-solid fa-moon fa-fw"></i>
+                                    <span class="ms-2">Dark</span>
+                                    <i class="fa-solid fa-check ms-auto d-none"></i>
+                                  </button>
+                                </li>
+                                <li>
+                                  <button class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto" aria-pressed="false">
+                                    <i class="fa-solid fa-circle-half-stroke fa-fw"></i>
+                                    <span class="ms-2">Auto</span>
+                                    <i class="fa-solid fa-check ms-auto d-none"></i>
+                                  </button>
+                                </li>
+                              </ul>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <script src="../js/darkmode.js"></script>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="2"><a href="#authorizing-with-maven-client-mavenartifactsearcher" class="nav-link">Authorizing with maven-client (MavenArtifactSearcher)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h2 id="authorizing-with-maven-client-mavenartifactsearcher">Authorizing with maven-client (MavenArtifactSearcher)</h2>
+<p>All existing maven repositories support basic authorization, the only difference is how you go about issuing their tokens.</p>
+<p>Authorization is required when accessing private repositories, and the same username/token pair could be used in Maven or Gradle</p>
+<p>There's also now another way of working with Maven and Generic repositories - <code>ArtifactFinder</code> client, that supports plug-ins for different providers,
+and separate Cloud Authentication/Credentials abstraction.</p>
+<h3 id="jfrog-artifactory">JFrog Artifactory</h3>
+<p>JFrog Artifactory supports basic password authentication, so you can just use your technical user's login/password pair</p>
+<pre class="highlight"><code class="language-python">params_jfrog = {
+    "username": "x_technical_user",
+    "password": os.getenv('JFROG_TECH_USER_PASSWORD'),
+    "registry_url": "http://192.168.225.129:8081/artifactory/test-mvn-repo",
+}
+maven_searcher = MavenArtifactSearcher(params_jfrog.get("registry_url")).with_artifactory(params_jfrog.get("username"), params_jfrog.get("password"))</code></pre>
+<h3 id="github-packages">GitHub Packages</h3>
+<p>To access Maven artifacts stored in GitHub Packages, you need to authenticate with your personal access token.</p>
+<p>Official documentation on <a href="https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry">this process is here</a></p>
+<p>But to recap, you need to go to your (or your technical user's) account settings:</p>
+<p><code>Settings -&gt; Developer Settings -&gt; Personal access tokens -&gt; Tokens (classic)</code></p>
+<p>And <code>Generate new token (classic)</code> (token looks like <code>ghp_.....</code>)</p>
+<p>GitHub doesn't have a single maven registry, but rather a registry per User/Organization.
+So for registry URL you need to use either <code>https://maven.pkg.github.com/Netcracker/*</code> (to navigate all repositories under specified user) or <code>https://maven.pkg.github.com/Netcracker/certain_repo_name</code></p>
+<pre class="highlight"><code class="language-python">registry_connection_params_github = {
+    "username": "gh_tech_user_login",
+    "password": os.getenv('GH_ACCESS_TOKEN'),
+    "registry_url": "https://maven.pkg.github.com/Netcracker/*",
+}</code></pre>
+<h3 id="google-cloud-gar-google-artifact-registry">Google Cloud GAR (Google Artifact Registry)</h3>
+<p>Official documentation on <a href="https://cloud.google.com/artifact-registry/docs/java/authentication?hl=en">this process is here</a></p>
+<p>You need to use service account key as a credential.</p>
+<p>So the process is:</p>
+<ul>
+<li>Create new <code>Service Account</code> with minimum required roles/permissions to access your Artifact Registry (e.g. "Artifact Registry Reader" role)</li>
+<li>Create new <code>Service Account Key</code> - and download it (it's a <code>.json</code> file)</li>
+<li>base64 encode this file to get your authentication token (e.g. <code>base64 -w 0 your_key.json &gt; encoded_key.txt</code>)</li>
+<li><code>username</code> should be <code>_json_key_base64</code></li>
+</ul>
+<pre class="highlight"><code class="language-python">params_gcp = {
+    "username": "_json_key_base64",
+    "password": os.getenv('GAR_ACCESS_TOKEN'),
+    "registry_url": "https://LOCATION-maven.pkg.dev/PROJECT/REPOSITORY",
+}
+maven_searcher = MavenArtifactSearcher(params_gcp.get("registry_url")).with_gcp_artifact_registry({"service_account_key": params_gcp.get("password")}, PROJECT, REGION, REPOSITORY)
+</code></pre>
+<h3 id="aws-code-artifact">AWS Code Artifact</h3>
+<p>Official AWS <a href="https://docs.aws.amazon.com/codeartifact/latest/ug/get-set-up-for-codeartifact.html">documentation is here</a></p>
+<p>You access <code>Code Artifact</code> repositories using special temporary token, but it's only valid for up to 12 hours.</p>
+<p>To use persistent credentials, this library provides utility helper <code>AWSCodeArtifactHelper</code> that can generate token for you using Access + Secret keys and your domain + region.</p>
+<p>You need to create an <code>IAM User</code> with required policies/permissions (<a href="https://docs.aws.amazon.com/codeartifact/latest/ug/get-set-up-provision-user.html">instructions here</a>)</p>
+<p>Get <code>Access Key</code> and <code>Secret Key</code> to this user, you'll need them to generate your temporary authorization token to Code Artifact</p>
+<pre class="highlight"><code class="language-python">params_aws = {
+    "username": "aws",
+    "password": AWSCodeArtifactHelper.get_authorization_token(
+        os.getenv('AWS_ACCESS_KEY'),
+        os.getenv('AWS_SECRET_KEY'),
+        "test-maven-domain",
+        "us-east-1"
+    ),
+    "registry_url": "https://test-maven-domain-123.d.codeartifact.us-east-1.amazonaws.com/maven/test-maven-repo/",
+}
+maven_searcher = MavenArtifactSearcher(params_aws.get("registry_url")).with_aws_code_artifact(os.getenv('AWS_ACCESS_KEY'), os.getenv('AWS_SECRET_KEY'), DOMAIN, REGION, REPOSITORY)</code></pre></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

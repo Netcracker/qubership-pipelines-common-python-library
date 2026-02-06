@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Commands - Qubership Pipelines Common Library</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">Qubership Pipelines Common Library</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../" class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../clients/" class="nav-link">Clients</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../context/" class="nav-link">Context</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="./" class="nav-link active" aria-current="page">Commands</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../maven_auth/" class="nav-link">Maven</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../context/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../../maven_auth/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item dropdown">
+                              <button id="theme-menu" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static" aria-label="Toggle theme" class="nav-link dropdown-toggle">
+                                <i class="fa-solid fa-circle-half-stroke fa-fw"></i>
+                                <span class="d-lg-none ms-2">Toggle theme</span>
+                              </button>
+                              <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                  <button class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" aria-pressed="true">
+                                    <i class="fa-solid fa-sun fa-fw"></i>
+                                    <span class="ms-2">Light</span>
+                                    <i class="fa-solid fa-check ms-auto"></i>
+                                  </button>
+                                </li>
+                                <li>
+                                  <button class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" aria-pressed="false">
+                                    <i class="fa-solid fa-moon fa-fw"></i>
+                                    <span class="ms-2">Dark</span>
+                                    <i class="fa-solid fa-check ms-auto d-none"></i>
+                                  </button>
+                                </li>
+                                <li>
+                                  <button class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto" aria-pressed="false">
+                                    <i class="fa-solid fa-circle-half-stroke fa-fw"></i>
+                                    <span class="ms-2">Auto</span>
+                                    <i class="fa-solid fa-check ms-auto d-none"></i>
+                                  </button>
+                                </li>
+                              </ul>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <script src="../../js/darkmode.js"></script>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v2.github.github_run_pipeline_command.GithubRunPipeline" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;GithubRunPipeline</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v2.gitlab.gitlab_run_pipeline_command.GitlabRunPipeline" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;GitlabRunPipeline</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v2.jenkins.jenkins_run_pipeline_command.JenkinsRunPipeline" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;JenkinsRunPipeline</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v2.jira.jira_create_ticket_command.JiraCreateTicket" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;JiraCreateTicket</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v2.jira.jira_add_ticket_comment_command.JiraAddTicketComment" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;JiraAddTicketComment</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v2.jira.jira_update_ticket_command.JiraUpdateTicket" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;JiraUpdateTicket</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v2.podman.podman_command.PodmanRunImage" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;PodmanRunImage</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v2.notifications.send_email_command.SendEmail" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;SendEmail</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v2.notifications.send_webex_message_command.SendWebexMessage" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;SendWebexMessage</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v2.github.github_run_pipeline_command.GithubRunPipeline" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">GithubRunPipeline</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">GithubRunPipeline(*args, pipeline_data_importer: <span title="qubership_pipelines_common_library.v2.extensions.pipeline_data_importer.PipelineDataImporter">PipelineDataImporter</span> = None, **kwargs)</code></pre>
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="            ExecutionCommand (qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand">ExecutionCommand</a></code></p>
+
+
+
+        <p>Executes a GitHub Actions workflow pipeline and optionally imports artifacts.</p>
+<p>This command triggers a GitHub workflow run, monitors its execution, and provides
+options for importing workflow artifacts and custom data processing through extensible
+importers.</p>
+<p>Input Parameters Structure (this structure is expected inside "input_params.params" block):
+<pre class="highlight"><code>{
+    "pipeline_owner": "Netcracker",                          # REQUIRED: Repository owner/organization
+    "pipeline_repo_name": "qubership-test-pipelines",        # REQUIRED: Repository name
+    "pipeline_workflow_file_name": "test.yaml",              # REQUIRED: Workflow filename (e.g., main.yaml, ci-cd.yml)
+    "pipeline_branch": "main",                               # OPTIONAL: Branch to run workflow from (default: repo's default branch)
+    "pipeline_params": {                                     # OPTIONAL: Input parameters to pass to the workflow
+        "KEY1": "VALUE1",
+        "KEY2": "VALUE2"
+    },
+    "import_artifacts": false,                               # OPTIONAL: Whether to import workflow artifacts (default: false)
+    "use_existing_pipeline": 123456789,                      # OPTIONAL: Use existing workflow run ID instead of starting new one (debug feature)
+    "timeout_seconds": 1800,                                 # OPTIONAL: Maximum wait time for workflow completion in seconds (default: 1800, 0 for async execution)
+    "wait_seconds": 1,                                       # OPTIONAL: Wait interval between status checks in seconds (default: 1)
+    "retry_timeout_seconds": 180,                            # OPTIONAL: Timeout for GitHub client initialization and workflow start retries in seconds (default: 180)
+    "retry_wait_seconds": 1,                                 # OPTIONAL: Wait interval between retries in seconds (default: 1)
+    "success_statuses": "SUCCESS,UNSTABLE"                   # OPTIONAL: Comma-separated list of acceptable completion statuses (default: SUCCESS)
+}</code></pre></p>
+<p>Systems Configuration (expected in "systems.github" block):
+<pre class="highlight"><code>{
+    "url": "https://github.com",                             # OPTIONAL: GitHub UI URL for self-hosted instances (default: https://github.com)
+    "api_url": "https://api.github.com",                     # OPTIONAL: GitHub API URL for self-hosted instances (default: https://api.github.com)
+    "password": "&lt;github_token&gt;"                             # REQUIRED: GitHub access token with workflow permissions
+}</code></pre></p>
+
+
+<details class="output-parameters" open>
+  <summary>Output Parameters</summary>
+  <ul>
+<li>params.build.url: URL to view the workflow run in GitHub</li>
+<li>params.build.id: ID of the executed workflow run</li>
+<li>params.build.status: Final status of the workflow execution</li>
+<li>params.build.date: Workflow start time in ISO format</li>
+<li>params.build.duration: Total execution duration in human-readable format</li>
+<li>params.build.name: Name of the workflow run</li>
+</ul>
+</details>
+
+<details class="extension-points" open>
+  <summary>Extension Points</summary>
+  <ul>
+<li>Custom pipeline data importers can be implemented by extending PipelineDataImporter interface</li>
+<li>PipelineDataImporter is passed into constructor of command via "pipeline_data_importer" arg</li>
+</ul>
+</details>
+
+<details class="notes" open>
+  <summary>Notes</summary>
+  <ul>
+<li>Setting timeout_seconds to 0 enables asynchronous execution (workflow starts but command doesn't wait for completion)</li>
+<li>For self-hosted GitHub Enterprise, configure both "systems.github.url" and "systems.github.api_url"</li>
+<li>Custom data importers receive the command context and can implement advanced processing logic</li>
+</ul>
+</details>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v2.gitlab.gitlab_run_pipeline_command.GitlabRunPipeline" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">GitlabRunPipeline</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">GitlabRunPipeline(*args, pipeline_data_importer: <span title="qubership_pipelines_common_library.v2.extensions.pipeline_data_importer.PipelineDataImporter">PipelineDataImporter</span> = None, **kwargs)</code></pre>
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="            ExecutionCommand (qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand">ExecutionCommand</a></code></p>
+
+
+
+        <p>Runs GitLab Pipeline via Trigger or Create API and optionally imports artifacts.</p>
+<p>This command runs GitLab Pipeline, monitors its execution, and provides
+options for importing resulting artifacts and custom data processing through extensible
+importers.</p>
+<p>Input Parameters Structure (this structure is expected inside "input_params.params" block):
+<pre class="highlight"><code>{
+    "pipeline_path": "path/to/gitlab_project",               # REQUIRED: Full pipeline path (e.g. "group/subgroup/repo")
+    "pipeline_branch": "main",                               # OPTIONAL: Branch to run pipeline from (default: repo's default branch)
+    "trigger_type": "CREATE_PIPELINE",                       # OPTIONAL: Which API will be used to trigger the pipeline (CREATE_PIPELINE or TRIGGER_PIPELINE)
+    "pipeline_params": {                                     # OPTIONAL: Input parameters to pass to the pipeline
+        "KEY1": "VALUE1",
+        "KEY2": "VALUE2"
+    },
+    "import_artifacts": false,                               # OPTIONAL: Whether to import pipeline artifacts (default: false)
+    "use_existing_pipeline": 123456789,                      # OPTIONAL: Use existing pipeline ID (or use 'latest' here) instead of starting new one (debug feature)
+    "timeout_seconds": 1800,                                 # OPTIONAL: Maximum wait time for pipeline completion in seconds (default: 1800, 0 for async execution)
+    "wait_seconds": 1,                                       # OPTIONAL: Wait interval between status checks in seconds (default: 1)
+    "retry_timeout_seconds": 180,                            # OPTIONAL: Timeout for GitLab client initialization and pipeline start retries in seconds (default: 180)
+    "retry_wait_seconds": 1,                                 # OPTIONAL: Wait interval between retries in seconds (default: 1)
+    "success_statuses": "SUCCESS,UNSTABLE"                   # OPTIONAL: Comma-separated list of acceptable completion statuses (default: SUCCESS)
+}</code></pre></p>
+<p>Systems Configuration (expected in "systems.gitlab" block):
+<pre class="highlight"><code>{
+    "url": "https://github.com",                             # OPTIONAL: GitLab URL for self-hosted instances (default: https://gitlab.com)
+    "password": "&lt;gitlab_token&gt;"                             # REQUIRED: GitLab access token with CI/CD permissions
+    "trigger_token": "&lt;gitlab_trigger_token&gt;"                # OPTIONAL: Special token issued for triggering pipeline. If not provided - will try to use CI_JOB_TOKEN
+}</code></pre></p>
+
+
+<details class="output-parameters" open>
+  <summary>Output Parameters</summary>
+  <ul>
+<li>params.build.url: URL to view the pipeline run in GitLab</li>
+<li>params.build.id: ID of the executed pipeline</li>
+<li>params.build.status: Final status of the pipeline execution</li>
+<li>params.build.date: Workflow start time in ISO format</li>
+<li>params.build.duration: Total execution duration in human-readable format</li>
+<li>params.build.name: Name of the pipeline execution</li>
+</ul>
+</details>
+
+<details class="extension-points" open>
+  <summary>Extension Points</summary>
+  <ul>
+<li>Custom pipeline data importers can be implemented by extending PipelineDataImporter interface</li>
+<li>PipelineDataImporter is passed into constructor of command via "pipeline_data_importer" arg</li>
+</ul>
+</details>
+
+<details class="notes" open>
+  <summary>Notes</summary>
+  <ul>
+<li>Setting timeout_seconds to 0 enables asynchronous execution (workflow starts but command doesn't wait for completion)</li>
+<li>For self-hosted GitLab instances, configure "systems.github.url"</li>
+<li>Custom data importers receive the command context and can implement advanced processing logic</li>
+</ul>
+</details>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v2.jenkins.jenkins_run_pipeline_command.JenkinsRunPipeline" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">JenkinsRunPipeline</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">JenkinsRunPipeline(*args, pipeline_data_importer: <span title="qubership_pipelines_common_library.v2.extensions.pipeline_data_importer.PipelineDataImporter">PipelineDataImporter</span> = None, **kwargs)</code></pre>
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="            ExecutionCommand (qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand">ExecutionCommand</a></code></p>
+
+
+
+        <p>Runs Jenkins Pipeline and optionally imports artifacts.</p>
+<p>This command runs Jenkins Pipeline, monitors its execution, and provides
+options for importing resulting artifacts and custom data processing through extensible
+importers.</p>
+<p>Input Parameters Structure (this structure is expected inside "input_params.params" block):
+<pre class="highlight"><code>{
+    "pipeline_path": "TENANT-NAME/path/to/job",              # REQUIRED: Full pipeline path (e.g. "TENANT/folder/job")
+    "pipeline_params": {                                     # OPTIONAL: Input parameters to pass to the pipeline
+        "KEY1": "VALUE1",                                    #     Side-note: if you want to run your parametrized job with default parameters,
+        "KEY2": "VALUE2"                                     #     you still need to pass some fake params (they will be ignored by Jenkins), e.g. "__fake_key":"fake_value",
+    },                                                       #     Otherwise, if this dict is empty - endpoint for non-parametrized jobs will be triggered
+    "import_artifacts": true,                                # OPTIONAL: Whether to import pipeline artifacts (default: true)
+    "use_existing_pipeline": 123456789,                      # OPTIONAL: Use existing pipeline ID instead of starting new one (debug feature)
+    "timeout_seconds": 1800,                                 # OPTIONAL: Maximum wait time for pipeline completion in seconds (default: 1800, 0 for async execution)
+    "wait_seconds": 1,                                       # OPTIONAL: Wait interval between status checks in seconds (default: 1)
+    "retry_timeout_seconds": 180,                            # OPTIONAL: Timeout for GitLab client initialization and pipeline start retries in seconds (default: 180)
+    "retry_wait_seconds": 1,                                 # OPTIONAL: Wait interval between retries in seconds (default: 1)
+    "success_statuses": "SUCCESS,UNSTABLE"                   # OPTIONAL: Comma-separated list of acceptable completion statuses (default: SUCCESS)
+}</code></pre></p>
+<p>Systems Configuration (expected in "systems.jenkins" block):
+<pre class="highlight"><code>{
+    "url": "https://github.com",                             # REQUIRED: Jenkins instance URL
+    "username": "&lt;jenkins_user&gt;"                             # REQUIRED: Jenkins user
+    "password": "&lt;jenkins_token&gt;"                            # REQUIRED: Jenkins password or token with job-triggering permissions
+}</code></pre></p>
+
+
+<details class="output-parameters" open>
+  <summary>Output Parameters</summary>
+  <ul>
+<li>params.build.url: URL to view the pipeline run in GitLab</li>
+<li>params.build.id: ID of the executed pipeline</li>
+<li>params.build.status: Final status of the pipeline execution</li>
+<li>params.build.date: Workflow start time in ISO format</li>
+<li>params.build.duration: Total execution duration in human-readable format</li>
+<li>params.build.name: Name of the pipeline execution</li>
+</ul>
+</details>
+
+<details class="extension-points" open>
+  <summary>Extension Points</summary>
+  <ul>
+<li>Custom pipeline data importers can be implemented by extending PipelineDataImporter interface</li>
+<li>PipelineDataImporter is passed into constructor of command via "pipeline_data_importer" arg</li>
+</ul>
+</details>
+
+<details class="notes" open>
+  <summary>Notes</summary>
+  <ul>
+<li>Setting timeout_seconds to 0 enables asynchronous execution (workflow starts but command doesn't wait for completion, and won't fetch build id)</li>
+</ul>
+</details>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v2.jira.jira_create_ticket_command.JiraCreateTicket" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">JiraCreateTicket</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">JiraCreateTicket(context_path: <span title="str">str</span> = None, input_params: <span title="dict">dict</span> = None, input_params_secure: <span title="dict">dict</span> = None, folder_path: <span title="str">str</span> = None, parent_context_to_reuse: <a class="autorefs autorefs-internal" title="            ExecutionContext (qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext">ExecutionContext</a> = None, pre_execute_actions: <span title="list">list</span>[<span title="qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommandExtension">ExecutionCommandExtension</span>] = None, post_execute_actions: <span title="list">list</span>[<span title="qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommandExtension">ExecutionCommandExtension</span>] = None)</code></pre>
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="            ExecutionCommand (qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand">ExecutionCommand</a></code></p>
+
+
+
+        <p>Creates new issue/ticket in JIRA project.</p>
+<p>Input Parameters Structure (this structure is expected inside "input_params.params" block):
+<pre class="highlight"><code>{
+    "ticket": {
+        "fields: {                                                  # REQUIRED: Dict structure that will be used as ticket-creation-body, without transformations
+            "project": {"key": "&lt;YOUR_PROJECT_KEY&gt;"},               # REQUIRED: Project Key
+            "issuetype": {"name": "Bug"},                           # REQUIRED: Issue type name
+            "priority": {"name": "High"},                           # OPTIONAL: Other ticket fields with different formats, depending on your Project configuration
+            "duedate": "2030-02-20",                                # OPTIONAL: Text-value fields need no dict wrappers
+            "summary": "[SOME_LABEL] Ticket Subject",
+            "description": "Ticket body",
+            "components": [{"name":"COMPONENT NAME"}],
+            "labels": ["Test_Label1"],
+        },
+        "comment": "your comment body",                             # OPTIONAL: Comment to add to created ticket
+        "field_names_filter": "summary,issuetype,creator,status",   # OPTIONAL: Comma-separated names of fields to extract from created ticket to output params
+    },
+    "retry_timeout_seconds": 180,           # OPTIONAL: Timeout for JIRA client operations in seconds (default: 180)
+    "retry_wait_seconds": 1,                # OPTIONAL: Wait interval between retries in seconds (default: 1)
+}</code></pre></p>
+<p>Systems Configuration (expected in "systems.jira" block):
+<pre class="highlight"><code>{
+    "url": "https://your_cloud_jira.atlassian.net",         # REQUIRED: JIRA server URL
+    "username": "your_username_or_email",                   # REQUIRED: JIRA user login or email
+    "password": "&lt;your_token&gt;",                             # REQUIRED: JIRA user token
+    "auth_type": "basic"                                    # OPTIONAL: 'basic' or 'bearer'
+}</code></pre></p>
+<p>Command name: "jira-create-ticket"</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v2.jira.jira_add_ticket_comment_command.JiraAddTicketComment" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">JiraAddTicketComment</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">JiraAddTicketComment(context_path: <span title="str">str</span> = None, input_params: <span title="dict">dict</span> = None, input_params_secure: <span title="dict">dict</span> = None, folder_path: <span title="str">str</span> = None, parent_context_to_reuse: <a class="autorefs autorefs-internal" title="            ExecutionContext (qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext">ExecutionContext</a> = None, pre_execute_actions: <span title="list">list</span>[<span title="qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommandExtension">ExecutionCommandExtension</span>] = None, post_execute_actions: <span title="list">list</span>[<span title="qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommandExtension">ExecutionCommandExtension</span>] = None)</code></pre>
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="            ExecutionCommand (qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand">ExecutionCommand</a></code></p>
+
+
+
+        <p>Adds comment to JIRA ticket and retrieves latest comments.</p>
+<p>Input Parameters Structure (this structure is expected inside "input_params.params" block):
+<pre class="highlight"><code>{
+    "ticket": {
+        "id": "BUG-567",                    # REQUIRED: Ticket ID
+        "comment": "your comment body",     # REQUIRED: Comment body
+        "latest_comments_count": 50,        # OPTIONAL: Number of latest comments to fetch
+    },
+    "retry_timeout_seconds": 180,           # OPTIONAL: Timeout for JIRA client operations in seconds (default: 180)
+    "retry_wait_seconds": 1,                # OPTIONAL: Wait interval between retries in seconds (default: 1)
+}</code></pre></p>
+<p>Systems Configuration (expected in "systems.jira" block):
+<pre class="highlight"><code>{
+    "url": "https://your_cloud_jira.atlassian.net",         # REQUIRED: JIRA server URL
+    "username": "your_username_or_email",                   # REQUIRED: JIRA user login or email
+    "password": "&lt;your_token&gt;",                             # REQUIRED: JIRA user token
+    "auth_type": "basic"                                    # OPTIONAL: 'basic' or 'bearer'
+}</code></pre></p>
+<p>Command name: "jira-add-ticket-comment"</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v2.jira.jira_update_ticket_command.JiraUpdateTicket" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">JiraUpdateTicket</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">JiraUpdateTicket(context_path: <span title="str">str</span> = None, input_params: <span title="dict">dict</span> = None, input_params_secure: <span title="dict">dict</span> = None, folder_path: <span title="str">str</span> = None, parent_context_to_reuse: <a class="autorefs autorefs-internal" title="            ExecutionContext (qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext">ExecutionContext</a> = None, pre_execute_actions: <span title="list">list</span>[<span title="qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommandExtension">ExecutionCommandExtension</span>] = None, post_execute_actions: <span title="list">list</span>[<span title="qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommandExtension">ExecutionCommandExtension</span>] = None)</code></pre>
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="            ExecutionCommand (qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand">ExecutionCommand</a></code></p>
+
+
+
+        <p>Updates ticket fields and transitions status.</p>
+<p>Input Parameters Structure (this structure is expected inside "input_params.params" block):
+<pre class="highlight"><code>{
+    "ticket": {
+        "fields: {                                                # REQUIRED: Dict structure that will be used as ticket-update-body, without transformations
+            "status": {"name": "Done"},                           # OPTIONAL: Next status name
+            "transition": {"name": "From Review to Done"},        # OPTIONAL: Transition name
+            "priority": {"name": "High"},                         # OPTIONAL: Other ticket fields with different formats, depending on your Project configuration
+            "duedate": "2030-02-20",                              # OPTIONAL: Text-value fields need no dict wrappers
+            "description": "Ticket body",
+            "labels": ["Test_Label1"],
+        },
+        "id": "BUG-567",                                            # REQUIRED: Ticket ID
+        "comment": "your comment body",                             # OPTIONAL: Comment to add to created ticket
+        "field_names_filter": "summary,issuetype,creator,status",   # OPTIONAL: Comma-separated names of fields to extract from created ticket to output params
+    },
+    "retry_timeout_seconds": 180,           # OPTIONAL: Timeout for JIRA client operations in seconds (default: 180)
+    "retry_wait_seconds": 1,                # OPTIONAL: Wait interval between retries in seconds (default: 1)
+}</code></pre></p>
+<p>Systems Configuration (expected in "systems.jira" block):
+<pre class="highlight"><code>{
+    "url": "https://your_cloud_jira.atlassian.net",         # REQUIRED: JIRA server URL
+    "username": "your_username_or_email",                   # REQUIRED: JIRA user login or email
+    "password": "&lt;your_token&gt;",                             # REQUIRED: JIRA user token
+    "auth_type": "basic"                                    # OPTIONAL: 'basic' or 'bearer'
+}</code></pre></p>
+<p>Command name: "jira-update-ticket"</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v2.podman.podman_command.PodmanRunImage" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">PodmanRunImage</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">PodmanRunImage(context_path: <span title="str">str</span> = None, input_params: <span title="dict">dict</span> = None, input_params_secure: <span title="dict">dict</span> = None, folder_path: <span title="str">str</span> = None, parent_context_to_reuse: <a class="autorefs autorefs-internal" title="            ExecutionContext (qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext">ExecutionContext</a> = None, pre_execute_actions: <span title="list">list</span>[<span title="qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommandExtension">ExecutionCommandExtension</span>] = None, post_execute_actions: <span title="list">list</span>[<span title="qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommandExtension">ExecutionCommandExtension</span>] = None)</code></pre>
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="            ExecutionCommand (qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand">ExecutionCommand</a></code></p>
+
+
+
+        <p>Executes a container using "podman run" command.</p>
+<p>This command supports running containers with configurable execution parameters,
+environment variable management, file mounting, and output extraction.</p>
+<p>Input Parameters Structure (this structure is expected inside "input_params.params" block):
+<pre class="highlight"><code>{
+    "image": "docker.io/library/hello-world:latest",  # REQUIRED: Container image to run
+    "command": "python -m pipelines_declarative_executor run --pipeline_dir="/WORK/EXEC_DIR"",  # OPTIONAL: Command to execute in container
+    "execution_config": { # ALL OF THESE ARE OPTIONAL
+        "working_dir": "/some/dir/inside/container",  # Working directory inside container
+        "timeout": "600",  # Maximum execution time in seconds
+        "operations_timeout": "15",  # Timeout for operations like file copying
+        "remove_container": True,  # Whether to remove container after execution
+        "save_stdout_to_logs": True,  # Save container stdout to execution logs
+        "save_stdout_to_files": True,  # Save container stdout to output files
+        "save_stdout_to_params": False,  # Save container stdout to output parameters
+        "expected_return_codes": "0,125",  # Comma-separated list of acceptable exit codes
+        "additional_run_flags": "--cgroups=disabled",  # Optional string of flags that will be added to "podman run" command
+    },
+    "before_script": {
+        "mounts": {  # Filesystem mounts, "host_path: container_path"
+            "output_files": "/WORK",
+            "prepared_data": "/CONFIGS"
+        },
+        "env_vars": {
+            "explicit": {  # Direct environment variable assignment
+                "PIPELINES_DECLARATIVE_EXECUTOR_ENCRYPT_OUTPUT_SECURE_PARAMS": False
+            },
+            "env_files": [  # Environment files on host to load and pass into container
+                "../CONFIGS/sample.env"
+            ],
+            "pass_via_file": {  # Sensitive vars passed via temp file
+                "SOMETHING_VERY_SECURE": "PASSWORD"
+            },
+            "host_prefixes": [  # Host environment variable prefixes to pass through. Can use "*" to pass everything from host.
+                "SOME_PREFIX_*"
+            ]
+        }
+    },
+    "after_script": {
+        "copy_files_to_host": {  # Copy files from container to host after execution, "host_path: container_path"
+            "output_files/report.json": "/WORK/EXEC_DIR/pipeline_state/pipeline_ui_view.json",
+            "output_files/pipeline_state": "/WORK/EXEC_DIR/pipeline_state",
+        },
+        "extract_params_from_files": {  # OPTIONAL: Extract parameters from container files. Supports JSON, YAML, and ENV files
+            "SOME_FILE_IN_CONTAINER": "SECTION_NAME_IN_PARAMS_WHERE_IT_WILL_BE_STORED",
+        }
+    }
+}</code></pre></p>
+
+
+<details class="output-parameters" open>
+  <summary>Output Parameters</summary>
+  <ul>
+<li>params.execution_time: Total execution time in seconds</li>
+<li>params.return_code: Container exit code</li>
+<li>params.stdout: Container stdout (if save_stdout_to_params enabled)</li>
+<li>params.stderr: Container stderr (if save_stdout_to_params enabled)</li>
+<li>params.extracted_output.*: Extracted parameters from files (if extract_params_from_files configured)</li>
+</ul>
+</details>
+
+<details class="notes" open>
+  <summary>Notes</summary>
+  <ul>
+<li>The command automatically handles container lifecycle including start, execution, and cleanup</li>
+<li>All host-paths (including mount paths) are resolved relative to context directory.</li>
+</ul>
+</details>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v2.notifications.send_email_command.SendEmail" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">SendEmail</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">SendEmail(context_path: <span title="str">str</span> = None, input_params: <span title="dict">dict</span> = None, input_params_secure: <span title="dict">dict</span> = None, folder_path: <span title="str">str</span> = None, parent_context_to_reuse: <a class="autorefs autorefs-internal" title="            ExecutionContext (qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext">ExecutionContext</a> = None, pre_execute_actions: <span title="list">list</span>[<span title="qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommandExtension">ExecutionCommandExtension</span>] = None, post_execute_actions: <span title="list">list</span>[<span title="qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommandExtension">ExecutionCommandExtension</span>] = None)</code></pre>
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="            ExecutionCommand (qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand">ExecutionCommand</a></code></p>
+
+
+
+        <p>This command sends email notification with optional attachments.</p>
+<p>Input Parameters Structure (this structure is expected inside "input_params.params" block):
+<pre class="highlight"><code>{
+    "email_subject": "Report for 01.01.2026",                         # REQUIRED: E-mail subject
+    "email_body": "Following jobs were completed: ...",               # REQUIRED: E-mail message
+    "email_recipients": "user1@qubership.org,user2@qubership.org",    # REQUIRED: Comma-separated list of recipients
+    "email_body_type": "plain",                                       # OPTIONAL: Either "plain" or "html
+    "attachments": {                                                  # OPTIONAL: Dict with attachments
+        "unique_attachment_key": {
+            "name": "HTML_report.html",                               # REQUIRED: File name used for attachment
+            "content": "&lt;html&gt;...&lt;/html&gt;",                            # REQUIRED: Text content put inside attachment
+            "mime_type": "text/html",
+        },
+        "another_attachment_key": {...}
+    }
+}</code></pre></p>
+<p>Systems Configuration (expected in "systems.email" block):
+<pre class="highlight"><code>{
+    "server": "your.mail.server.org",           # REQUIRED: E-mail host server
+    "port": "3025"                              # REQUIRED: E-mail port
+    "user": "your@email.bot"                    # REQUIRED: E-mail user
+    "password": "&lt;email_password&gt;"              # OPTIONAL: E-mail password
+    "use_ssl": "False"                          # OPTIONAL: SMTP connection will use SSL mode (default: False)
+    "use_tls": "False"                          # OPTIONAL: SMTP connection will use TLS mode (default: False)
+    "verify": "False"                           # OPTIONAL: SSL Certificate verification (default: False)
+    "timeout_seconds": "60"                     # OPTIONAL: SMTP connection timeout in seconds (default: 60)
+}</code></pre></p>
+<p>Command name: "send-email"</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v2.notifications.send_webex_message_command.SendWebexMessage" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">SendWebexMessage</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">SendWebexMessage(context_path: <span title="str">str</span> = None, input_params: <span title="dict">dict</span> = None, input_params_secure: <span title="dict">dict</span> = None, folder_path: <span title="str">str</span> = None, parent_context_to_reuse: <a class="autorefs autorefs-internal" title="            ExecutionContext (qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_context.ExecutionContext">ExecutionContext</a> = None, pre_execute_actions: <span title="list">list</span>[<span title="qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommandExtension">ExecutionCommandExtension</span>] = None, post_execute_actions: <span title="list">list</span>[<span title="qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommandExtension">ExecutionCommandExtension</span>] = None)</code></pre>
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="            ExecutionCommand (qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_command.ExecutionCommand">ExecutionCommand</a></code></p>
+
+
+
+        <p>This command sends Webex message with optional attachments.</p>
+<p>Input Parameters Structure (this structure is expected inside "input_params.params" block):
+<pre class="highlight"><code>{
+    "webex_message": "Hello, world!",           # REQUIRED: Text message (Markdown format is supported)
+    "parent_id": "1234321",                     # OPTIONAL: The parent message to reply to
+    "attachments": {                            # OPTIONAL: Dict with attachments
+        "unique_attachment_key": {
+            "name": "HTML_report.html",         # REQUIRED: File name used for attachment
+            "content": "&lt;html&gt;...&lt;/html&gt;",      # REQUIRED: Text content put inside attachment
+            "mime_type": "text/html",
+        },
+        "another_attachment_key": {...}
+    }
+}</code></pre></p>
+<p>Systems Configuration (expected in "systems.webex" block):
+<pre class="highlight"><code>{
+    "room_id": "...Y2lzY29zc...",               # REQUIRED: Webex unique room_id where message will be posted
+    "token": "your_bot_account_token"           # REQUIRED: Bot/Service account token that will be used to send message
+    "proxy": "https://127.0.0.1"                # OPTIONAL: Host to be used as a webex-proxy
+}</code></pre></p>
+
+
+<details class="output-parameters" open>
+  <summary>Output Parameters</summary>
+  <ul>
+<li>params.message_id: Received <code>message_id</code> of sent message</li>
+<li>params.attachment_message_ids: dict of <code>attachment_name</code> -&gt; <code>message_id</code></li>
+</ul>
+</details>        <p>Command name: "send-webex-message"</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><hr /></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>

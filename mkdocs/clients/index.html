@@ -1,0 +1,2189 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+        <title>Clients - Qubership Pipelines Common Library</title>
+        <link href="../../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../../css/brands.min.css" rel="stylesheet">
+        <link href="../../css/solid.min.css" rel="stylesheet">
+        <link href="../../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <link href="../../assets/_mkdocstrings.css" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="../..">Qubership Pipelines Common Library</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="../" class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="./" class="nav-link active" aria-current="page">Clients</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../context/" class="nav-link">Context</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../commands/" class="nav-link">Commands</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../../maven_auth/" class="nav-link">Maven</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="../context/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item dropdown">
+                              <button id="theme-menu" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static" aria-label="Toggle theme" class="nav-link dropdown-toggle">
+                                <i class="fa-solid fa-circle-half-stroke fa-fw"></i>
+                                <span class="d-lg-none ms-2">Toggle theme</span>
+                              </button>
+                              <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                  <button class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" aria-pressed="true">
+                                    <i class="fa-solid fa-sun fa-fw"></i>
+                                    <span class="ms-2">Light</span>
+                                    <i class="fa-solid fa-check ms-auto"></i>
+                                  </button>
+                                </li>
+                                <li>
+                                  <button class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" aria-pressed="false">
+                                    <i class="fa-solid fa-moon fa-fw"></i>
+                                    <span class="ms-2">Dark</span>
+                                    <i class="fa-solid fa-check ms-auto d-none"></i>
+                                  </button>
+                                </li>
+                                <li>
+                                  <button class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto" aria-pressed="false">
+                                    <i class="fa-solid fa-circle-half-stroke fa-fw"></i>
+                                    <span class="ms-2">Auto</span>
+                                    <i class="fa-solid fa-check ms-auto d-none"></i>
+                                  </button>
+                                </li>
+                              </ul>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <script src="../../js/darkmode.js"></script>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v1.artifactory_client.ArtifactoryClient" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ArtifactoryClient</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v2.artifacts_finder.artifact_finder.ArtifactFinder" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;ArtifactFinder</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v1.git_client.GitClient" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;GitClient</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v2.github.github_client.GithubClient" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;GithubClient</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v2.gitlab.gitlab_client.GitlabClient" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;GitlabClient</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v2.jenkins.jenkins_client.JenkinsClient" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;JenkinsClient</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v2.jira.jira_client.JiraClient" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;JiraClient</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v1.kube_client.KubeClient" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;KubeClient</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v1.minio_client.MinioClient" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;MinioClient</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            
+            <li class="nav-item" data-bs-level="2"><a href="#qubership_pipelines_common_library.v1.webex_client.WebexClient" class="nav-link"><code class="doc-symbol doc-symbol-toc doc-symbol-class"></code>&nbsp;WebexClient</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v1.artifactory_client.ArtifactoryClient" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">ArtifactoryClient</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">ArtifactoryClient(params: <span title="dict">dict</span>)</code></pre>
+
+    <div class="doc doc-contents first">
+
+
+
+        <p><strong><code>params</code></strong> is a dictionary with following mandatory params:</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>url</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>Artifactory host url</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>username</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>User used in auth request</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>password</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>Token used in auth request</p>
+          </div>
+        </li>
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.artifactory_client.ArtifactoryClient.get_artifact_properties" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_artifact_properties</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_artifact_properties(path_to_artifact: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.artifactory_client.ArtifactoryClient.get_folder_files_list" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_folder_files_list</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_folder_files_list(path_to_folder: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.artifactory_client.ArtifactoryClient.get_artifact_content_by_url" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_artifact_content_by_url</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_artifact_content_by_url(path_to_file: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v2.artifacts_finder.artifact_finder.ArtifactFinder" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">ArtifactFinder</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">ArtifactFinder(artifact_provider: <span title="qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider.ArtifactProvider">ArtifactProvider</span>, **kwargs)</code></pre>
+
+    <div class="doc doc-contents first">
+
+
+
+        <p>Allows searching for specific descriptor artifacts in different repositories without knowing full coordinates
+(e.g. knowing only <code>artifact_id</code> and <code>version</code>, but not its <code>group_id</code>)</p>
+<p>Supports different repository providers: Artifactory, Nexus, AWS, GCP, Azure</p>
+<p>Provides different auth methods for Cloud Providers, implementing <code>CloudCredentialsProvider</code> interface</p>
+<p>Start by initializing this client with one of implementations:
+<code>finder = ArtifactFinder(artifact_provider=ArtifactoryProvider(registry_url="https://our_url", username="user", password="password"))</code></p>
+<p>Then find your artifacts using
+<code>resource_urls = finder.find_artifact_urls(artifact_id='art_id', version='1.0.0', extension='json')</code></p>
+<p>Additionally, perform filtering of returned results (if you expect to find more than one artifact), and then download necessary artifacts with
+<code>finder.download_artifact(one_of_the_returned_resource_urls, './my_artifact.json')</code></p>
+<p>For more complex providers (e.g. AWS Code Artifact), you need to use specific Credential Providers
+As an example:
+<pre class="highlight"><code>aws_creds = AwsCredentialsProvider().with_assume_role(...all the required params...).get_credentials()
+aws_code_artifact_provider = AwsCodeArtifactProvider(creds=creds, domain='our_domain', project='our_project')
+finder = ArtifactFinder(artifact_provider=aws_code_artifact_provider)</code></pre></p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v1.git_client.GitClient" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">GitClient</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">GitClient(host: <span title="str">str</span>, username: <span title="str">str</span>, password: <span title="str">str</span>, email: <span title="str">str</span> = None)</code></pre>
+
+    <div class="doc doc-contents first">
+
+
+
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>host</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>Git instance URL</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>username</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>User used in auth request</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>password</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>Token used in auth request</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>email</code></b>
+              (<code><span title="str">str</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Email used when committing changes using client</p>
+          </div>
+        </li>
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.git_client.GitClient.clone" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">clone</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">clone(repo_path: <span title="str">str</span>, branch: <span title="str">str</span>, temp_path: <span title="str">str</span>, **kwargs)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.git_client.GitClient.clone_repo_from_commit_hash" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">clone_repo_from_commit_hash</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">clone_repo_from_commit_hash(repo_path: <span title="str">str</span>, commit_hash: <span title="str">str</span>, temp_path: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.git_client.GitClient.commit_and_push" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">commit_and_push</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">commit_and_push(commit_message: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.git_client.GitClient.commit" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">commit</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">commit(commit_message: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.git_client.GitClient.push" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">push</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">push()</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.git_client.GitClient.pull" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">pull</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">pull(**kwargs)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.git_client.GitClient.get_file_content_utf8" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_file_content_utf8</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_file_content_utf8(relative_path: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.git_client.GitClient.set_file_content_utf8" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">set_file_content_utf8</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">set_file_content_utf8(relative_path: <span title="str">str</span>, content: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.git_client.GitClient.delete_by_path" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">delete_by_path</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">delete_by_path(relative_path: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v2.github.github_client.GithubClient" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">GithubClient</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">GithubClient(token: <span title="str">str</span> = None, api_url: <span title="str">str</span> = None, **kwargs)</code></pre>
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="qubership_pipelines_common_library.v1.github_client.GithubClient">GithubClient</span></code></p>
+
+
+
+        <p>This class is deprecated and will be removed in v3.0.0. Use class from v2 module instead.
+Arguments:
+    token (str): Token used in auth request
+    api_url (str): Optional Github Enterprise API URL, leave empty if using github.com
+    **kwargs (Any): will be passed into Github API constructor</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.github.github_client.GithubClient.trigger_workflow" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">trigger_workflow</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">trigger_workflow(owner: <span title="str">str</span>, repo_name: <span title="str">str</span>, workflow_file_name: <span title="str">str</span>, branch: <span title="str">str</span>, pipeline_params: <span title="dict">dict</span>, timeout_seconds: <span title="float">float</span> = 30.0, wait_seconds: <span title="float">float</span> = 3.0, find_via_uuid: <span title="bool">bool</span> = False, uuid_param_name: <span title="str">str</span> = <span title="qubership_pipelines_common_library.v1.github_client.GithubClient.DEFAULT_UUID_PARAM_NAME">DEFAULT_UUID_PARAM_NAME</span>, uuid_artifact_name: <span title="str">str</span> = <span title="qubership_pipelines_common_library.v1.github_client.GithubClient.DEFAULT_UUID_ARTIFACT_NAME">DEFAULT_UUID_ARTIFACT_NAME</span>, uuid_file_name: <span title="str">str</span> = <span title="qubership_pipelines_common_library.v1.github_client.GithubClient.DEFAULT_UUID_FILE_NAME">DEFAULT_UUID_FILE_NAME</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>There's currently no reliable way to get ID of triggered workflow, without adding explicit ID as an input parameter to each workflow, dispatch is async and doesn't return anything
+This method supports two different ways to find and return started workflow:
+    Unreliable - where we start looking for newly created runs of that workflow, filtering them as much as possible (might return wrong run in a concurrent scenario)
+    Reliable:
+        you need to add specific explicit ID param to the workflow you are triggering (e.g. 'workflow_run_uuid'),
+        said workflow should have a step where it will save its input params,
+        and then you run this method with 'find_via_uuid = True'</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.github.github_client.GithubClient.get_workflow_run_status" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_workflow_run_status</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_workflow_run_status(execution: <a class="autorefs autorefs-internal" title="            ExecutionInfo (qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo">ExecutionInfo</a>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.github.github_client.GithubClient.wait_workflow_run_execution" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">wait_workflow_run_execution</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">wait_workflow_run_execution(execution: <a class="autorefs autorefs-internal" title="            ExecutionInfo (qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo">ExecutionInfo</a>, timeout_seconds: <span title="float">float</span> = 60.0, break_status_list: <span title="list">list</span> = None, wait_seconds: <span title="float">float</span> = 10.0)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.github.github_client.GithubClient.cancel_workflow_run_execution" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">cancel_workflow_run_execution</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">cancel_workflow_run_execution(execution: <a class="autorefs autorefs-internal" title="            ExecutionInfo (qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo">ExecutionInfo</a>, timeout: <span title="float">float</span> = 1.0)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.github.github_client.GithubClient.download_workflow_run_artifacts" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">download_workflow_run_artifacts</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">download_workflow_run_artifacts(execution: <a class="autorefs autorefs-internal" title="            ExecutionInfo (qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo">ExecutionInfo</a>, local_dir: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.github.github_client.GithubClient.get_workflow_run_input_params" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_workflow_run_input_params</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_workflow_run_input_params(execution: <a class="autorefs autorefs-internal" title="            ExecutionInfo (qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo">ExecutionInfo</a>, artifact_name: <span title="str">str</span> = <span title="qubership_pipelines_common_library.v1.github_client.GithubClient.DEFAULT_UUID_ARTIFACT_NAME">DEFAULT_UUID_ARTIFACT_NAME</span>, file_name: <span title="str">str</span> = <span title="qubership_pipelines_common_library.v1.github_client.GithubClient.DEFAULT_UUID_FILE_NAME">DEFAULT_UUID_FILE_NAME</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v2.gitlab.gitlab_client.GitlabClient" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">GitlabClient</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">GitlabClient(host: <span title="str">str</span>, username: <span title="str">str</span>, password: <span title="str">str</span>, email: <span title="str">str</span> = None, **kwargs)</code></pre>
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="qubership_pipelines_common_library.v1.gitlab_client.GitlabClient">GitlabClient</span></code></p>
+
+
+
+        <p>This class is deprecated and will be removed in v3.0.0. Use class from v2 module instead.
+Arguments:
+    host (str): Gitlab instance URL
+    username (str): User used in auth request, might be empty string if no auth is required
+    password (str): Token used in auth request
+    email (str): Email used when committing changes using API
+    **kwargs (Any): will be passed into Gitlab API constructor</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.gitlab.gitlab_client.GitlabClient.trigger_pipeline" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">trigger_pipeline</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">trigger_pipeline(project_id: <span title="str">str</span>, ref: <span title="str">str</span>, trigger_token: <span title="str">str</span> = None, variables: <span title="dict">dict</span> = None, use_ci_job_token: <span title="bool">bool</span> = False)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.gitlab.gitlab_client.GitlabClient.create_pipeline" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">create_pipeline</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">create_pipeline(project_id: <span title="str">str</span>, ref: <span title="str">str</span>, variables: <span title="dict">dict</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.gitlab.gitlab_client.GitlabClient.get_file_content" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_file_content</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_file_content(project_id: <span title="str">str</span>, ref: <span title="str">str</span>, file_path: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.gitlab.gitlab_client.GitlabClient.create_file" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">create_file</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">create_file(project_id: <span title="str">str</span>, file_path: <span title="str">str</span>, content: <span title="str">str</span>, ref: <span title="str">str</span>, commit_message: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.gitlab.gitlab_client.GitlabClient.update_file" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">update_file</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">update_file(project_id: <span title="str">str</span>, file_path: <span title="str">str</span>, content: <span title="str">str</span>, ref: <span title="str">str</span>, commit_message: <span title="str">str</span>, create_if_not_exists: <span title="bool">bool</span> = False)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.gitlab.gitlab_client.GitlabClient.delete_file" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">delete_file</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">delete_file(project_id: <span title="str">str</span>, file_path: <span title="str">str</span>, ref: <span title="str">str</span>, commit_message: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.gitlab.gitlab_client.GitlabClient.get_latest_commit_id" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_latest_commit_id</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_latest_commit_id(project_id: <span title="str">str</span>, ref: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.gitlab.gitlab_client.GitlabClient.get_file_commit_info" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_file_commit_info</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_file_commit_info(project_id: <span title="str">str</span>, ref: <span title="str">str</span>, file_path: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Returns dict with 'commit_id' and 'last_commit_id' from Gitlab API</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.gitlab.gitlab_client.GitlabClient.cancel_pipeline_execution" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">cancel_pipeline_execution</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">cancel_pipeline_execution(execution: <a class="autorefs autorefs-internal" title="            ExecutionInfo (qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo">ExecutionInfo</a>, timeout: <span title="float">float</span> = 1.0)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.gitlab.gitlab_client.GitlabClient.get_pipeline_status" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_pipeline_status</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_pipeline_status(execution: <a class="autorefs autorefs-internal" title="            ExecutionInfo (qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo">ExecutionInfo</a>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.gitlab.gitlab_client.GitlabClient.wait_pipeline_execution" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">wait_pipeline_execution</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">wait_pipeline_execution(execution: <a class="autorefs autorefs-internal" title="            ExecutionInfo (qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo">ExecutionInfo</a>, timeout_seconds: <span title="float">float</span> = 180.0, break_status_list: <span title="list">list</span> = None, wait_seconds: <span title="float">float</span> = 1.0)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.gitlab.gitlab_client.GitlabClient.get_repo_branch_path" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_repo_branch_path</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_repo_branch_path(url: <span title="str">str</span>, branch: <span title="str">str</span> = 'main')</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Extracts 'repo', 'branch' and 'path' parts from possible Gitlab URLs. Needs to know branch beforehand</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.gitlab.gitlab_client.GitlabClient.is_gitlab_project_exist" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">is_gitlab_project_exist</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">is_gitlab_project_exist(gitlab_url, gitlab_project, gitlab_token)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.gitlab.gitlab_client.GitlabClient.search_group_id" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">search_group_id</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">search_group_id(gitlab_url, gitlab_project, gitlab_token)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.gitlab.gitlab_client.GitlabClient.create_internal_gitlab_project" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">create_internal_gitlab_project</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">create_internal_gitlab_project(gitlab_url, gitlab_token, group_id, repo_name, repo_branch, visibility='internal')</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.gitlab.gitlab_client.GitlabClient.make_first_commit_to_gitlab_project" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">make_first_commit_to_gitlab_project</span>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">make_first_commit_to_gitlab_project(gitlab_url, gitlab_token, project_id, repo_branch)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v2.jenkins.jenkins_client.JenkinsClient" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">JenkinsClient</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">JenkinsClient(host: <span title="str">str</span>, user: <span title="str">str</span>, password: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="qubership_pipelines_common_library.v1.jenkins_client.JenkinsClient">JenkinsClient</span></code></p>
+
+
+
+        <p>This class is deprecated and will be removed in v3.0.0. Use class from v2 module instead.
+Arguments:
+    host (str): Jenkins host URL
+    user (str): User used in auth request
+    password (str): Token used in auth request</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.jenkins.jenkins_client.JenkinsClient.run_pipeline" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">run_pipeline</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">run_pipeline(job_name: <span title="str">str</span>, job_params: <span title="dict">dict</span>, timeout_seconds: <span title="float">float</span> = 180.0, wait_seconds: <span title="float">float</span> = 1.0)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.jenkins.jenkins_client.JenkinsClient.get_pipeline_execution_status" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_pipeline_execution_status</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_pipeline_execution_status(execution: <a class="autorefs autorefs-internal" title="            ExecutionInfo (qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo">ExecutionInfo</a>, timeout_seconds: <span title="float">float</span> = 30.0, wait_seconds: <span title="float">float</span> = 1.0)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.jenkins.jenkins_client.JenkinsClient.wait_pipeline_execution" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">wait_pipeline_execution</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">wait_pipeline_execution(execution: <a class="autorefs autorefs-internal" title="            ExecutionInfo (qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo">ExecutionInfo</a>, timeout_seconds: <span title="float">float</span> = 180.0, wait_seconds: <span title="float">float</span> = 1.0)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.jenkins.jenkins_client.JenkinsClient.cancel_pipeline_execution" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">cancel_pipeline_execution</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">cancel_pipeline_execution(execution: <a class="autorefs autorefs-internal" title="            ExecutionInfo (qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo">ExecutionInfo</a>, timeout_seconds: <span title="float">float</span> = 30.0, wait_seconds: <span title="float">float</span> = 1.0)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.jenkins.jenkins_client.JenkinsClient.get_pipeline_execution_artifacts" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_pipeline_execution_artifacts</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_pipeline_execution_artifacts(execution: <a class="autorefs autorefs-internal" title="            ExecutionInfo (qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo">ExecutionInfo</a>, timeout_seconds: <span title="float">float</span> = 30.0, wait_seconds: <span title="float">float</span> = 1.0)</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Returns list of artifact relative paths</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v2.jenkins.jenkins_client.JenkinsClient.save_pipeline_execution_artifact_to_file" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">save_pipeline_execution_artifact_to_file</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">save_pipeline_execution_artifact_to_file(execution: <a class="autorefs autorefs-internal" title="            ExecutionInfo (qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo)" href="../context/#qubership_pipelines_common_library.v1.execution.exec_info.ExecutionInfo">ExecutionInfo</a>, artifact_path: <span title="str">str</span>, file_path: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v2.jira.jira_client.JiraClient" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">JiraClient</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">JiraClient(host: <span title="str">str</span>, user: <span title="str">str</span>, password: <span title="str">str</span>, auth_type: <span title="str">str</span> = <span title="qubership_pipelines_common_library.v2.jira.jira_client.AuthType.BASIC">BASIC</span>)</code></pre>
+
+    <div class="doc doc-contents first">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v1.kube_client.KubeClient" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">KubeClient</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">KubeClient(endpoint: <span title="str">str</span> = None, token: <span title="str">str</span> = None, kubeconfig_path: <span title="str">str</span> = None)</code></pre>
+
+    <div class="doc doc-contents first">
+
+
+
+        <p>Needs either of <strong><code>endpoint</code></strong> and <strong><code>token</code></strong> or <strong><code>kubeconfig_path</code></strong></p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>endpoint</code></b>
+              (<code><span title="str">str</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Kubernetes API server URL</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>token</code></b>
+              (<code><span title="str">str</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Token used for cluster access</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>kubeconfig_path</code></b>
+              (<code><span title="str">str</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Path to local .kubeconfig file</p>
+          </div>
+        </li>
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.kube_client.KubeClient.list_namespaces" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">list_namespaces</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">list_namespaces()</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.kube_client.KubeClient.namespace_exists" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">namespace_exists</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">namespace_exists(namespace: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.kube_client.KubeClient.deployments_exist" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">deployments_exist</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">deployments_exist(namespace: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.kube_client.KubeClient.is_namespace_scaled_to_zero" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">is_namespace_scaled_to_zero</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">is_namespace_scaled_to_zero(namespace: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.kube_client.KubeClient.list_not_ready_resources" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">list_not_ready_resources</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">list_not_ready_resources(namespace)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.kube_client.KubeClient.create_namespace" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">create_namespace</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">create_namespace(namespace: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.kube_client.KubeClient.delete_namespaces" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">delete_namespaces</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">delete_namespaces(namespaces: <span title="list">list</span>[<span title="str">str</span>], ignore_not_found: <span title="bool">bool</span> = False)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.kube_client.KubeClient.list_config_map_names" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">list_config_map_names</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">list_config_map_names(namespace: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.kube_client.KubeClient.read_config_map" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">read_config_map</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">read_config_map(namespace: <span title="str">str</span>, config_map_name: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.kube_client.KubeClient.create_config_map" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">create_config_map</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">create_config_map(namespace: <span title="str">str</span>, config_map_name: <span title="str">str</span>, config_map_data: <span title="dict">dict</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.kube_client.KubeClient.patch_config_map" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">patch_config_map</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">patch_config_map(namespace: <span title="str">str</span>, config_map_name: <span title="str">str</span>, config_map_data: <span title="dict">dict</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Patching allows adding/removing only specified keys in config map. Removes key-value pair when value is None</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.kube_client.KubeClient.replace_config_map" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">replace_config_map</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">replace_config_map(namespace: <span title="str">str</span>, config_map_name: <span title="str">str</span>, config_map_data: <span title="dict">dict</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Replaces all data inside existing config map with value of 'config_map_data' argument</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.kube_client.KubeClient.create_or_replace_config_map" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">create_or_replace_config_map</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">create_or_replace_config_map(namespace: <span title="str">str</span>, config_map_name: <span title="str">str</span>, config_map_data: <span title="dict">dict</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Creates map if it doesn't exist, replaces it otherwise</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.kube_client.KubeClient.delete_config_map" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">delete_config_map</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">delete_config_map(namespace: <span title="str">str</span>, config_map_name: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.kube_client.KubeClient.scale_namespace" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">scale_namespace</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">scale_namespace(namespace: <span title="str">str</span>, scale_mode: <span title="qubership_pipelines_common_library.v1.kube_client.ScaleMode">ScaleMode</span>, use_config_map: <span title="bool">bool</span> = True, replicas: <span title="int">int</span> = 0)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.kube_client.KubeClient.scale_namespace_down" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">scale_namespace_down</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">scale_namespace_down(namespace: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.kube_client.KubeClient.scale_namespace_up" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">scale_namespace_up</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">scale_namespace_up(namespace: <span title="str">str</span>, use_config_map: <span title="bool">bool</span>, replicas: <span title="int">int</span> = 0)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v1.minio_client.MinioClient" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">MinioClient</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">MinioClient(endpoint: <span title="str">str</span>, access_key: <span title="str">str</span>, secret_key: <span title="str">str</span>, secure: <span title="bool">bool</span> = True, cert_check: <span title="bool">bool</span> = True)</code></pre>
+
+    <div class="doc doc-contents first">
+
+
+
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>endpoint</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>MiniO host URL</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>access_key</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>Access key used in auth request</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>secret_key</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>Secret key used in auth request</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>secure</code></b>
+              (<code><span title="bool">bool</span></code>, default:
+                  <code>True</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Which protocol to use (in case it's not present in <code>endpoint</code>)</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>cert_check</code></b>
+              (<code><span title="bool">bool</span></code>, default:
+                  <code>True</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Whether to verify certificate</p>
+          </div>
+        </li>
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.minio_client.MinioClient.list_objects" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">list_objects</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">list_objects(bucket_name: <span title="str">str</span>, path: <span title="str">str</span> = None)</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>No leading slash in <strong><code>path</code></strong> - newer versions of MiniO don't support it,
+Trailing slash in <strong><code>path</code></strong> must be present</p>
+<p>e.g. don't do this: path="/folder1/folder2"</p>
+<p>do this: path="folder/folder2/"</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.minio_client.MinioClient.get_folder_names" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_folder_names</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_folder_names(bucket_name: <span title="str">str</span>, path: <span title="str">str</span> = None)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.minio_client.MinioClient.get_file_names" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_file_names</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_file_names(bucket_name: <span title="str">str</span>, path: <span title="str">str</span> = None)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.minio_client.MinioClient.get_last_modified_file" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_last_modified_file</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_last_modified_file(bucket_name: <span title="str">str</span>, path: <span title="str">str</span> = None)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.minio_client.MinioClient.get_last_modified_text_file_content" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_last_modified_text_file_content</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_last_modified_text_file_content(bucket_name: <span title="str">str</span>, path: <span title="str">str</span> = None)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.minio_client.MinioClient.get_file" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_file</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_file(bucket_name: <span title="str">str</span>, file_path: <span title="str">str</span>, local_path: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.minio_client.MinioClient.put_file" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">put_file</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">put_file(bucket_name: <span title="str">str</span>, path: <span title="str">str</span>, local_path: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.minio_client.MinioClient.get_text_file_content" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">get_text_file_content</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">get_text_file_content(bucket_name: <span title="str">str</span>, file_path: <span title="str">str</span>)</code></pre>
+
+    <div class="doc doc-contents ">
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="qubership_pipelines_common_library.v1.webex_client.WebexClient" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-class"></code>            <span class="doc doc-object-name doc-class-name">WebexClient</span>
+
+
+</h2>
+<pre class="highlight"><code class="language-python doc-signature">WebexClient(bot_token: <span title="str">str</span>, proxies: <span title="dict">dict</span> = None)</code></pre>
+
+    <div class="doc doc-contents first">
+
+
+
+        <p><strong><code>proxies</code></strong> dict for different protocols is passed to requests session.
+    e.g. proxies = { 'https' : 'https://user:password@ip:port' }</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>bot_token</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>bot's auth token</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>proxies</code></b>
+              (<code><span title="dict">dict</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>dict with proxy connections for different protocols</p>
+          </div>
+        </li>
+    </ul>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="qubership_pipelines_common_library.v1.webex_client.WebexClient.send_message" class="doc doc-heading">
+<code class="doc-symbol doc-symbol-heading doc-symbol-method"></code>            <span class="doc doc-object-name doc-function-name">send_message</span>
+
+
+</h3>
+<pre class="highlight"><code class="language-python doc-signature">send_message(room_id: <span title="str">str</span>, msg: <span title="str">str</span> = None, attachment_path: <span title="str">str</span> = None, parent_id: <span title="str">str</span> = None, to_person_id: <span title="str">str</span> = None, to_person_email: <span title="str">str</span> = None, markdown: <span title="str">str</span> = None, **request_parameters)</code></pre>
+
+    <div class="doc doc-contents ">
+
+        <p>Post a message to a room.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <ul>
+        <li class="doc-section-item field-body">
+            <b><code>room_id</code></b>
+              (<code><span title="str">str</span></code>)
+          –
+          <div class="doc-md-description">
+            <p>The room ID.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>to_person_id</code></b>
+              (<code><span title="str">str</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>The ID of the recipient when sending a
+private 1:1 message.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>to_person_email</code></b>
+              (<code><span title="str">str</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>The email address of the recipient when
+sending a private 1:1 message.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>msg</code></b>
+              (<code><span title="str">str</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>The message, in plain text. If <code>markdown</code> is
+specified this parameter may be optionally used to provide
+alternate text for UI clients that do not support rich text.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>markdown</code></b>
+              (<code><span title="str">str</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>The message, in Markdown format.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>attachment_path</code></b>
+              (<code><span title="str">str</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>Path to file that will be attached to a message</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>parent_id</code></b>
+              (<code><span title="str">str</span></code>, default:
+                  <code>None</code>
+)
+          –
+          <div class="doc-md-description">
+            <p>The parent message to reply to. This will
+start or reply to a thread.</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>**request_parameters</code></b>
+          –
+          <div class="doc-md-description">
+            <p>Additional request parameters (provides
+support for parameters that may be added in the future).</p>
+          </div>
+        </li>
+        <li class="doc-section-item field-body">
+            <b><code>Returns</code></b>
+          –
+          <div class="doc-md-description">
+            <p>dict: The API response containing details of the created message.</p>
+          </div>
+        </li>
+    </ul>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr /></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../../js/base.js"></script>
+        <script src="../../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
