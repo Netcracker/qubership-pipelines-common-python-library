@@ -36,6 +36,8 @@ class CryptoUtils:
             }
         elif isinstance(data, list):
             return [CryptoUtils.mask_values(item, path) for item in data]
+        elif data is None or data == '':
+            return ""
         else:
             return "[MASKED]"
 

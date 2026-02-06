@@ -25,6 +25,10 @@
 
 ---
 
+::: qubership_pipelines_common_library.v2.jira.jira_client.JiraClient
+
+---
+
 ::: qubership_pipelines_common_library.v1.kube_client.KubeClient
 
 ---
