@@ -37,6 +37,10 @@
 
 ---
 
+::: qubership_pipelines_common_library.v2.secret_manager.secret_manager.SecretManager
+
+---
+
 ::: qubership_pipelines_common_library.v1.webex_client.WebexClient
 
 ---
