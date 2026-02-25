@@ -26,3 +26,12 @@ class UtilsString:
     @staticmethod
     def convert_to_bool(input_str):
         return str(input_str).strip().lower() == "true"
+
+    @staticmethod
+    def with_ascii_box(text: str) -> str:
+        inner_width = len(text) + 2  # text length + padding
+        horizontal_line = "─" * inner_width
+        top_line = f"┌{horizontal_line}┐"
+        middle_line = f"│ {text} │"
+        bottom_line = f"└{horizontal_line}┘"
+        return "\n".join([top_line, middle_line, bottom_line])
