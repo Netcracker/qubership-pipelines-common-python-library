@@ -39,29 +39,15 @@ def _configure_global_logger(global_logger: logging.Logger, log_level: str):
     if global_logger.hasHandlers():
         global_logger.handlers.clear()
     global_logger.propagate = True
+
+    stdout_handler = logging.StreamHandler(sys.stdout)
+    stdout_handler.setLevel(log_level_value)
     if UtilsString.convert_to_bool(os.getenv('NO_RICH', False)):
-        stdout_handler = logging.StreamHandler(sys.stdout)
-        stdout_handler.setLevel(log_level_value)
         stdout_handler.setFormatter(logging.Formatter(ExecutionLogger.DEFAULT_FORMAT))
-        global_logger.addHandler(stdout_handler)
     else:
-        from rich.logging import RichHandler
-        from qubership_pipelines_common_library.v1.utils.utils_logging import rich_console, ExtendedReprHighlighter, LevelColorFilter
-        rich_handler = RichHandler(
-            console=rich_console,
-            show_time=False,
-            show_level=False,
-            show_path=False,
-            enable_link_path=False,
-            rich_tracebacks=True,
-            tracebacks_show_locals=False,
-            markup=True,
-            highlighter=ExtendedReprHighlighter(),
-        )
-        rich_handler.addFilter(LevelColorFilter())
-        rich_handler.setFormatter(logging.Formatter(ExecutionLogger.LEVELNAME_COLORED_FORMAT))
-        rich_handler.setLevel(log_level_value)
-        global_logger.addHandler(rich_handler)
+        from qubership_pipelines_common_library.v1.utils.utils_logging import ColoredFormatter
+        stdout_handler.setFormatter(ColoredFormatter(ExecutionLogger.DEFAULT_FORMAT))
+    global_logger.addHandler(stdout_handler)
 
 
 def _print_command_name():
@@ -72,16 +58,9 @@ def _print_command_name():
         logging.getLogger().warning("Can't find command name.")
         command_name = ""
 
-    if UtilsString.convert_to_bool(os.getenv('NO_RICH', False)):
-        logging.info(f"command_name = {command_name}")
-    else:
-        from rich import box
-        from rich.panel import Panel
-        from qubership_pipelines_common_library.v1.utils.utils_logging import rich_console
-        command_panel = Panel(f"command_name = {command_name}", expand=False, padding=(0, 1), box=box.ROUNDED)
-        rich_console.print()
-        rich_console.print(command_panel)
-        rich_console.print()
+    display_text = f"command_name = {command_name}"
+    formatted_text = f"\n{UtilsString.with_ascii_box(display_text)}\n"
+    logging.info(formatted_text)
 
 
 def _transform_kwargs(kwargs):

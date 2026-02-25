@@ -22,7 +22,6 @@ class ExecutionLogger:
     EXECUTION_LOG_LEVEL = logging.INFO
     FULL_LOG_LEVEL = logging.DEBUG
     DEFAULT_FORMAT = u'[%(asctime)s] [%(levelname)-7s] [class=%(filename)s:%(lineno)-3s] %(message)s'
-    LEVELNAME_COLORED_FORMAT = u'[%(asctime)s] [%(levelname_color_open_tag)s%(levelname)-7s%(levelname_color_close_tag)s] \\[class=%(filename)s:%(lineno)-3s] %(message)s'
 
     def __init__(self, path_logs):
         """
