@@ -65,7 +65,6 @@ class ExecutionCommand:
             self._log_border_line()
             self._log_input_params()
             if not self._validate():
-                logging.error(ExecutionCommand.FAILURE_MSG)
                 self._exit(False, ExecutionCommand.FAILURE_MSG)
             self._pre_execute()
             self._execute()

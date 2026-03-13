@@ -40,3 +40,8 @@ class UtilsDictionary:
                 curr[key] = {}
             curr = curr[key]
         return input_dict
+
+    @staticmethod
+    def check_required_fields(data: dict, required_fields: list[str]) -> list[str] | None:
+        missing = [field for field in required_fields if field not in data]
+        return missing if missing else None
