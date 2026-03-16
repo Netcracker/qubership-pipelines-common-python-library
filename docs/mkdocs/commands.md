@@ -28,6 +28,10 @@
     options:
         inherited_members: []
 ---
+::: qubership_pipelines_common_library.v2.pipelines.prepare_pyz_module_command.PreparePyzModule
+    options:
+        inherited_members: []
+---
 ::: qubership_pipelines_common_library.v2.notifications.send_email_command.SendEmail
     options:
         inherited_members: []
