@@ -6,12 +6,13 @@ import click
 
 from qubership_pipelines_common_library.v1.execution.exec_logger import ExecutionLogger
 from qubership_pipelines_common_library.v1.utils.utils_string import UtilsString
+from qubership_pipelines_common_library.v2.cli_output.cli_output import CliOutput
 
 DEFAULT_CONTEXT_FILE_PATH = 'context.yaml'
 
 
 def utils_cli(func):
-    """Decorator to add CLI options for logging level, context path and custom input params."""
+    """Decorator to add CLI options for logging level, context path, CLI output mode and custom input params."""
 
     @click.option('--log-level', default='INFO', show_default=True,
                   type=click.Choice(['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], case_sensitive=False),
@@ -20,10 +21,17 @@ def utils_cli(func):
     @click.option("--input_params", "-p", multiple=True, callback=_input_params_to_dict,
                   help="Params to use instead of context as key-values. Nested keys are supported with double-underscores or dots as separators, e.g. -p params__group__key=value")
     @click.option("--input_params_secure", "-s", multiple=True, callback=_input_params_to_dict,
-                  help="Params to use instead of context as key-values. Nested keys are supported with double-underscores or dots as separators, e.g. -p params__group__key=value")
+                  help="Params to use instead of context as key-values. Nested keys are supported with double-underscores or dots as separators, e.g. -s params__group__key=value")
+    @click.option('--cli-output-mode', default='OFF', show_default=True,
+                  type=click.Choice(['OFF', 'INSECURE_PARAMS', 'SECURE_PARAMS', 'MERGED_PARAMS'], case_sensitive=False),
+                  help="Set CLI Output Mode, making this execution produce only requested output_params in STDOUT instead of logs. Note that secure params would be shown unmasked!")
+    @click.option('--cli-output-format', default='YAML', show_default=True,
+                  type=click.Choice(['YAML', 'JSON', 'PRETTY_JSON'], case_sensitive=False),
+                  help="Set CLI Output Format, configuring desired output format for output_params in STDOUT")
     @click.pass_context
-    def wrapper(ctx, *args, log_level, **kwargs):
+    def wrapper(ctx, *args, log_level, cli_output_mode, cli_output_format, **kwargs):
         ExecutionLogger.EXECUTION_LOG_LEVEL = getattr(logging, log_level.upper(), logging.INFO)
+        CliOutput.configure(cli_output_mode.upper(), cli_output_format.upper())
         _configure_global_logger(logging.getLogger(), log_level)
         _print_command_name()
         _transform_kwargs(kwargs)
@@ -40,14 +48,17 @@ def _configure_global_logger(global_logger: logging.Logger, log_level: str):
         global_logger.handlers.clear()
     global_logger.propagate = True
 
-    stdout_handler = logging.StreamHandler(sys.stdout)
-    stdout_handler.setLevel(log_level_value)
-    if UtilsString.convert_to_bool(os.getenv('NO_RICH', False)):
-        stdout_handler.setFormatter(logging.Formatter(ExecutionLogger.DEFAULT_FORMAT))
+    if CliOutput.OUTPUT_MODE == CliOutput.OutputMode.OFF:
+        stdout_handler = logging.StreamHandler(sys.stdout)
+        stdout_handler.setLevel(log_level_value)
+        if UtilsString.convert_to_bool(os.getenv('NO_RICH', False)):
+            stdout_handler.setFormatter(logging.Formatter(ExecutionLogger.DEFAULT_FORMAT))
+        else:
+            from qubership_pipelines_common_library.v1.utils.utils_logging import ColoredFormatter
+            stdout_handler.setFormatter(ColoredFormatter(ExecutionLogger.DEFAULT_FORMAT))
+        global_logger.addHandler(stdout_handler)
     else:
-        from qubership_pipelines_common_library.v1.utils.utils_logging import ColoredFormatter
-        stdout_handler.setFormatter(ColoredFormatter(ExecutionLogger.DEFAULT_FORMAT))
-    global_logger.addHandler(stdout_handler)
+        global_logger.addHandler(logging.NullHandler())
 
 
 def _print_command_name():
