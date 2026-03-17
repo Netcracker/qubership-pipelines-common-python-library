@@ -7,6 +7,7 @@ from qubership_pipelines_common_library.v2.artifacts_finder.artifact_finder impo
 from qubership_pipelines_common_library.v2.artifacts_finder.auth.aws_credentials import AwsCredentialsProvider
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact import Artifact
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider
+from qubership_pipelines_common_library.v2.artifacts_finder.providers.nexus import NexusProvider
 
 
 class TestArtifactFinder:
@@ -71,3 +72,29 @@ class TestArtifactFinder:
         credentials = cred_provider.get_credentials()
         assert credentials.access_key == "test_assumed_access_key"
         assert credentials.secret_key == "test_assumed_secret_key"
+
+    @patch('requests.sessions.Session.get')
+    def test_nexus_search_snapshot_resolution(self, requests_mock):
+        def side_effect(url, **kwargs):
+            mock_resp = Mock()
+            mock_resp.status_code = 200
+            if url.endswith('/service/rest/v1/search/assets'):
+                mock_resp.json.return_value = {
+                    "items": [
+                        {"downloadUrl": "https://mock.nexus.url/test-repo/org/qubership/test-component/0.5.0-SNAPSHOT/test-component-0.5.0-20260318.111111-1.pyz"},
+                        {"downloadUrl": "https://mock.nexus.url/test-repo/org/qubership/test-component/0.5.0-SNAPSHOT/test-component-0.5.0-20260318.222222-2.pyz"},
+                        {"downloadUrl": "https://mock.nexus.url/test-repo/org/qubership/test-component/0.5.0-SNAPSHOT/test-component-0.5.0-20260318.333333-3.pyz"},
+                    ]
+                }
+            elif url.endswith('/maven-metadata.xml'):
+                mock_resp.content = "<metadata><versioning><snapshot><timestamp>20260318.333333</timestamp><buildNumber>3</buildNumber></snapshot></versioning></metadata>"
+            return mock_resp
+
+        requests_mock.side_effect = side_effect
+        artifact = Artifact(artifact_id="test-component", version="0.5.0-SNAPSHOT", extension="pyz")
+        finder = ArtifactFinder(artifact_provider=NexusProvider(registry_url="https://mock.nexus.url"))
+
+        urls = finder.find_artifact_urls(artifact=artifact)
+
+        assert len(urls) == 1
+        assert urls[0].rsplit("/", maxsplit=1)[-1] == "test-component-0.5.0-20260318.333333-3.pyz"
