@@ -14,6 +14,8 @@ class AwsCodeArtifactProvider(ArtifactProvider):
         """
         Initializes this client to work with **AWS Code Artifact** for generic or maven artifacts.
         Requires `Credentials` provided by `AwsCredentialsProvider`.
+
+        This provider currently doesn't support searching for `-SNAPSHOT` versions and/or resolving them
         """
         super().__init__(**kwargs)
         self._credentials = credentials

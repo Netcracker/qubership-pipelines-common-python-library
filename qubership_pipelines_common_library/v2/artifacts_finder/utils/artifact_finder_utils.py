@@ -1,5 +1,6 @@
 from qubership_pipelines_common_library.v1.execution.exec_command import ExecutionCommand
 from qubership_pipelines_common_library.v1.utils.utils_dictionary import UtilsDictionary
+from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact import Artifact
 
 
 class ArtifactProviderFactory:
@@ -186,3 +187,44 @@ class ArtifactFinderUtils:
 
         from qubership_pipelines_common_library.v2.artifacts_finder.artifact_finder import ArtifactFinder
         return ArtifactFinder(artifact_provider=provider)
+
+    @staticmethod
+    def resolve_snapshot_versions(artifact: Artifact, download_urls: list, provider) -> list[str]:
+        groups = {}
+        for url in download_urls:
+            group_id = ArtifactFinderUtils.extract_group_id_from_artifact_url(url)
+            if group_id in groups:
+                continue
+            base_url = url.rsplit("/", maxsplit=1)[0]
+            groups[group_id] = {
+                "snapshot_url": f"{base_url}/{artifact.artifact_id}-{artifact.version.removesuffix('-SNAPSHOT')}",
+                "metadata_url": f"{base_url}/maven-metadata.xml",
+            }
+
+        result = []
+        for urls in groups.values():
+            metadata_response = provider._session.get(url=urls.get("metadata_url"), timeout=provider.timeout)
+            metadata_response.raise_for_status()
+            timestamp = ArtifactFinderUtils.extract_metadata_snapshot_timestamp(metadata_response.content)
+            result.append(f'{urls.get("snapshot_url")}-{timestamp}.{artifact.extension}')
+        return result
+
+    @staticmethod
+    def extract_group_id_from_artifact_url(artifact_url: str) -> str:
+        # Expects Artifactory/Nexus URLs, e.g. "repo-name/...group.../artifact/version/file"
+        # Returns unique repo/group identifiers, not actual maven group_id
+        # So might return "api-bind.repo-name.com.apache" - and it is expected in related providers
+        from urllib.parse import urlparse
+        path = urlparse(artifact_url).path
+        components = [c for c in path.split("/") if c]
+        if len(components) < 4:
+            raise ValueError(f"Can't extract group_id from URL: {artifact_url}")
+        return ".".join(components[:-3])
+
+    @staticmethod
+    def extract_metadata_snapshot_timestamp(metadata_content: str) -> str:
+        import xml.etree.ElementTree as ET
+        metadata_xml = ET.fromstring(metadata_content)
+        timestamp = metadata_xml.findall("./versioning/snapshot/timestamp")[0].text
+        build_number = metadata_xml.findall("./versioning/snapshot/buildNumber")[0].text
+        return f"{timestamp}-{build_number}"

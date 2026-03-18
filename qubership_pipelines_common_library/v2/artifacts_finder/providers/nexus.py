@@ -1,6 +1,7 @@
 from pathlib import Path
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact import Artifact
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider
+from qubership_pipelines_common_library.v2.artifacts_finder.utils.artifact_finder_utils import ArtifactFinderUtils
 
 
 class NexusProvider(ArtifactProvider):
@@ -9,6 +10,10 @@ class NexusProvider(ArtifactProvider):
         """
         Initializes this client to work with **Sonatype Nexus Repository** for maven artifacts.
         Requires `username` and its `password` or `token`.
+
+        Nexus Artifact IDs are case-sensitive (`test-cli` and `test-CLI` are different artifacts)
+
+        This provider supports resolving `-SNAPSHOT` artifacts into latest version
         """
         super().__init__(**kwargs)
         self.registry_url = registry_url
@@ -35,7 +40,12 @@ class NexusProvider(ArtifactProvider):
                                      timeout=self.timeout)
         if response.status_code != 200:
             raise Exception(f"Could not find '{artifact.artifact_id}' - search request returned {response.status_code}!")
-        return [result["downloadUrl"] for result in response.json()["items"]]
+
+        download_urls = [item.get("downloadUrl") for item in response.json().get("items", [])]
+        if artifact.is_snapshot():
+            return ArtifactFinderUtils.resolve_snapshot_versions(artifact=artifact, download_urls=download_urls, provider=self)
+        else:
+            return download_urls
 
     def get_provider_name(self) -> str:
         return "nexus"
