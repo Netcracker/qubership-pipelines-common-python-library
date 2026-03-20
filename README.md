@@ -9,9 +9,11 @@ Open-source python library of clients used by Qubership pipelines/modules.
 
 Library provides easy-to-use clients and wrappers for common DevOps services (e.g. Jenkins, MiniO, GitLab Pipelines)
 
-## Sample implementation
+## Using Execution Commands
 
 Sample implementation of CLI commands using this library is available at [qubership-pipelines-cli-command-samples](https://github.com/Netcracker/qubership-pipelines-cli-command-samples)
+
+Library itself also provides commands since `v2.0.0`, and there's [a separate documentation](./docs/using_commands.md) on recommended ways to integrate and use them in your applications.
 
 It includes reference python implementation along with the [Development Guide](https://github.com/Netcracker/qubership-pipelines-cli-command-samples/blob/main/docs/development.md)
 
@@ -35,13 +37,3 @@ Auto-generated reference (via mkdocs) is available on [this repo's GitHub Pages]
   ```bash
   pip install qubership-pipelines-common-library
   ```
-
-## Backported version
-
-There also exists backported to python3.9 version of this library
-
-You can install it via `pip`:
-
-```bash
-pip install qubership-pipelines-common-library-py39
-```

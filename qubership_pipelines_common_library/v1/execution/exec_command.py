@@ -19,6 +19,7 @@ from abc import ABC, abstractmethod
 
 from qubership_pipelines_common_library.v1.execution.exec_context import ExecutionContext
 from qubership_pipelines_common_library.v1.utils.utils_context import create_execution_context
+from qubership_pipelines_common_library.v2.cli_output.cli_output import CliOutput
 from qubership_pipelines_common_library.v2.utils.crypto_utils import CryptoUtils
 
 
@@ -75,6 +76,7 @@ class ExecutionCommand:
             self._exit(False, ExecutionCommand.FAILURE_MSG)
         finally:
             self._log_border_line()
+            self._print_cli_output() # we allow failed commands to produce output
 
     def _log_command_class_name(self):
         self.context.logger.info("command_class_name = %s", type(self).__name__)
@@ -102,6 +104,9 @@ class ExecutionCommand:
     def _post_execute(self):
         for action in self._post_execute_actions:
             action.with_command(self).execute()
+
+    def _print_cli_output(self):
+        CliOutput.print_command_output(self)
 
     def _exit(self, success: bool, message: str):
         if success:
