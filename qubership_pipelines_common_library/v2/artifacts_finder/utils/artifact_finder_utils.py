@@ -167,7 +167,7 @@ class ArtifactFinderUtils:
 
     @staticmethod
     def create_artifact_finder_for_command(cmd: ExecutionCommand):
-        params = cmd.context.input_param_get("systems.artifact_finder")
+        params = cmd.context.input_param_get("systems.registry")
         provider = None
         if params:
             configured_providers = [name for name in ArtifactFinderUtils.PROVIDERS_CONFIG if name in params]

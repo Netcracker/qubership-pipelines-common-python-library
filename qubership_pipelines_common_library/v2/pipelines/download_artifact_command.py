@@ -10,23 +10,24 @@ from qubership_pipelines_common_library.v1.execution.exec_command import Executi
 from qubership_pipelines_common_library.v1.utils.utils_string import UtilsString
 
 
-class PreparePyzModule(ExecutionCommand):
+class DownloadArtifact(ExecutionCommand):
     """
     Downloads and unzips requested PYZ module to be used from Pipelines Declarative Executor (PDE)
 
     Supports `Artifact Finder` and `Direct Download` scenarios.
 
-    If "systems.artifact_finder" section is present - command will initialize Artifact Finder and use it to either
-    find and download artifact from registry (if "params.artifact_finder" data is specified), or to get artifact via "params.direct_url"
+    If "systems.registry" section is present - command will initialize Artifact Finder and use it to either
+    find and download artifact from registry (if "params.artifact_finder" data is specified with search params),
+    or to get artifact via "params.artifact_url"
 
-    Otherwise, during "Direct Download" command will use http session to get module from "params.direct_url"
+    Otherwise, during "Direct Download" command will use http session to get module from "params.artifact_url"
     (with optional authorization params from "systems.http" section)
 
     Input Parameters Structure (this structure is expected inside "input_params.params" block):
     ```
     {
-        "target_path": "/app/sample_cli",                                 # REQUIRED: Path where PYZ Module should be extracted
-        "direct_url": "https://github.com/...your_release_asset.pyz",     # OPTIONAL: Direct URL where PYZ Module is located
+        "target_path": "/app/sample_cli.pyz | /app/sample_cli",           # REQUIRED: Path where Artifact should be downloaded/extracted
+        "artifact_url": "https://github.com/...your_release_asset.pyz",   # OPTIONAL: Direct URL where artifact is stored
         "artifact_finder": {                                              # OPTIONAL: Artifact Info to look up via ArtifactFinder,
             "artifact_id": "sample_cli_module",                                       `artifact_id` and `version` are required here,
             "group_id": "org.qubership",                                              `extension` defaults to "pyz" if not specified
@@ -35,8 +36,10 @@ class PreparePyzModule(ExecutionCommand):
         },
         "timeout_seconds": 300,                                           # OPTIONAL: Maximum wait time for download in seconds for direct download
         "verify": true,                                                   # OPTIONAL: Sets up session's `verify` property (for both direct and artifact_finder flows)
-        "clear_target_path": true,                                        # OPTIONAL: Whether extraction path should be cleared first
-    }
+        "clear_target_path": true,                                        # OPTIONAL: Whether download/extraction path should be cleared first
+        "need_to_extract": true,                                          # OPTIONAL: Whether Artifact should be extracted to target_path (instead of just downloaded)
+        "source_type": "AUTO"                                             # OPTIONAL: Specifies artifact download type (Git/FTP/S3 will be supported in further releases).
+    }                                                                                 AUTO - derives type from other available params
     ```
 
     Systems Configuration (expected in "systems" block):
@@ -51,7 +54,7 @@ class PreparePyzModule(ExecutionCommand):
                 "Authorization": "Bearer TOKEN",
             },
         },
-        "artifact_finder": {                        # OPTIONAL: Auth settings for ArtifactFinder search/download,
+        "registry": {                        # OPTIONAL: Auth settings for ArtifactFinder search/download,
             "artifactory": {                                    only section required for your provider should be present
                 "registry_url": "artifactory_url",              Refer to ArtifactFinder docs and specific Cloud Providers for more information
                 "username": "user",
@@ -113,18 +116,20 @@ class PreparePyzModule(ExecutionCommand):
         if not self.context.validate(names):
             return False
 
-        self.direct_url = self.context.input_param_get("params.direct_url")
+        self.artifact_url = self.context.input_param_get("params.artifact_url")
         self.artifact_info = self.context.input_param_get("params.artifact_finder", {})
         self.target_path = Path(self.context.input_param_get("params.target_path"))
         self.timeout_seconds = max(0, int(self.context.input_param_get("params.timeout_seconds", self.WAIT_TIMEOUT)))
         self.verify = UtilsString.convert_to_bool(self.context.input_param_get("params.verify", True))
         self.clear_target_path = UtilsString.convert_to_bool(self.context.input_param_get("params.clear_target_path", True))
+        self.need_to_extract = UtilsString.convert_to_bool(self.context.input_param_get("params.need_to_extract", True))
+        self.source_type = self.context.input_param_get("params.source_type", "AUTO")
 
-        if self.context.input_param_get("systems.artifact_finder"):
+        if self.context.input_param_get("systems.registry"):
             from qubership_pipelines_common_library.v2.artifacts_finder.utils.artifact_finder_utils import ArtifactFinderUtils
             self.artifact_finder = ArtifactFinderUtils.create_artifact_finder_for_command(self)
-            if not self.direct_url and not self.artifact_info:
-                self.context.logger.error("Either 'direct_url' or 'artifact_finder' info is required for Artifact Finder scenario")
+            if not self.artifact_url and not self.artifact_info:
+                self.context.logger.error("Either 'artifact_url' or 'artifact_finder' info is required for Artifact Finder scenario")
                 return False
         else:
             self.artifact_finder = None
@@ -134,8 +139,8 @@ class PreparePyzModule(ExecutionCommand):
                 self.session.auth = HTTPBasicAuth(basic_auth.get("username"), basic_auth.get("password"))
             if headers_auth := self.context.input_param_get("systems.http.headers_auth"):
                 self.session.headers.update(headers_auth)
-            if not self.direct_url:
-                self.context.logger.error("'direct_url' is mandatory for direct-download scenario")
+            if not self.artifact_url:
+                self.context.logger.error("'artifact_url' is mandatory for direct-download scenario")
                 return False
         return True
 
@@ -147,16 +152,22 @@ class PreparePyzModule(ExecutionCommand):
         self.context.logger.info(f"Downloaded to temporary file: {downloaded_file_path} ({file_size} bytes)")
 
         self._extract_to_path(downloaded_file_path, self.target_path)
-        self.context.logger.info(f"Extracted to {self.target_path}")
+        self.context.logger.info(f"{'Extracted' if self.need_to_extract else 'Moved'} to {self.target_path}")
 
         self.context.output_param_set("params.target_path", str(self.target_path))
         self.context.output_param_set("params.file_size", file_size)
         self.context.output_params_save()
 
     def _prepare_target_path(self):
-        if self.clear_target_path and self.target_path.exists() and self.target_path.is_dir():
-            shutil.rmtree(self.target_path)
-        self.target_path.mkdir(parents=True, exist_ok=True)
+        if self.clear_target_path and self.target_path.exists():
+            if self.target_path.is_dir():
+                shutil.rmtree(self.target_path)
+            else:
+                self.target_path.unlink()
+        if self.need_to_extract:
+            self.target_path.mkdir(parents=True, exist_ok=True)
+        else:
+            self.target_path.parent.mkdir(parents=True, exist_ok=True)
 
     def _download_to_file(self) -> str:
         try:
@@ -173,7 +184,7 @@ class PreparePyzModule(ExecutionCommand):
                         raise Exception(f"Could not find artifacts using provided parameters (artifact_info={self.artifact_info})")
                     resource_url = urls[0]
                 else:
-                    resource_url = self.direct_url
+                    resource_url = self.artifact_url
 
                 self.context.logger.info(f"Downloading using Artifact Finder from Resource URL: {resource_url}")
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".zip") as tmp_file:
@@ -182,8 +193,8 @@ class PreparePyzModule(ExecutionCommand):
                     return tmp_path
 
             else:
-                self.context.logger.info(f"Downloading via HTTP from Direct URL: {self.direct_url}")
-                response = self.session.get(self.direct_url, stream=True, timeout=self.timeout_seconds)
+                self.context.logger.info(f"Downloading via HTTP from Direct URL: {self.artifact_url}")
+                response = self.session.get(self.artifact_url, stream=True, timeout=self.timeout_seconds)
                 response.raise_for_status()
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".zip") as tmp_file:
                     tmp_path = tmp_file.name
@@ -197,9 +208,13 @@ class PreparePyzModule(ExecutionCommand):
 
     def _extract_to_path(self, source_path, target_path):
         try:
-            with zipfile.ZipFile(source_path, 'r') as zip_ref:
-                zip_ref.extractall(target_path)
+            if self.need_to_extract:
+                with zipfile.ZipFile(source_path, 'r') as zip_ref:
+                    zip_ref.extractall(target_path)
+                os.unlink(source_path)
+            else:
+                shutil.move(str(source_path), str(target_path))
         except Exception as e:
-            os.unlink(source_path)
-            self._exit(False, f"Extraction failed: {e}")
-        os.unlink(source_path)
+            if os.path.exists(source_path):
+                os.unlink(source_path)
+            self._exit(False, f"Processing failed: {e}")
