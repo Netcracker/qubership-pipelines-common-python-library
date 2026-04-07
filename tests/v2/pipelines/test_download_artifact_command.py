@@ -3,15 +3,15 @@ import pytest
 
 from pathlib import Path
 from unittest.mock import patch, MagicMock
-from qubership_pipelines_common_library.v2.pipelines.prepare_pyz_module_command import PreparePyzModule
+from qubership_pipelines_common_library.v2.pipelines.download_artifact_command import DownloadArtifact
 
 
-class TestPreparePyzModule:
+class TestDownloadArtifact:
 
     REQUIRED_INPUT_PARAMS = {
         'params': {
             'target_path': 'module_cli',
-            'direct_url': 'https://qubership.org/test-target-url',
+            'artifact_url': 'https://qubership.org/test-target-url',
             'artifact_finder': {
                 'artifact_id': 'light_cli',
                 'version': '1.0.0-RELEASE'
@@ -31,7 +31,7 @@ class TestPreparePyzModule:
 
     def test_prepare_pyz_fails_without_mandatory_params(self, caplog, tmp_path):
         with pytest.raises(SystemExit) as exit_result:
-            cmd = PreparePyzModule(folder_path=str(tmp_path))
+            cmd = DownloadArtifact(folder_path=str(tmp_path))
             cmd.run()
 
         assert exit_result.value.code == 1
@@ -44,11 +44,11 @@ class TestPreparePyzModule:
         input_params['systems'] = {'http': {'headers_auth': {'Authorization': 'Bearer SOME_TOKEN'}}}
 
         get_response = MagicMock()
-        get_response.iter_content.return_value = [TestPreparePyzModule.create_sample_zip()]
+        get_response.iter_content.return_value = [TestDownloadArtifact.create_sample_zip()]
         session_get.return_value = get_response
 
         with pytest.raises(SystemExit) as exit_result:
-            cmd = PreparePyzModule(folder_path=str(tmp_path), input_params=input_params)
+            cmd = DownloadArtifact(folder_path=str(tmp_path), input_params=input_params)
             cmd.run()
 
         assert exit_result.value.code == 0
@@ -60,15 +60,15 @@ class TestPreparePyzModule:
     def test_prepare_pyz_find_artifact(self, nexus_search, session_get, tmp_path):
         input_params = copy.deepcopy(self.REQUIRED_INPUT_PARAMS)
         input_params['params']['target_path'] = Path(tmp_path).joinpath("module_cli").as_posix()
-        input_params['systems'] = {"artifact_finder":{"nexus": {"registry_url": "some_nexus_url"}}}
+        input_params['systems'] = {"registry":{"nexus": {"registry_url": "some_nexus_url"}}}
 
         nexus_search.return_value = ["test_resource_url"]
         get_response = MagicMock()
-        get_response.content = TestPreparePyzModule.create_sample_zip()
+        get_response.content = TestDownloadArtifact.create_sample_zip()
         session_get.return_value = get_response
 
         with pytest.raises(SystemExit) as exit_result:
-            cmd = PreparePyzModule(folder_path=str(tmp_path), input_params=input_params)
+            cmd = DownloadArtifact(folder_path=str(tmp_path), input_params=input_params)
             cmd.run()
 
         assert exit_result.value.code == 0

@@ -28,7 +28,7 @@
     options:
         inherited_members: []
 ---
-::: qubership_pipelines_common_library.v2.pipelines.prepare_pyz_module_command.PreparePyzModule
+::: qubership_pipelines_common_library.v2.pipelines.download_artifact_command.DownloadArtifact
     options:
         inherited_members: []
 ---
