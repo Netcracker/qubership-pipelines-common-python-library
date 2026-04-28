@@ -1,4 +1,5 @@
 import json
+import os
 from enum import StrEnum
 from pathlib import Path
 
@@ -57,6 +58,17 @@ class GcpCredentialsProvider(CloudCredentialsProvider):
         self.subject_token_type = subject_token_type
         self.validate_mandatory_attrs(["oidc_credential_source", "audience"])
         self._auth_type = self.AuthType.OIDC_CREDS
+        return self
+
+    def with_env_vars(self):
+        self.scopes = self.DEFAULT_SCOPES
+        gcp_creds_file_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "")
+        if not os.path.isfile(gcp_creds_file_path):
+            raise FileNotFoundError(f"GCP Application Credentials file not found at '{gcp_creds_file_path}' (from 'GOOGLE_APPLICATION_CREDENTIALS' var)")
+        with open(gcp_creds_file_path, 'r') as key_file:
+            self.service_account_key_content = key_file.read()
+        self.validate_mandatory_attrs(["service_account_key_content"])
+        self._auth_type = self.AuthType.SA_KEY
         return self
 
     def get_credentials(self) -> Credentials:

@@ -1,3 +1,5 @@
+import configparser
+import os
 import boto3
 
 from enum import StrEnum
@@ -50,6 +52,26 @@ class AwsCredentialsProvider(CloudCredentialsProvider):
         self.role_session_name = role_session_name
         self.validate_mandatory_attrs(["access_key", "secret_key", "region_name", "role_arn", "role_session_name"])
         self._auth_type = self.AuthType.ASSUME_ROLE
+        return self
+
+    def with_profile(self, profile_name: str = None, region_name: str = None):
+        profile_name = profile_name or os.getenv("AWS_PROFILE", "default")
+
+        aws_creds_file = os.path.expanduser("~/.aws/credentials")
+        if not os.path.isfile(aws_creds_file):
+            raise FileNotFoundError(f"AWS credentials file not found at {aws_creds_file}")
+        config = configparser.ConfigParser()
+        config.read(aws_creds_file)
+        if profile_name not in config:
+            raise KeyError(f"Profile '{profile_name}' not found in {aws_creds_file}")
+
+        profile_data = config[profile_name]
+        self.access_key = profile_data.get("aws_access_key_id")
+        self.secret_key = profile_data.get("aws_secret_access_key")
+        self.session_token = None
+        self.region_name = region_name or profile_data.get("region") or os.getenv("AWS_DEFAULT_REGION")
+        self.validate_mandatory_attrs(["access_key", "secret_key", "region_name"])
+        self._auth_type = self.AuthType.DIRECT
         return self
 
     def get_credentials(self) -> Credentials:
