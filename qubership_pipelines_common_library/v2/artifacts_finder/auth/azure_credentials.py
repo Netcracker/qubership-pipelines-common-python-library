@@ -1,3 +1,4 @@
+import os
 import requests
 
 from enum import StrEnum
@@ -44,6 +45,21 @@ class AzureCredentialsProvider(CloudCredentialsProvider):
         self.tenant_id = tenant_id
         self._auth_data = custom_auth_data
         self.validate_mandatory_attrs(["tenant_id", "_auth_data"])
+        self._auth_type = self.AuthType.OAUTH2
+        return self
+
+    def with_env_vars(self):
+        self.tenant_id = os.getenv("AZURE_TENANT_ID")
+        self.client_id = os.getenv("AZURE_CLIENT_ID")
+        self.client_secret = os.getenv("AZURE_CLIENT_SECRET")
+        self.target_resource = os.getenv("AZURE_TARGET_RESOURCE", "https://vault.azure.net")
+        self.validate_mandatory_attrs(["tenant_id", "client_id", "client_secret", "target_resource"])
+        self._auth_data = {
+            "grant_type": "client_credentials",
+            "client_id": self.client_id,
+            "client_secret": self.client_secret,
+            "scope": f"{self.target_resource}/.default"
+        }
         self._auth_type = self.AuthType.OAUTH2
         return self
 
