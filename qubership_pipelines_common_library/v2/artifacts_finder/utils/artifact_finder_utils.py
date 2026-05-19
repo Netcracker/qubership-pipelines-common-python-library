@@ -222,6 +222,14 @@ class ArtifactFinderUtils:
         return ".".join(components[:-3])
 
     @staticmethod
+    def parse_snapshot_timestamp_version(version_str: str) -> tuple | None:
+        import re
+        match = re.match(r'^(.+)-(\d{8}\.\d{6}-(\d+))$', version_str)
+        if match:
+            return match.group(1), match.group(2), int(match.group(3))
+        return None
+
+    @staticmethod
     def extract_metadata_snapshot_timestamp(metadata_content: str) -> str:
         import xml.etree.ElementTree as ET
         metadata_xml = ET.fromstring(metadata_content)

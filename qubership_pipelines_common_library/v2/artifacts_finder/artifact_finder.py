@@ -12,7 +12,7 @@ class ArtifactFinder:
 
     Supports different repository providers: Artifactory, Nexus, AWS, GCP, Azure
 
-    Providers might slightly differ in functionality, refer to the Provider docs (e.g. not all providers support snapshot resolving)
+    Providers might slightly differ in functionality, refer to the Provider docs
 
     Provides different auth methods for Cloud Providers, implementing `CloudCredentialsProvider` interface
 

@@ -6,6 +6,7 @@ from requests.auth import HTTPBasicAuth
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact import Artifact
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider
 from qubership_pipelines_common_library.v2.artifacts_finder.model.credentials import Credentials
+from qubership_pipelines_common_library.v2.artifacts_finder.utils.artifact_finder_utils import ArtifactFinderUtils
 
 
 class AzureArtifactsProvider(ArtifactProvider):
@@ -15,7 +16,7 @@ class AzureArtifactsProvider(ArtifactProvider):
         Initializes this client to work with **Azure Artifacts** for generic artifacts.
         Requires `Credentials` provided by `AzureCredentialsProvider`.
 
-        This provider currently doesn't support searching for `-SNAPSHOT` versions and/or resolving them
+        This provider supports resolving `-SNAPSHOT` artifacts into latest version (in maven-format feeds)
         """
         super().__init__(**kwargs)
         self._credentials = credentials
@@ -32,11 +33,12 @@ class AzureArtifactsProvider(ArtifactProvider):
         if timestamp_version_match := re.match(self.TIMESTAMP_VERSION_PATTERN, artifact.version):
             acceptable_versions.append(timestamp_version_match.group(1) + "SNAPSHOT")
 
-        # Try to find package with name ~ "artifact_id"
+        # Search all packages with matching artifact_id
         feeds_search_url = f"https://feeds.dev.azure.com/{self.organization}/{self.project}/_apis/packaging/feeds/{self.feed}/packages"
+        name_query = f"{artifact.group_id}:{artifact.artifact_id}" if artifact.group_id else artifact.artifact_id
         feed_search_params = {
-            "includeAllVersions": "true",
-            "packageNameQuery": artifact.artifact_id,
+            "includeAllVersions": "false",
+            "packageNameQuery": name_query,
             "protocolType": "maven",
             "api-version": "7.1",
         }
@@ -47,54 +49,81 @@ class AzureArtifactsProvider(ArtifactProvider):
             raise Exception(f"Could not find '{artifact.artifact_id}' - search request returned {feeds_response.status_code}!")
 
         logging.debug(f"Feeds search response: {feeds_response_json}")
-        if feeds_response_json.get("count") > 1:
-            logging.warning("Found more than 1 feeds. Use the first one.")
-        elif feeds_response_json.get("count") == 0:
-            logging.warning("No feeds were found.")
+        packages = feeds_response_json.get("value", [])
+        if not packages:
+            logging.warning("No packages were found.")
             return []
-        feed = feeds_response_json.get("value")[0]
-        feed_links = feed.get("_links", {})
+        if len(packages) > 1:
+            logging.debug(f"Found multiple packages (groups) for '{artifact.artifact_id}', processing all")
 
-        # Get feed versions
-        feed_versions_url = feed_links.get("versions", {}).get("href", "")
-        feed_versions_response = self._session.get(url=feed_versions_url, timeout=self.timeout)
-        feed_versions_response_json = feed_versions_response.json()
-        if feed_versions_response.status_code != 200:
-            logging.error(f"Feed versions error ({feed_versions_response.status_code}) response: {feed_versions_response_json}")
-            raise Exception(f"Could not find feed versions, search request returned {feed_versions_response.status_code}!")
-        logging.debug(f"Feed versions response: {feed_versions_response_json}")
-        feed_versions = feed_versions_response_json.get("value")
+        result_urls = []
+        for feed_pkg in packages:
+            pkg_links = feed_pkg.get("_links", {})
+            pkg_versions_url = pkg_links.get("versions", {}).get("href", "")
+            if not pkg_versions_url:
+                continue
 
-        # Filter by acceptable versions
-        logging.debug(f"Filtering by acceptable versions: '{acceptable_versions}'")
-        feed_version = [f for f in feed_versions if (f.get('protocolMetadata').get('data').get('version') in acceptable_versions)]
-        if len(feed_version) == 0:
-            logging.warning("All feed versions filtered.")
-            return []
-        filtered_feed_version = feed_version[0]
+            pkg_versions_response = self._session.get(url=pkg_versions_url, params={"isDeleted": "false"}, timeout=self.timeout)
+            if pkg_versions_response.status_code != 200:
+                logging.warning(f"Skipping package, versions request returned {pkg_versions_response.status_code}")
+                continue
 
-        # Search for target file
-        files = [f for f in filtered_feed_version.get("files") if f.get('name').startswith(f"{artifact.artifact_id}-{artifact.version}") and f.get('name').endswith(artifact.extension)]
-        logging.debug(f"Files found: {files}")
-        if len(files) == 0:
-            logging.warning("All files filtered.")
-            return []
-        target_file = files[0]
+            feed_versions = pkg_versions_response.json().get("value", [])
+            if not feed_versions:
+                continue
 
-        # Build download url
-        feed_id = feed_links.get("feed").get("href").split("/")[-1] # take id from link to feed
-        feed_version = filtered_feed_version.get("version")
-        group_id = filtered_feed_version.get('protocolMetadata').get('data').get("groupId")
-        artifact_id = filtered_feed_version.get('protocolMetadata').get('data').get("artifactId")
-        target_file_name = target_file.get("name")
+            # Filter by acceptable versions (stores snapshot versions literally: "5.0.0-SNAPSHOT")
+            feed_version = [
+                f for f in feed_versions
+                if f.get("protocolMetadata", {}).get("data", {}).get("version") in acceptable_versions
+            ]
+            if not feed_version:
+                continue
+            filtered_feed_version = feed_version[0]
+            feed_id = pkg_links.get("feed").get("href").split("/")[-1]
+            feed_version = filtered_feed_version.get("version")
+            group_id = filtered_feed_version.get("protocolMetadata", {}).get("data", {}).get("groupId")
+            artifact_id = filtered_feed_version.get("protocolMetadata", {}).get("data", {}).get("artifactId")
 
-        download_url = (
-            f"https://pkgs.dev.azure.com/{self.organization}/{self.project}/_apis/packaging/feeds/{feed_id}/maven/"
-            f"{group_id}/{artifact_id}/{feed_version}/{target_file_name}/content"
-            f"?api-version=7.1-preview.1"
-        )
-        logging.info(f"Azure search resulting url: {download_url}")
-        return [download_url]
+            all_version_files = filtered_feed_version.get("files") or []
+            if artifact.is_snapshot():
+                base_version = artifact.version.removesuffix("-SNAPSHOT")
+                candidate_files = []
+                for f in all_version_files:
+                    name = f.get("name", "")
+                    if not name.startswith(f"{artifact.artifact_id}-") or not name.endswith(f".{artifact.extension}"):
+                        continue
+                    version_part = name.removeprefix(f"{artifact.artifact_id}-").removesuffix(f".{artifact.extension}")
+                    parsed = ArtifactFinderUtils.parse_snapshot_timestamp_version(version_part)
+                    if parsed and parsed[0] == base_version:
+                        candidate_files.append((parsed[1], parsed[2], f))
+                if not candidate_files:
+                    logging.warning("No snapshot files found.")
+                    continue
+                candidate_files.sort(key=lambda x: (x[0], x[1]), reverse=True)
+                target_file = candidate_files[0][2]
+                logging.debug(f"Resolved SNAPSHOT version '{artifact.version}' -> '{target_file.get('name')}' (group_id: {group_id})")
+            else:
+                target_file = None
+                for f in all_version_files:
+                    name = f.get("name", "")
+                    if name.startswith(f"{artifact.artifact_id}-") and name.endswith(f".{artifact.extension}"):
+                        target_file = f
+                        break
+                if not target_file:
+                    continue
+
+            # Build download url
+            target_file_name = target_file.get("name")
+
+            download_url = (
+                f"https://pkgs.dev.azure.com/{self.organization}/{self.project}/_apis/packaging/feeds/{feed_id}/maven/"
+                f"{group_id}/{artifact_id}/{feed_version}/{target_file_name}/content"
+                f"?api-version=7.1-preview.1"
+            )
+            result_urls.append(download_url)
+
+        return result_urls
 
     def get_provider_name(self) -> str:
         return "azure_artifacts"
