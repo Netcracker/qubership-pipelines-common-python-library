@@ -1,0 +1,7 @@
+kind: "AtlasModuleContextDescriptor"
+apiVersion: "v1"
+paths:
+  input:
+    params: "./tests/cli/sample_data/params.yaml"
+  output:
+    params: "./tests/cli/sample_data/result.yaml"

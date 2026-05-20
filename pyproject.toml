@@ -32,6 +32,7 @@ pytest = "^6.0.0"
 [tool.pytest.ini_options]
 markers = [
     "integration: tests requiring external services (deselect with '-m \"not integration\"')",
+    "cli: tests that build and run a sample CLI .pyz archive",
 ]
 
 [build-system]
