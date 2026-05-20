@@ -67,3 +67,19 @@ def test_run_via_inline_params_merged(sample_cli_pyz):
     parsed = yaml.safe_load(result.stdout)
     assert parsed["params"]["result"] == 20
     assert parsed["kind"] == "AtlasModuleParamsSecure" # due to merge
+
+
+@pytest.mark.cli
+def test_run_via_inline_params_with_folder_path(sample_cli_pyz):
+    result = subprocess.run(
+        ["python", sample_cli_pyz, "calc",
+         "-p", "params.param_1=9",
+         "-p", "params.param_2=10",
+         "--folder_path=./test_output"],
+        capture_output=True, text=True
+    )
+    assert result.returncode == 0
+    output_path = os.path.join("test_output", "output", "params.yaml")
+    with open(output_path) as f:
+        parsed = yaml.safe_load(f)
+    assert parsed["params"]["result"] == 19
