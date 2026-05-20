@@ -23,7 +23,7 @@ jobs:
           MINIO_ROOT_PASSWORD: ${{ env.MINIO_PASSWORD }}
         options: --health-cmd "curl -I http://localhost:9000/minio/health/live"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup MiniO
         run: ./.github/scripts/setup_minio.sh
@@ -34,7 +34,7 @@ jobs:
           start-args: "--static-ip 192.168.200.200"
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 

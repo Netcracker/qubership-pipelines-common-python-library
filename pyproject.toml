@@ -12,9 +12,10 @@ python = "^3.11"
 pyyaml = "^6.0.2"
 click = "^8.1.7"
 requests = "^2.32.3"
-urllib3 = "^2.2.3"
+urllib3 = "^2.7.0"
+idna = "^3.15"
 python-jenkins = "^1.8.2"
-GitPython = "^3.1.43"
+GitPython = "^3.1.50"
 http-exceptions = "^0.2.10"
 python-gitlab = ">=4.13.0,<6.0.0"
 minio = "^7.2.12"
@@ -27,7 +28,7 @@ google-cloud-secret-manager = "^2.26.0"
 hvac = "^2.4.0"
 
 [tool.poetry.group.test.dependencies]
-pytest = "^6.0.0"
+pytest = "^9.0.3"
 
 [tool.pytest.ini_options]
 markers = [
