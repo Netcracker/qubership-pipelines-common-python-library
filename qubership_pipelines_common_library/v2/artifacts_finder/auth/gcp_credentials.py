@@ -60,13 +60,19 @@ class GcpCredentialsProvider(CloudCredentialsProvider):
         self._auth_type = self.AuthType.OIDC_CREDS
         return self
 
-    def with_env_vars(self):
+    def with_env_vars(self, prefix: str = ""):
         self.scopes = self.DEFAULT_SCOPES
-        gcp_creds_file_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "")
-        if not os.path.isfile(gcp_creds_file_path):
-            raise FileNotFoundError(f"GCP Application Credentials file not found at '{gcp_creds_file_path}' (from 'GOOGLE_APPLICATION_CREDENTIALS' var)")
-        with open(gcp_creds_file_path, 'r') as key_file:
-            self.service_account_key_content = key_file.read()
+        gcp_creds_file_content = os.getenv(f"{prefix}GOOGLE_APPLICATION_CREDENTIALS_CONTENT", "")
+        if gcp_creds_file_content:
+            self.service_account_key_content = gcp_creds_file_content
+        else:
+            gcp_creds_file_path = os.getenv(f"{prefix}GOOGLE_APPLICATION_CREDENTIALS", "")
+            if not os.path.isfile(gcp_creds_file_path):
+                raise FileNotFoundError(f"GCP Application Credentials file not found at '{gcp_creds_file_path}'"
+                                        f" (from '{prefix}GOOGLE_APPLICATION_CREDENTIALS' var)"
+                                        f", or at '{prefix}GOOGLE_APPLICATION_CREDENTIALS_CONTENT' var")
+            with open(gcp_creds_file_path, 'r') as key_file:
+                self.service_account_key_content = key_file.read()
         self.validate_mandatory_attrs(["service_account_key_content"])
         self._auth_type = self.AuthType.SA_KEY
         return self

@@ -11,7 +11,7 @@ from qubership_pipelines_common_library.v2.secret_manager.model.secret_provider 
 
 class HashicorpVaultProvider(SecretProvider):
 
-    def __init__(self, url: str = None, verify: bool = True, credentials: Credentials = None,
+    def __init__(self, url: str = None, namespace: str = None, verify: bool = True, credentials: Credentials = None,
                  vault_client: hvac.Client = None, **kwargs):
         """
         Initializes this client to work with **Hashicorp Vault**.
@@ -22,14 +22,15 @@ class HashicorpVaultProvider(SecretProvider):
 
         if not vault_client:
             vault_addr = url or os.environ.get("VAULT_ADDR")
+            vault_namespace = namespace or os.environ.get("VAULT_NAMESPACE")
             if not vault_addr:
                 raise Exception("Vault Address must be provided (via 'url' argument or VAULT_ADDR env variable)")
             if not credentials:
                 raise Exception("Credentials object is mandatory")
             if credentials.token:
-                self._vault_client = hvac.Client(url=vault_addr, token=credentials.token, verify=verify)
+                self._vault_client = hvac.Client(url=vault_addr, token=credentials.token, verify=verify, namespace=vault_namespace)
             elif credentials.username:
-                self._vault_client = hvac.Client(url=vault_addr, username=credentials.username, password=credentials.password, verify=verify)
+                self._vault_client = hvac.Client(url=vault_addr, username=credentials.username, password=credentials.password, verify=verify, namespace=vault_namespace)
             else:
                 raise Exception("Credentials object did not have any valid configurations")
         else:
@@ -40,7 +41,7 @@ class HashicorpVaultProvider(SecretProvider):
 
     def read_secret(self, path: str) -> str | None:
         secret_path_with_mount, frag = self.parse_vals_path(path)
-        if not frag: # it's an undocumented behaviour in vals for vault, we will keep it their way
+        if not frag: # it's an undocumented behaviour in vals for vault/openbao, we will keep it their way
             secret_path_with_mount, frag = secret_path_with_mount.rstrip("/").rsplit("/", 1)
 
         kv_version, secret_path, mount_point = self._detect_kv_version_and_mount_point(secret_path_with_mount)
@@ -57,7 +58,7 @@ class HashicorpVaultProvider(SecretProvider):
             raise ValueError("Fragment (#/key) in path is not allowed when creating a secret")
 
         if not isinstance(data, dict):
-            raise TypeError("vault's 'create_secret' only accepts a dict; plain string values are not supported")
+            raise TypeError(f"{self.get_provider_name()}'s 'create_secret' only accepts a dict; plain string values are not supported")
 
         kv_version, secret_path, mount_point = self._detect_kv_version_and_mount_point(secret_path_with_mount)
 
@@ -149,7 +150,7 @@ class HashicorpVaultProvider(SecretProvider):
                 if options and options.get("version") == "2":
                     version = 2
         except Exception:
-            raise Exception(f"Unable to detect Vault mount point and version for {path}!")
+            raise Exception(f"Unable to detect mount point and version for {path}!")
 
         self.mount_versions[path] = (version, secret_path, mount_point)
         return version, secret_path, mount_point

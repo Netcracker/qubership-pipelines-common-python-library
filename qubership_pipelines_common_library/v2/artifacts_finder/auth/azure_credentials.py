@@ -48,11 +48,11 @@ class AzureCredentialsProvider(CloudCredentialsProvider):
         self._auth_type = self.AuthType.OAUTH2
         return self
 
-    def with_env_vars(self):
-        self.tenant_id = os.getenv("AZURE_TENANT_ID")
-        self.client_id = os.getenv("AZURE_CLIENT_ID")
-        self.client_secret = os.getenv("AZURE_CLIENT_SECRET")
-        self.target_resource = os.getenv("AZURE_TARGET_RESOURCE", "https://vault.azure.net")
+    def with_env_vars(self, prefix: str = ""):
+        self.tenant_id = os.getenv(f"{prefix}AZURE_TENANT_ID")
+        self.client_id = os.getenv(f"{prefix}AZURE_CLIENT_ID")
+        self.client_secret = os.getenv(f"{prefix}AZURE_CLIENT_SECRET")
+        self.target_resource = os.getenv(f"{prefix}AZURE_TARGET_RESOURCE", "https://vault.azure.net")
         self.validate_mandatory_attrs(["tenant_id", "client_id", "client_secret", "target_resource"])
         self._auth_data = {
             "grant_type": "client_credentials",

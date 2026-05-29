@@ -7,6 +7,7 @@ from qubership_pipelines_common_library.v2.artifacts_finder.model.credentials im
 from qubership_pipelines_common_library.v2.secret_manager.model.secret_provider import SecretProvider
 from qubership_pipelines_common_library.v2.secret_manager.providers.hashicorp_vault import HashicorpVaultProvider
 from qubership_pipelines_common_library.v2.secret_manager.secret_manager import SecretManager
+from qubership_pipelines_common_library.v2.secret_manager.providers.multi_store_provider import MultiStoreProvider
 
 
 class MockSecretProvider(SecretProvider):
@@ -308,3 +309,74 @@ class TestHashicorpVaultCredentialsProvider:
     def test_get_credentials_without_init_raises(self):
         with pytest.raises(ValueError, match="Need to initialize"):
             HashicorpVaultCredentialsProvider().get_credentials()
+
+
+class TestMultiStoreProvider:
+
+    def test_create_secret_not_implemented(self):
+        with pytest.raises(NotImplementedError, match="MultiStoreProvider can only read secrets!"):
+            MultiStoreProvider().create_secret("path", {})
+
+    def test_read_secret_parses_uri_and_delegates(self):
+        p = MultiStoreProvider()
+        p._parse_uri = MagicMock(return_value=("vault", None))
+        inner = MagicMock()
+        inner.read_secret.return_value = "secret-value"
+        p._build_provider = MagicMock(return_value=inner)
+
+        result = p.read_secret("ref+vault://path/to/secret")
+
+        assert result == "secret-value"
+        p._parse_uri.assert_called_once_with("ref+vault://path/to/secret")
+        p._build_provider.assert_called_once_with("vault", None)
+        inner.read_secret.assert_called_once_with("ref+vault://path/to/secret")
+
+    def test_read_secret_caches_provider_by_key(self):
+        p = MultiStoreProvider()
+        p._parse_uri = MagicMock(return_value=("vault", "store1"))
+        inner = MagicMock()
+        inner.read_secret.return_value = "val"
+        p._build_provider = MagicMock(return_value=inner)
+
+        p.read_secret("ref+vault://path1?secret_store_id=store1")
+        p.read_secret("ref+vault://path2?secret_store_id=store1")
+
+        p._build_provider.assert_called_once_with("vault", "store1")
+
+    def test_read_secret_different_store_ids_new_provider(self):
+        p = MultiStoreProvider()
+        inner1 = MagicMock()
+        inner1.read_secret.return_value = "val1"
+        inner2 = MagicMock()
+        inner2.read_secret.return_value = "val2"
+        p._build_provider = MagicMock(side_effect=[inner1, inner2])
+
+        assert p.read_secret("ref+vault://path1?secret_store_id=store1") == "val1"
+        assert p.read_secret("ref+vault://path2?secret_store_id=store2") == "val2"
+        assert p._build_provider.call_count == 2
+
+
+class TestParseUri:
+
+    def test_invalid_scheme_no_plus_raises(self):
+        p = MultiStoreProvider()
+        with pytest.raises(ValueError, match="Invalid VALS URI scheme"):
+            p._parse_uri("novault://path")
+
+    def test_unknown_provider_type_raises(self):
+        p = MultiStoreProvider()
+        with pytest.raises(ValueError, match="Unknown provider type"):
+            p._parse_uri("ref+unknown://path")
+
+    def test_without_store_id(self):
+        p = MultiStoreProvider()
+        assert p._parse_uri("ref+vault://secret/path") == ("vault", None)
+
+    def test_with_store_id(self):
+        p = MultiStoreProvider()
+        assert p._parse_uri("ref+vault://path?secret_store_id=myid") == ("vault", "myid")
+
+    def test_with_multiple_query_params(self):
+        p = MultiStoreProvider()
+        result = p._parse_uri("ref+awssecrets://path?foo=bar&secret_store_id=s1&baz=qux")
+        assert result == ("awssecrets", "s1")
