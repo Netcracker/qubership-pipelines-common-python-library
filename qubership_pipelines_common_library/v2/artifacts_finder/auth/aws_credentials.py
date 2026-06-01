@@ -54,6 +54,15 @@ class AwsCredentialsProvider(CloudCredentialsProvider):
         self._auth_type = self.AuthType.ASSUME_ROLE
         return self
 
+    def with_env_vars(self, prefix: str = ""):
+        self.access_key = os.getenv(f"{prefix}AWS_ACCESS_KEY_ID")
+        self.secret_key = os.getenv(f"{prefix}AWS_SECRET_ACCESS_KEY")
+        self.region_name = os.getenv(f"{prefix}AWS_DEFAULT_REGION")
+        self.session_token = None
+        self.validate_mandatory_attrs(["access_key", "secret_key", "region_name"])
+        self._auth_type = self.AuthType.DIRECT
+        return self
+
     def with_profile(self, profile_name: str = None, region_name: str = None):
         profile_name = profile_name or os.getenv("AWS_PROFILE", "default")
 

@@ -7,7 +7,7 @@ from qubership_pipelines_common_library.v2.secret_manager.model.secret_provider 
 class SecretManager:
     """
     Performs CRUD operations on secrets across different secret providers.
-    Supports providers: Vault, AWS, GCP, Azure.
+    Supports providers: Vault, AWS, GCP, Azure, OpenBao.
 
     **Initialization example** ::
 
@@ -35,6 +35,14 @@ class SecretManager:
     - ``delete_secret("myapp/config#/db/host")`` removes the specified key from the secret.
 
     Without a fragment, the whole secret is returned or operated on as a single unit.
+
+    **Smart MultiStore Provider**
+
+    You can use special `MultiStoreProvider` to resolve secrets without explicitly providing credentials/configuring secret stores.
+    It will try to configure requested providers internally using provider type specified in Vals-like secret path, and using system's environment variables.
+    Initialization example::
+
+        SecretManager(secret_provider=MultiStoreProvider())
 
     **Concurrency / thread-safety note**
 

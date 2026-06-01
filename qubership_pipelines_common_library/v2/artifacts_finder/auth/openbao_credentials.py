@@ -5,7 +5,7 @@ from qubership_pipelines_common_library.v2.artifacts_finder.model.credentials_pr
 from qubership_pipelines_common_library.v2.utils.env_var_utils import EnvVarUtils
 
 
-class HashicorpVaultCredentialsProvider(CloudCredentialsProvider):
+class OpenBaoCredentialsProvider(CloudCredentialsProvider):
 
     token: str = None
     username: str = None
@@ -30,15 +30,15 @@ class HashicorpVaultCredentialsProvider(CloudCredentialsProvider):
         return self
 
     def with_env_vars(self, prefix: str = ""):
-        if token := os.getenv(f"{prefix}VAULT_TOKEN"):
+        if token := os.getenv(f"{prefix}BAO_TOKEN"):
             self.token = token
             self._auth_type = self.AuthType.TOKEN
-        elif username := os.getenv(f"{prefix}VAULT_USERNAME"):
+        elif username := os.getenv(f"{prefix}BAO_USERNAME"):
             self.username = username
-            self.password = EnvVarUtils.get_from_env_or_file(f"{prefix}VAULT_PASSWORD")
+            self.password = EnvVarUtils.get_from_env_or_file(f"{prefix}BAO_PASSWORD")
             self._auth_type = self.AuthType.USERPASS
         else:
-            raise ValueError(f"Could not find required environment variables ({prefix}VAULT_TOKEN or {prefix}VAULT_USERNAME)")
+            raise ValueError(f"Could not find required environment variables ({prefix}BAO_TOKEN or {prefix}BAO_USERNAME)")
         return self
 
     def get_credentials(self) -> Credentials:
