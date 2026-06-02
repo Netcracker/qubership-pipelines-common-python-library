@@ -12,7 +12,12 @@ class SopsClient:
 
     def __init__(self, sops_artifact_configs_folder_path: Path):
         self.sops_artifact_configs_folder_path = sops_artifact_configs_folder_path
-        self.sops_executable = Path(os.environ.get("SOPS_EXECUTABLE", "/usr/local/bin/sops"))
+        sops_from_env = os.environ.get("SOPS_EXECUTABLE")
+        if sops_from_env:
+            self.sops_executable = Path(sops_from_env)
+        else:
+            sops_on_path = shutil.which("sops")
+            self.sops_executable = Path(sops_on_path) if sops_on_path else Path("/usr/local/bin/sops")
         self.logger = logging.getLogger()
 
     def encrypt_content_by_path(
@@ -76,6 +81,10 @@ class SopsClient:
             return ""
         self.logger.debug(f"Content {source_file_path_to_decrypt} was decrypted by sops")
         return sops_decrypt_result.stdout
+
+    @staticmethod
+    def is_encrypted(yaml_dict: dict) -> bool:
+        return yaml_dict.get('sops', {}).get('age') is not None
 
     def _get_prepared_sops_config_path(self, age_public_key) -> Path:
         """

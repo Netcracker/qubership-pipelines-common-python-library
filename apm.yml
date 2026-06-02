@@ -1,0 +1,7 @@
+name: qubership-pipelines-common-python-library
+version: 1.0.0
+description: APM project for qubership-pipelines-common-python-library
+
+dependencies:
+  apm: []
+  mcp: []

@@ -68,19 +68,18 @@ class SecretManager:
         - Without a fragment, the raw secret payload is returned.
         """
         logging.debug(f"Reading secret '{path}' in '{self.provider.get_provider_name()}'...")
-        secret = None
-        try:
-            secret = self.provider.read_secret(path=path)
-        except Exception as e:
-            logging.error(f"Error reading secret from provider: [{e}]")
-
+        secret = self.provider.read_secret(path=path)
         if secret is None:
             if fail_on_missing:
                 raise Exception(f"No secret found for path {path}")
-            else:
-                logging.warning(f"No secret found for path {path} (returning default value)")
-                return default_value
+            logging.warning(f"No secret found for path {path} (returning default value)")
+            return default_value
         return secret
+
+    def secret_exists(self, path: str) -> bool:
+        """Check whether a secret exists at the given path. Implementation might differ in providers, but generally - by attempting to read its value."""
+        logging.debug(f"Checking existence of secret '{path}' in '{self.provider.get_provider_name()}'...")
+        return self.provider.secret_exists(path)
 
     def create_secret(self, path: str, data: Any) -> Any:
         """

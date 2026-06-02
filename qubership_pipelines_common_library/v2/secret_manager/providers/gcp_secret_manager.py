@@ -122,6 +122,10 @@ class GcpSecretManagerProvider(SecretProvider):
     def get_provider_name(self) -> str:
         return "gcpsecrets"
 
+    def secret_exists(self, path: str) -> bool:
+        secret_path, _ = self.parse_vals_path(path)
+        return self._secret_exists(secret_path)
+
     def _secret_exists(self, secret_path: str) -> bool:
         project, secret_id = self._get_project_and_secret_id(secret_path)
         name = f"projects/{project}/secrets/{secret_id}"
@@ -143,7 +147,10 @@ class GcpSecretManagerProvider(SecretProvider):
     @staticmethod
     def _get_project_and_secret_id(secret_path: str) -> tuple[str, str]:
         if "/" in secret_path:
-            return secret_path.split("/", 1)
+            project, secret_id = secret_path.split("/", 1)
+            if "/" in secret_id:
+                raise ValueError(f"Invalid GCP secret path '{secret_path}': secret ID must not contain slashes")
+            return project, secret_id
         project = os.getenv("GCP_PROJECT")
         if not project:
             raise ValueError("No project found in secret path and GCP_PROJECT environment variable is not set")

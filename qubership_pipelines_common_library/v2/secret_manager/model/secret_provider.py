@@ -29,6 +29,10 @@ class SecretProvider(ABC):
     def get_provider_name(self) -> str:
         pass
 
+    @abstractmethod
+    def secret_exists(self, path: str) -> bool:
+        pass
+
     def parse_vals_path(self, vals_path: str) -> tuple[str, Optional[str]]:
         provider = None
         secret_path = vals_path

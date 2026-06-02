@@ -20,7 +20,7 @@ class TestJiraCommands:
         'systems': {
             'jira': {
                 'url': 'localhost',
-                'username': 'test@qubership.org',
+                'username': 'example@example.com',
                 'password': 'password',
             }
         }

@@ -40,35 +40,42 @@ class MultiStoreProvider(SecretProvider):
         self._cache = {}
 
     def read_secret(self, path: str) -> str | None:
-        provider_type, store_id = self._parse_uri(path)
-        cache_key = (provider_type, store_id or "default")
-        if cache_key not in self._cache:
-            self._cache[cache_key] = self._build_provider(provider_type, store_id)
-        return self._cache[cache_key].read_secret(path)
+        return self.with_provider(path).read_secret(path)
 
     def create_secret(self, path: str, data: Any):
-        raise NotImplementedError("MultiStoreProvider can only read secrets!")
+        return self.with_provider(path).create_secret(path, data)
 
     def update_secret(self, path: str, data: Any):
-        raise NotImplementedError("MultiStoreProvider can only read secrets!")
+        return self.with_provider(path).update_secret(path, data)
 
     def delete_secret(self, path: str):
-        raise NotImplementedError("MultiStoreProvider can only read secrets!")
+        return self.with_provider(path).delete_secret(path)
+
+    def secret_exists(self, path: str) -> bool:
+        return self.with_provider(path).secret_exists(path)
 
     def get_provider_name(self) -> str:
         return "multistore"
 
-    def _parse_uri(self, path: str) -> tuple[str, str | None]:
+    def with_provider(self, path: str) -> SecretProvider:
+        provider_type, store_id = self.parse_provider_type(path)
+        cache_key = (provider_type, store_id or "default")
+        if cache_key not in self._cache:
+            self._cache[cache_key] = self._build_provider(provider_type, store_id)
+        return self._cache[cache_key]
+
+    @classmethod
+    def parse_provider_type(cls, path: str) -> tuple[str, str | None]:
         parsed = urlparse(path)
         if "+" not in parsed.scheme:
             raise ValueError(f"Invalid VALS URI scheme: '{parsed.scheme}' in '{path}'")
         provider_type = parsed.scheme.split("+", 1)[1]
-        if provider_type not in self.PROVIDER_MAP:
+        if provider_type not in cls.PROVIDER_MAP:
             raise ValueError(f"Unknown provider type '{provider_type}' in '{path}'")
         query_params = {}
         if parsed.query:
-            query_params = dict(p.split("=", 1) for p in parsed.query.split("&"))
-        store_id = query_params.get(self.STORE_ID_PARAM_NAME)
+            query_params = dict(p.split("=", 1) for p in parsed.query.split("&") if "=" in p)
+        store_id = query_params.get(cls.STORE_ID_PARAM_NAME)
         if store_id is not None:
             store_id = unquote(store_id)
         return provider_type, store_id
