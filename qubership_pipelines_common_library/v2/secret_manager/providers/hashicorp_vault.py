@@ -1,9 +1,9 @@
-import logging
+import json
 import os
 import hvac
 
 from typing import Any
-from hvac.exceptions import InvalidPath
+from hvac.exceptions import Forbidden, InvalidPath
 from qubership_pipelines_common_library.v1.utils.utils import recursive_merge
 from qubership_pipelines_common_library.v2.artifacts_finder.model.credentials import Credentials
 from qubership_pipelines_common_library.v2.secret_manager.model.secret_provider import SecretProvider
@@ -41,11 +41,11 @@ class HashicorpVaultProvider(SecretProvider):
 
     def read_secret(self, path: str) -> str | None:
         secret_path_with_mount, frag = self.parse_vals_path(path)
-        if not frag: # it's an undocumented behaviour in vals for vault/openbao, we will keep it their way
-            secret_path_with_mount, frag = secret_path_with_mount.rstrip("/").rsplit("/", 1)
-
         kv_version, secret_path, mount_point = self._detect_kv_version_and_mount_point(secret_path_with_mount)
         data = self._get_raw_secret_data(secret_path, mount_point, kv_version)
+
+        if frag is None:
+            return json.dumps(data) if data is not None else None
 
         secret_value = self.get_frag_value(data, frag)
         if secret_value is not None and not isinstance(secret_value, str):
@@ -117,6 +117,11 @@ class HashicorpVaultProvider(SecretProvider):
     def get_provider_name(self) -> str:
         return "vault"
 
+    def secret_exists(self, path: str) -> bool:
+        secret_path_with_mount, _ = self.parse_vals_path(path)
+        kv_version, secret_path, mount_point = self._detect_kv_version_and_mount_point(secret_path_with_mount)
+        return self._secret_exists(secret_path, mount_point, kv_version)
+
     def _secret_exists(self, secret_path: str, mount_point: str, kv_version: int) -> bool:
         return self._get_raw_secret_data(secret_path, mount_point, kv_version) is not None
 
@@ -129,9 +134,6 @@ class HashicorpVaultProvider(SecretProvider):
                 response = self._vault_client.secrets.kv.v2.read_secret_version(path=secret_path, mount_point=mount_point)
                 return response.get("data", {}).get("data", {})
         except InvalidPath:
-            return None
-        except Exception as e:
-            logging.error(f"Unexpected error reading secret at '{mount_point}/{secret_path}': {e}")
             return None
 
     def _detect_kv_version_and_mount_point(self, path: str) -> tuple[int, str, str]:
@@ -149,8 +151,10 @@ class HashicorpVaultProvider(SecretProvider):
                 options = response["data"].get("options")
                 if options and options.get("version") == "2":
                     version = 2
-        except Exception:
-            raise Exception(f"Unable to detect mount point and version for {path}!")
+        except Forbidden as exc:
+            raise Exception(f"Permission denied reading mount info for '{path}' - verify permissions OR mount doesn't exist!") from exc
+        except Exception as exc:
+            raise Exception(f"Unable to detect mount point and version for '{path}'") from exc
 
         self.mount_versions[path] = (version, secret_path, mount_point)
         return version, secret_path, mount_point

@@ -10,13 +10,13 @@ class TestSendEmail:
         'params': {
             'email_subject': 'SUBJ-1',
             'email_body': 'Test email body',
-            'email_recipients': 'test.recipient@qubership.org',
+            'email_recipients': 'example@example.com',
         },
         'systems': {
             'email': {
                 'server': 'localhost',
                 'port': '25',
-                'user': 'test@qubership.org',
+                'user': 'example@example.com',
                 'password': 'password',
             }
         }
@@ -40,6 +40,6 @@ class TestSendEmail:
             cmd = SendEmail(folder_path=str(tmp_path), input_params=self.REQUIRED_INPUT_PARAMS)
             cmd.run()
 
-        smtp_client.login.assert_called_once_with("test@qubership.org", "password")
+        smtp_client.login.assert_called_once_with("example@example.com", "password")
         smtp_client.send_message.assert_called_once()
         assert exit_result.value.code == 0

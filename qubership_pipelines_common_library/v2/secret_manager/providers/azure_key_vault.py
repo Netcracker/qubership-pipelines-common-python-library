@@ -118,6 +118,11 @@ class AzureKeyVaultProvider(SecretProvider):
     def get_provider_name(self) -> str:
         return "azurekeyvault"
 
+    def secret_exists(self, path: str) -> bool:
+        secret_path, _ = self.parse_vals_path(path)
+        vault_url, secret_name, _ = self._parse_azure_resource(secret_path)
+        return self._secret_exists(vault_url, secret_name)
+
     def _request(self, method: str, vault_url: str, api_path: str, json_data: dict = None) -> dict:
         url = f"{vault_url}/{api_path}?api-version={self.API_VERSION}"
         response = self._session.request(method, url, json=json_data)

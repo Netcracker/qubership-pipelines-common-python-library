@@ -18,7 +18,7 @@ class SendEmail(ExecutionCommand):
     {
         "email_subject": "Report for 01.01.2026",                         # REQUIRED: E-mail subject
         "email_body": "Following jobs were completed: ...",               # REQUIRED: E-mail message
-        "email_recipients": "user1@qubership.org,user2@qubership.org",    # REQUIRED: Comma-separated list of recipients
+        "email_recipients": "example@example.com,example@example.com",    # REQUIRED: Comma-separated list of recipients
         "email_body_type": "plain",                                       # OPTIONAL: Either "plain" or "html
         "attachments": {                                                  # OPTIONAL: Dict with attachments
             "unique_attachment_key": {

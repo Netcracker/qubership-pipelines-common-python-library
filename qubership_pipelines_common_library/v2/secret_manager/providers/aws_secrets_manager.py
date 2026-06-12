@@ -101,6 +101,10 @@ class AwsSecretsManagerProvider(SecretProvider):
     def get_provider_name(self) -> str:
         return "awssecrets"
 
+    def secret_exists(self, path: str) -> bool:
+        secret_path, _ = self.parse_vals_path(path)
+        return self._secret_exists(secret_path)
+
     def _secret_exists(self, secret_id: str) -> bool:
         try:
             self._aws_client.describe_secret(SecretId=secret_id)

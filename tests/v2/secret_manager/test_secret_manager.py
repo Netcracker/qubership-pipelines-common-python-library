@@ -12,12 +12,13 @@ from qubership_pipelines_common_library.v2.secret_manager.providers.multi_store_
 
 class MockSecretProvider(SecretProvider):
     def __init__(self, name="mock_provider", read_return=None, create_return=None,
-                 update_return=None, delete_return=None):
+                 update_return=None, delete_return=None, exists_return=False):
         self.name = name
         self.read_return = read_return
         self.create_return = create_return
         self.update_return = update_return
         self.delete_return = delete_return
+        self.exists_return = exists_return
         self.read_called_with = None
         self.create_called_with = None
         self.update_called_with = None
@@ -47,6 +48,9 @@ class MockSecretProvider(SecretProvider):
             raise self.delete_return
         return self.delete_return
 
+    def secret_exists(self, path: str) -> bool:
+        return self.exists_return
+
     def get_provider_name(self) -> str:
         return self.name
 
@@ -63,16 +67,16 @@ class TestSecretManager:
         assert result == "my-secret"
         assert mock_prov.read_called_with == "path/to/secret"
 
-    def test_read_secret_provider_raises_not_fail_on_missing(self):
+    def test_read_secret_provider_raises_propagates(self):
         mock_prov = MockSecretProvider(read_return=Exception("boom"))
         sm = SecretManager(secret_provider=mock_prov)
-        result = sm.read_secret("path", fail_on_missing=False, default_value="default")
-        assert result == "default"
+        with pytest.raises(Exception, match="boom"):
+            sm.read_secret("path", fail_on_missing=False, default_value="default")
 
-    def test_read_secret_provider_raises_fail_on_missing(self):
+    def test_read_secret_provider_raises_propagates_regardless_of_fail_on_missing(self):
         mock_prov = MockSecretProvider(read_return=Exception("boom"))
         sm = SecretManager(secret_provider=mock_prov)
-        with pytest.raises(Exception, match="No secret found for path path"):
+        with pytest.raises(Exception, match="boom"):
             sm.read_secret("path", fail_on_missing=True)
 
     def test_read_secret_returns_default_when_none(self):
@@ -107,6 +111,16 @@ class TestSecretManager:
         result = sm.delete_secret("path")
         assert result == "deleted"
         assert mock_prov.delete_called_with == "path"
+
+    def test_secret_exists_true(self):
+        mock_prov = MockSecretProvider(exists_return=True)
+        sm = SecretManager(secret_provider=mock_prov)
+        assert sm.secret_exists("path/to/secret") is True
+
+    def test_secret_exists_false(self):
+        mock_prov = MockSecretProvider(exists_return=False)
+        sm = SecretManager(secret_provider=mock_prov)
+        assert sm.secret_exists("path/to/secret") is False
 
 
 @pytest.fixture
@@ -169,14 +183,22 @@ class TestHashicorpVaultProvider:
             with pytest.raises(Exception, match="not authenticated"):
                 HashicorpVaultProvider(url="http://vault", credentials=creds)
 
-    def test_read_secret_kv1_no_fragment(self, mock_hvac_client):
+    def test_read_secret_kv1_no_fragment_returns_json_string(self, mock_hvac_client):
         mock_hvac_client.secrets.kv.v1.read_secret.return_value = {"data": {"key": "value"}}
         creds = Credentials(token="t")
         with patch("hvac.Client", return_value=mock_hvac_client):
             provider = HashicorpVaultProvider(url="http://vault", credentials=creds)
-        result = provider.read_secret("secret_v1/mysecret/key")
-        assert result == "value"
+        result = provider.read_secret("secret_v1/mysecret")
+        assert result == '{"key": "value"}'
         mock_hvac_client.read.assert_any_call("sys/internal/ui/mounts/secret_v1/mysecret")
+
+    def test_read_secret_kv1_with_fragment(self, mock_hvac_client):
+        mock_hvac_client.secrets.kv.v1.read_secret.return_value = {"data": {"key": "value"}}
+        creds = Credentials(token="t")
+        with patch("hvac.Client", return_value=mock_hvac_client):
+            provider = HashicorpVaultProvider(url="http://vault", credentials=creds)
+        result = provider.read_secret("secret_v1/mysecret#/key")
+        assert result == "value"
 
     def test_read_secret_kv2_with_explicit_fragment(self, mock_hvac_client):
         mock_hvac_client.secrets.kv.v2.read_secret_version.return_value = {
@@ -198,10 +220,11 @@ class TestHashicorpVaultProvider:
         assert result is None
 
     def test_create_secret_kv1_success(self, mock_hvac_client):
+        from hvac.exceptions import InvalidPath
         creds = Credentials(token="t")
         with patch("hvac.Client", return_value=mock_hvac_client):
             provider = HashicorpVaultProvider(url="http://vault", credentials=creds)
-        mock_hvac_client.secrets.kv.v1.read_secret.side_effect = Exception("not found")
+        mock_hvac_client.secrets.kv.v1.read_secret.side_effect = InvalidPath()
         provider.create_secret("secret_v1/newsecret", {"key": "val"})
         mock_hvac_client.secrets.kv.v1.create_or_update_secret.assert_called_once_with(
             path="newsecret", secret={"key": "val"}, mount_point="secret_v1/"
@@ -313,13 +336,23 @@ class TestHashicorpVaultCredentialsProvider:
 
 class TestMultiStoreProvider:
 
-    def test_create_secret_not_implemented(self):
-        with pytest.raises(NotImplementedError, match="MultiStoreProvider can only read secrets!"):
-            MultiStoreProvider().create_secret("path", {})
+    def test_create_secret_parses_uri_and_delegates(self):
+        p = MultiStoreProvider()
+        p.parse_provider_type = MagicMock(return_value=("vault", None))
+        inner = MagicMock()
+        inner.create_secret.return_value = "created"
+        p._build_provider = MagicMock(return_value=inner)
+
+        result = p.create_secret("ref+vault://path/to/secret", {"key": "val"})
+
+        assert result == "created"
+        p.parse_provider_type.assert_called_once_with("ref+vault://path/to/secret")
+        p._build_provider.assert_called_once_with("vault", None)
+        inner.create_secret.assert_called_once_with("ref+vault://path/to/secret", {"key": "val"})
 
     def test_read_secret_parses_uri_and_delegates(self):
         p = MultiStoreProvider()
-        p._parse_uri = MagicMock(return_value=("vault", None))
+        p.parse_provider_type = MagicMock(return_value=("vault", None))
         inner = MagicMock()
         inner.read_secret.return_value = "secret-value"
         p._build_provider = MagicMock(return_value=inner)
@@ -327,13 +360,13 @@ class TestMultiStoreProvider:
         result = p.read_secret("ref+vault://path/to/secret")
 
         assert result == "secret-value"
-        p._parse_uri.assert_called_once_with("ref+vault://path/to/secret")
+        p.parse_provider_type.assert_called_once_with("ref+vault://path/to/secret")
         p._build_provider.assert_called_once_with("vault", None)
         inner.read_secret.assert_called_once_with("ref+vault://path/to/secret")
 
     def test_read_secret_caches_provider_by_key(self):
         p = MultiStoreProvider()
-        p._parse_uri = MagicMock(return_value=("vault", "store1"))
+        p.parse_provider_type = MagicMock(return_value=("vault", "store1"))
         inner = MagicMock()
         inner.read_secret.return_value = "val"
         p._build_provider = MagicMock(return_value=inner)
@@ -361,22 +394,22 @@ class TestParseUri:
     def test_invalid_scheme_no_plus_raises(self):
         p = MultiStoreProvider()
         with pytest.raises(ValueError, match="Invalid VALS URI scheme"):
-            p._parse_uri("novault://path")
+            p.parse_provider_type("novault://path")
 
     def test_unknown_provider_type_raises(self):
         p = MultiStoreProvider()
         with pytest.raises(ValueError, match="Unknown provider type"):
-            p._parse_uri("ref+unknown://path")
+            p.parse_provider_type("ref+unknown://path")
 
     def test_without_store_id(self):
         p = MultiStoreProvider()
-        assert p._parse_uri("ref+vault://secret/path") == ("vault", None)
+        assert p.parse_provider_type("ref+vault://secret/path") == ("vault", None)
 
     def test_with_store_id(self):
         p = MultiStoreProvider()
-        assert p._parse_uri("ref+vault://path?secret_store_id=myid") == ("vault", "myid")
+        assert p.parse_provider_type("ref+vault://path?secret_store_id=myid") == ("vault", "myid")
 
     def test_with_multiple_query_params(self):
         p = MultiStoreProvider()
-        result = p._parse_uri("ref+awssecrets://path?foo=bar&secret_store_id=s1&baz=qux")
+        result = p.parse_provider_type("ref+awssecrets://path?foo=bar&secret_store_id=s1&baz=qux")
         assert result == ("awssecrets", "s1")
