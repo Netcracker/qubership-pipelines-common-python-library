@@ -36,7 +36,7 @@ class SendEmail(ExecutionCommand):
     {
         "server": "your.mail.server.org",           # REQUIRED: E-mail host server
         "port": "3025"                              # REQUIRED: E-mail port
-        "user": "your@email.bot"                    # REQUIRED: E-mail user
+        "user": "example@example.com"               # REQUIRED: E-mail user
         "password": "<email_password>"              # OPTIONAL: E-mail password
         "use_ssl": "False"                          # OPTIONAL: SMTP connection will use SSL mode (default: False)
         "use_tls": "False"                          # OPTIONAL: SMTP connection will use TLS mode (default: False)
