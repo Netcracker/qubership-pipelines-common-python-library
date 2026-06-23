@@ -16,7 +16,7 @@ class ArtifactoryProvider(ArtifactProvider):
 
         Artifactory Artifact IDs are case-sensitive (`test-cli` and `test-CLI` are different artifacts)
 
-        This provider supports resolving `-SNAPSHOT` artifacts into latest version
+        This provider supports resolving `-SNAPSHOT` artifacts into latest version and searching for versions with asterisk-wildcards.
         """
         super().__init__(**kwargs)
         self.registry_url = registry_url
@@ -27,7 +27,10 @@ class ArtifactoryProvider(ArtifactProvider):
     def download_artifact(self, resource_url: str, local_path: str | Path, **kwargs) -> None:
         return self.generic_download(resource_url=resource_url, local_path=local_path)
 
-    def search_artifacts(self, artifact: Artifact, **kwargs) -> list[str]:
+    def search_artifacts(self, artifact: Artifact, latest: bool = False, **kwargs) -> list[str]:
+        if artifact.has_version_wildcard():
+            return self._search_wildcard_versions(artifact, latest=latest)
+
         timestamp_version_match = re.match(self.TIMESTAMP_VERSION_PATTERN, artifact.version)
         if timestamp_version_match:
             base_version = timestamp_version_match.group(1) + "SNAPSHOT"
@@ -40,17 +43,9 @@ class ArtifactoryProvider(ArtifactProvider):
             "v": base_version,
             "specific": "true"
         }
-        search_api_url = f"{self.registry_url}/api/search/gavc"
-        logging.debug(f"Search URL: {search_api_url}"f"\nSearch Parameters: {search_params}")
-
-        response = self._session.get(url=search_api_url,
-                                     params=search_params,
-                                     timeout=self.timeout)
-        if response.status_code != 200:
-            raise Exception(f"Could not find '{artifact.artifact_id}' - search request returned {response.status_code}!")
-
+        results = self._gavc_search(search_params, artifact.artifact_id)
         download_urls = [
-            result["downloadUri"] for result in response.json().get("results", [])
+            result["downloadUri"] for result in results
             if result["ext"] == artifact.extension and (not timestamp_version_match or result["downloadUri"].endswith(f"{artifact.version}.{artifact.extension}"))
         ]
         if artifact.is_snapshot():
@@ -60,3 +55,39 @@ class ArtifactoryProvider(ArtifactProvider):
 
     def get_provider_name(self) -> str:
         return "artifactory"
+
+    def _search_wildcard_versions(self, artifact: Artifact, latest: bool = False) -> list[str]:
+        search_params = {
+            **({"g": artifact.group_id} if artifact.group_id else {}),
+            "a": artifact.artifact_id,
+            "v": artifact.version,
+            "specific": "true"
+        }
+        results = self._gavc_search(search_params, artifact.artifact_id)
+        # client-side pattern guard
+        version_pattern = self._wildcard_to_regex(artifact.version)
+        matches = [
+            result for result in results
+            if result["ext"] == artifact.extension and version_pattern.fullmatch(result["version"])
+        ]
+        if latest:
+            latest_match = self._select_latest(matches)
+            return [latest_match["downloadUri"]] if latest_match else []
+        return [result["downloadUri"] for result in matches]
+
+    def _gavc_search(self, search_params: dict, artifact_id: str) -> list[dict]:
+        search_api_url = f"{self.registry_url}/api/search/gavc"
+        logging.debug(f"Search URL: {search_api_url}"f"\nSearch Parameters: {search_params}")
+        response = self._session.get(url=search_api_url, params=search_params, timeout=self.timeout)
+        if response.status_code != 200:
+            raise Exception(f"Could not find '{artifact_id}' - search request returned {response.status_code}!")
+        return response.json().get("results", [])
+
+    @staticmethod
+    def _wildcard_to_regex(pattern: str) -> re.Pattern:
+        return re.compile(".*".join(re.escape(part) for part in pattern.split("*")))
+
+    @staticmethod
+    def _select_latest(matches: list[dict]) -> dict | None:
+        # Best-effort 'latest' among gavc results, comparing by semver, then snapshot/release timestamp
+        return max(matches, key=lambda match: ArtifactFinderUtils.version_sort_key(match["downloadUri"].rsplit("/", 1)[-1])) if matches else None

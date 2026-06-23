@@ -8,6 +8,9 @@ class Artifact:
     def is_snapshot(self):
         return self.version and self.version.endswith("SNAPSHOT")
 
+    def has_version_wildcard(self):
+        return self.version and "*" in self.version
+
     def get_filename(self) -> str:
         return f"{self.artifact_id}-{self.version}.{self.extension}"
 

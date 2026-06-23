@@ -12,7 +12,7 @@ class ArtifactFinder:
 
     Supports different repository providers: Artifactory, Nexus, AWS, GCP, Azure
 
-    Providers might slightly differ in functionality, refer to the Provider docs
+    Providers might slightly differ in functionality, refer to the Provider docs (e.g. only Artifactory currently supports wildcard version search)
 
     Provides different auth methods for Cloud Providers, implementing `CloudCredentialsProvider` interface
 
@@ -40,13 +40,13 @@ class ArtifactFinder:
         self.provider = artifact_provider
 
     def find_artifact_urls(self, artifact_id: str = None, version: str = None, group_id: str = None,
-                           extension: str = "jar", artifact: Artifact = None) -> list[str]:
+                           extension: str = "jar", artifact: Artifact = None, latest: bool = False) -> list[str]:
         if not artifact:
             artifact = Artifact(group_id=group_id, artifact_id=artifact_id, version=version, extension=extension)
         if not artifact.artifact_id or not artifact.version:
             raise Exception("Artifact 'artifact_id' and 'version' must be specified!")
         logging.debug(f"Searching for '{artifact.artifact_id}:{artifact.version}' in {self.provider.get_provider_name()}...")
-        return self.provider.search_artifacts(artifact=artifact)
+        return self.provider.search_artifacts(artifact=artifact, latest=latest)
 
     def download_artifact(self, resource_url: str, local_path: str | Path, artifact: Artifact = None):
         from qubership_pipelines_common_library.v1.utils.utils_file import UtilsFile

@@ -145,7 +145,7 @@ class DownloadArtifact(ExecutionCommand):
         return True
 
     def _execute(self):
-        self.context.logger.info("Running prepare-pyz-module...")
+        self.context.logger.info("Running download-artifact command...")
         self._prepare_target_path()
         downloaded_file_path = self._download_to_file()
         file_size = os.path.getsize(downloaded_file_path)
@@ -179,6 +179,7 @@ class DownloadArtifact(ExecutionCommand):
                         version=self.artifact_info.get("version"),
                         group_id=self.artifact_info.get("group_id"),
                         extension=self.artifact_info.get("extension", "pyz"),
+                        latest=True,
                     )
                     if len(urls) < 1:
                         raise Exception(f"Could not find artifacts using provided parameters (artifact_info={self.artifact_info})")
