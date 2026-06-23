@@ -236,3 +236,12 @@ class ArtifactFinderUtils:
         timestamp = metadata_xml.findall("./versioning/snapshot/timestamp")[0].text
         build_number = metadata_xml.findall("./versioning/snapshot/buildNumber")[0].text
         return f"{timestamp}-{build_number}"
+
+    @staticmethod
+    def version_sort_key(version: str):
+        import re
+        semver = re.search(r'(\d+)\.(\d+)\.(\d+)', version)
+        semver_key = tuple(int(part) for part in semver.groups()) if semver else (-1, -1, -1)
+        timestamp = re.search(r'(\d{8})\.(\d{6})(?:-(\d+))?', version)
+        timestamp_key = (int(timestamp.group(1)), int(timestamp.group(2)), int(timestamp.group(3) or 0)) if timestamp else (-1, -1, -1)
+        return semver_key, timestamp_key, version

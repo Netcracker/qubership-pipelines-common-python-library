@@ -7,6 +7,7 @@ from qubership_pipelines_common_library.v2.artifacts_finder.artifact_finder impo
 from qubership_pipelines_common_library.v2.artifacts_finder.auth.aws_credentials import AwsCredentialsProvider
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact import Artifact
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider
+from qubership_pipelines_common_library.v2.artifacts_finder.providers.artifactory import ArtifactoryProvider
 from qubership_pipelines_common_library.v2.artifacts_finder.providers.nexus import NexusProvider
 
 
@@ -98,3 +99,37 @@ class TestArtifactFinder:
 
         assert len(urls) == 1
         assert urls[0].rsplit("/", maxsplit=1)[-1] == "test-component-0.5.0-20260318.333333-3.pyz"
+
+    @patch('requests.sessions.Session.get')
+    def test_artifactory_version_wildcard_search(self, requests_mock):
+        base = "http://mock.artifactory/artifactory/libs-release-local/com/example/test-component"
+
+        def result(version, ext):
+            return {
+                "downloadUri": f"{base}/{version}/test-component-{version}.{ext}",
+                "ext": ext,
+                "version": version,
+            }
+
+        def side_effect(url, **kwargs):
+            mock_resp = Mock()
+            mock_resp.status_code = 200
+            mock_resp.json.return_value = {"results": [
+                result("master-5.0.0-20260101.120000-RELEASE", "yaml"),
+                result("master-5.0.1-20260201.130000-RELEASE", "yaml"),
+                result("master-6.0.0-20260301.140000-RELEASE", "yaml"),
+                result("master-5.0.0-20260101.120000-RELEASE", "json"),
+            ]}
+            return mock_resp
+
+        requests_mock.side_effect = side_effect
+        finder = ArtifactFinder(artifact_provider=ArtifactoryProvider(
+            registry_url="http://mock.artifactory/artifactory", username="admin", password="Password1"))
+
+        urls = finder.find_artifact_urls(artifact_id="test-component", version="master-*-RELEASE", extension="yaml")
+        assert len(urls) == 3
+        assert all(url.endswith(".yaml") for url in urls)
+
+        latest = finder.find_artifact_urls(artifact_id="test-component", version="master-*-RELEASE",
+                                           extension="yaml", latest=True)
+        assert latest == [f"{base}/master-6.0.0-20260301.140000-RELEASE/test-component-master-6.0.0-20260301.140000-RELEASE.yaml"]
