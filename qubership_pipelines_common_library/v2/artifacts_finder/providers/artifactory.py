@@ -27,9 +27,9 @@ class ArtifactoryProvider(ArtifactProvider):
     def download_artifact(self, resource_url: str, local_path: str | Path, **kwargs) -> None:
         return self.generic_download(resource_url=resource_url, local_path=local_path)
 
-    def search_artifacts(self, artifact: Artifact, latest: bool = False, **kwargs) -> list[str]:
+    def search_artifacts(self, artifact: Artifact, latest: bool = False, comparer=None, **kwargs) -> list[str]:
         if artifact.has_version_wildcard():
-            return self._search_wildcard_versions(artifact, latest=latest)
+            return self._search_wildcard_versions(artifact, latest=latest, comparer=comparer)
 
         timestamp_version_match = re.match(self.TIMESTAMP_VERSION_PATTERN, artifact.version)
         if timestamp_version_match:
@@ -56,7 +56,7 @@ class ArtifactoryProvider(ArtifactProvider):
     def get_provider_name(self) -> str:
         return "artifactory"
 
-    def _search_wildcard_versions(self, artifact: Artifact, latest: bool = False) -> list[str]:
+    def _search_wildcard_versions(self, artifact: Artifact, latest: bool = False, comparer=None) -> list[str]:
         search_params = {
             **({"g": artifact.group_id} if artifact.group_id else {}),
             "a": artifact.artifact_id,
@@ -65,15 +65,15 @@ class ArtifactoryProvider(ArtifactProvider):
         }
         results = self._gavc_search(search_params, artifact.artifact_id)
         # client-side pattern guard
-        version_pattern = self._wildcard_to_regex(artifact.version)
-        matches = [
-            result for result in results
+        version_pattern = ArtifactFinderUtils.wildcard_to_regex(artifact.version)
+        download_urls = [
+            result["downloadUri"] for result in results
             if result["ext"] == artifact.extension and version_pattern.fullmatch(result["version"])
         ]
         if latest:
-            latest_match = self._select_latest(matches)
-            return [latest_match["downloadUri"]] if latest_match else []
-        return [result["downloadUri"] for result in matches]
+            latest_url = ArtifactFinderUtils.select_latest([(url.rsplit("/", 1)[-1], url) for url in download_urls], comparer)
+            return [latest_url] if latest_url else []
+        return download_urls
 
     def _gavc_search(self, search_params: dict, artifact_id: str) -> list[dict]:
         search_api_url = f"{self.registry_url}/api/search/gavc"
@@ -82,12 +82,3 @@ class ArtifactoryProvider(ArtifactProvider):
         if response.status_code != 200:
             raise Exception(f"Could not find '{artifact_id}' - search request returned {response.status_code}!")
         return response.json().get("results", [])
-
-    @staticmethod
-    def _wildcard_to_regex(pattern: str) -> re.Pattern:
-        return re.compile(".*".join(re.escape(part) for part in pattern.split("*")))
-
-    @staticmethod
-    def _select_latest(matches: list[dict]) -> dict | None:
-        # Best-effort 'latest' among gavc results, comparing by semver, then snapshot/release timestamp
-        return max(matches, key=lambda match: ArtifactFinderUtils.version_sort_key(match["downloadUri"].rsplit("/", 1)[-1])) if matches else None
