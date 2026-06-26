@@ -20,6 +20,7 @@ class GcpArtifactRegistryProvider(ArtifactProvider):
         Requires `Credentials` provided by `GcpCredentialsProvider`.
 
         This provider supports resolving `-SNAPSHOT` artifacts into latest version (in maven-format repositories)
+        and searching for versions with asterisk-wildcards.
         """
         super().__init__(**kwargs)
         self._credentials = credentials
@@ -39,27 +40,63 @@ class GcpArtifactRegistryProvider(ArtifactProvider):
         with open(local_path, 'wb') as file:
             file.write(response.content)
 
-    def search_artifacts(self, artifact: Artifact, **kwargs) -> list[str]:
+    def search_artifacts(self, artifact: Artifact, latest: bool = False, comparer=None, **kwargs) -> list[str]:
+        if artifact.has_version_wildcard():
+            return self._search_wildcard_versions(artifact, latest=latest, comparer=comparer)
         if artifact.is_snapshot():
             return self._search_snapshot_artifacts(artifact)
 
         name_filter = f"{self._repo_resource_id}/files/*{artifact.artifact_id}-{artifact.version}.{artifact.extension}"
-        list_files_request = artifactregistry_v1.ListFilesRequest(
-            parent=f"{self._repo_resource_id}",
-            filter=f'name="{name_filter}"',
-        )
-        files = self._gcp_client.list_files(request=list_files_request)
+        files = self._list_files(name_filter)
 
-        group_filter = None
-        if artifact.group_id:
-            group_filter = f"/{artifact.group_id.replace('.', '/')}/"
+        group_filter = self._group_filter(artifact)
         urls = []
         for file in files:
             if group_filter and group_filter not in unquote(file.name):
                 continue
-            download_url = f"{self.GAR_URL_PREFIX}{file.name}{self.GAR_URL_SUFFIX}"
-            urls.append(download_url)
+            urls.append(f"{self.GAR_URL_PREFIX}{file.name}{self.GAR_URL_SUFFIX}")
         return urls
+
+    def get_provider_name(self) -> str:
+        return "gcp_artifact_registry"
+
+    def _search_wildcard_versions(self, artifact: Artifact, latest: bool = False, comparer=None) -> list[str]:
+        literal = f"{artifact.artifact_id}-{artifact.version.split('*', 1)[0]}"
+        files = self._list_files(f"{self._repo_resource_id}/files/*{literal}*")
+
+        version_pattern = ArtifactFinderUtils.wildcard_to_regex(artifact.version)
+        group_filter = self._group_filter(artifact)
+        name_prefix, name_suffix = f"{artifact.artifact_id}-", f".{artifact.extension}"
+        candidates = []  # (version_string, download_url) pairs
+        for file in files:
+            decoded = unquote(file.name)
+            if group_filter and group_filter not in decoded:
+                continue
+            filename = decoded.rsplit("/", 1)[-1].rsplit(":", 1)[-1]
+            if not (filename.startswith(name_prefix) and filename.endswith(name_suffix)):
+                continue
+            version = filename[len(name_prefix):-len(name_suffix)]
+            if not version_pattern.fullmatch(version):
+                continue
+            candidates.append((version, f"{self.GAR_URL_PREFIX}{file.name}{self.GAR_URL_SUFFIX}"))
+
+        if latest:
+            latest_url = ArtifactFinderUtils.select_latest(candidates, comparer)
+            return [latest_url] if latest_url else []
+        return [url for _, url in candidates]
+
+    def _list_files(self, name_filter: str):
+        list_files_request = artifactregistry_v1.ListFilesRequest(
+            parent=self._repo_resource_id,
+            filter=f'name="{name_filter}"',
+        )
+        return self._gcp_client.list_files(request=list_files_request)
+
+    @staticmethod
+    def _group_filter(artifact: Artifact) -> str | None:
+        if artifact.group_id:
+            return f"/{artifact.group_id.replace('.', '/')}/"
+        return None
 
     def _search_snapshot_artifacts(self, artifact: Artifact) -> list[str]:
         prefix = "*"
@@ -95,6 +132,3 @@ class GcpArtifactRegistryProvider(ArtifactProvider):
             result_urls.append(url)
 
         return result_urls
-
-    def get_provider_name(self) -> str:
-        return "gcp_artifact_registry"

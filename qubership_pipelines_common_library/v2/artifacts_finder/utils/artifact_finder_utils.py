@@ -238,10 +238,16 @@ class ArtifactFinderUtils:
         return f"{timestamp}-{build_number}"
 
     @staticmethod
-    def version_sort_key(version: str):
+    def wildcard_to_regex(pattern: str):
         import re
-        semver = re.search(r'(\d+)\.(\d+)\.(\d+)', version)
-        semver_key = tuple(int(part) for part in semver.groups()) if semver else (-1, -1, -1)
-        timestamp = re.search(r'(\d{8})\.(\d{6})(?:-(\d+))?', version)
-        timestamp_key = (int(timestamp.group(1)), int(timestamp.group(2)), int(timestamp.group(3) or 0)) if timestamp else (-1, -1, -1)
-        return semver_key, timestamp_key, version
+        return re.compile(".*".join(re.escape(part) for part in pattern.split("*")))
+
+    @staticmethod
+    def select_latest(candidates: list[tuple], comparer=None):
+        # candidates: (comparable_version_string, payload) pairs. Returns the payload whose version compares greatest
+        import functools
+        if not candidates:
+            return None
+        if comparer is None:
+            raise Exception("comparer cannot be None!")
+        return max(candidates, key=functools.cmp_to_key(lambda a, b: comparer.compare(a[0], b[0])))[1]

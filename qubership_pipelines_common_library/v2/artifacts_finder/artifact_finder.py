@@ -1,8 +1,10 @@
 import logging
 from pathlib import Path
 
+from qubership_pipelines_common_library.v2.artifacts_finder.comparers.default_version_comparer import DefaultVersionComparer
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact import Artifact
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider
+from qubership_pipelines_common_library.v2.artifacts_finder.model.comparer import Comparer
 
 
 class ArtifactFinder:
@@ -12,9 +14,12 @@ class ArtifactFinder:
 
     Supports different repository providers: Artifactory, Nexus, AWS, GCP, Azure
 
-    Providers might slightly differ in functionality, refer to the Provider docs (e.g. only Artifactory currently supports wildcard version search)
+    Providers might slightly differ in functionality, refer to the Provider docs
 
     Provides different auth methods for Cloud Providers, implementing `CloudCredentialsProvider` interface
+
+    When searching with ``latest=True``, the newest version is chosen by a pluggable comparer.
+    Pass a ``Comparer`` instance (e.g. ``SimpleVersionComparer()``); when omitted, a ``DefaultVersionComparer`` is used.
 
     Start by initializing this client with one of implementations:
     ``finder = ArtifactFinder(artifact_provider=ArtifactoryProvider(registry_url="https://our_url", username="user", password="password"))``
@@ -34,19 +39,24 @@ class ArtifactFinder:
     ```
     """
 
-    def __init__(self, artifact_provider: ArtifactProvider, **kwargs):
+    def __init__(self, artifact_provider: ArtifactProvider, comparer: Comparer = None, **kwargs):
         if not artifact_provider:
             raise Exception("Initialize ArtifactFinder with one of registry artifact providers first!")
         self.provider = artifact_provider
+        self.comparer = comparer if comparer is not None else DefaultVersionComparer()
 
     def find_artifact_urls(self, artifact_id: str = None, version: str = None, group_id: str = None,
                            extension: str = "jar", artifact: Artifact = None, latest: bool = False) -> list[str]:
+        """
+        :param version: Supports asterisk-wildcard (e.g. "main-*-RELEASE")
+        :param latest: Will try to determine and return only the latest version among all versions found when searching for wildcard-containing version
+        """
         if not artifact:
             artifact = Artifact(group_id=group_id, artifact_id=artifact_id, version=version, extension=extension)
         if not artifact.artifact_id or not artifact.version:
             raise Exception("Artifact 'artifact_id' and 'version' must be specified!")
         logging.debug(f"Searching for '{artifact.artifact_id}:{artifact.version}' in {self.provider.get_provider_name()}...")
-        return self.provider.search_artifacts(artifact=artifact, latest=latest)
+        return self.provider.search_artifacts(artifact=artifact, latest=latest, comparer=self.comparer)
 
     def download_artifact(self, resource_url: str, local_path: str | Path, artifact: Artifact = None):
         from qubership_pipelines_common_library.v1.utils.utils_file import UtilsFile
