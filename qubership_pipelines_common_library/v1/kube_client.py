@@ -63,7 +63,7 @@ class KubeClient:
         if not namespace:
             return False
         try:
-            self.core_api.read_namespace_status(namespace)
+            self.core_api.read_namespace(namespace)
             return True
         except ApiException as e:
             if e.status == 404:
