@@ -73,3 +73,38 @@ class TestDownloadArtifact:
 
         assert exit_result.value.code == 0
         assert cmd.artifact_finder is not None
+
+    @patch('requests.sessions.Session.get')
+    def test_clear_target_path_runs_after_download(self, session_get, tmp_path):
+        """Replacing the live module dir must not wipe it before HTTPS download completes."""
+        context_dir = Path(tmp_path) / "context"
+        target_path = Path(tmp_path) / "quber_cli"
+        certifi_pem = target_path / "certifi" / "cacert.pem"
+        certifi_pem.parent.mkdir(parents=True)
+        certifi_pem.write_text("PLACEHOLDER_CA_BUNDLE")
+
+        input_params = copy.deepcopy(self.REQUIRED_INPUT_PARAMS)
+        input_params["params"]["target_path"] = target_path.as_posix()
+        input_params["params"]["clear_target_path"] = True
+        input_params["params"]["need_to_extract"] = True
+        input_params["systems"] = {"http": {"headers_auth": {"Authorization": "Bearer SOME_TOKEN"}}}
+
+        seen_pem_during_get = {}
+
+        def get_side_effect(*args, **kwargs):
+            seen_pem_during_get["exists"] = certifi_pem.is_file()
+            get_response = MagicMock()
+            get_response.iter_content.return_value = [TestDownloadArtifact.create_sample_zip()]
+            get_response.raise_for_status = MagicMock()
+            return get_response
+
+        session_get.side_effect = get_side_effect
+
+        with pytest.raises(SystemExit) as exit_result:
+            cmd = DownloadArtifact(folder_path=str(context_dir), input_params=input_params)
+            cmd.run()
+
+        assert exit_result.value.code == 0
+        assert seen_pem_during_get.get("exists") is True
+        assert not certifi_pem.exists()
+        assert (target_path / "module" / "main.py").is_file()

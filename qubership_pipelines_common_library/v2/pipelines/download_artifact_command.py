@@ -36,7 +36,7 @@ class DownloadArtifact(ExecutionCommand):
         },
         "timeout_seconds": 300,                                           # OPTIONAL: Maximum wait time for download in seconds for direct download
         "verify": true,                                                   # OPTIONAL: Sets up session's `verify` property (for both direct and artifact_finder flows)
-        "clear_target_path": true,                                        # OPTIONAL: Whether download/extraction path should be cleared first
+        "clear_target_path": true,                                        # OPTIONAL: Whether target_path should be cleared after download, before extract/move
         "need_to_extract": true,                                          # OPTIONAL: Whether Artifact should be extracted to target_path (instead of just downloaded)
         "source_type": "AUTO"                                             # OPTIONAL: Specifies artifact download type (Git/FTP/S3 will be supported in further releases).
     }                                                                                 AUTO - derives type from other available params
@@ -146,11 +146,12 @@ class DownloadArtifact(ExecutionCommand):
 
     def _execute(self):
         self.context.logger.info("Running download-artifact command...")
-        self._prepare_target_path()
+        # Download first: clearing target_path up front would delete the running module's own files (e.g. cacert.pem)
         downloaded_file_path = self._download_to_file()
         file_size = os.path.getsize(downloaded_file_path)
         self.context.logger.info(f"Downloaded to temporary file: {downloaded_file_path} ({file_size} bytes)")
 
+        self._prepare_target_path()
         self._extract_to_path(downloaded_file_path, self.target_path)
         self.context.logger.info(f"{'Extracted' if self.need_to_extract else 'Moved'} to {self.target_path}")
 
