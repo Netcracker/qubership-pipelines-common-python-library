@@ -251,3 +251,7 @@ class ArtifactFinderUtils:
         if comparer is None:
             raise Exception("comparer cannot be None!")
         return max(candidates, key=functools.cmp_to_key(lambda a, b: comparer.compare(a[0], b[0])))[1]
+
+    @staticmethod
+    def deduplicate(items: list) -> list:
+        return list(dict.fromkeys(items))

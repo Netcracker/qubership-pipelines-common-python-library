@@ -1,6 +1,8 @@
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
+from google.cloud import artifactregistry_v1
 from unittest.mock import Mock, patch
 
 from qubership_pipelines_common_library.v2.artifacts_finder.artifact_finder import ArtifactFinder
@@ -263,3 +265,154 @@ class TestArtifactFinder:
         latest = finder.find_artifact_urls(artifact_id="test-component", version="master-*-RELEASE",
                                            extension="yaml", latest=True)
         assert latest == [expected_url("master-6.0.0-RELEASE")]
+
+    @patch('google.cloud.artifactregistry_v1.ArtifactRegistryClient')
+    def test_gcp_virtual_repository_searches_upstreams(self, gcp_client_cls):
+        repository = artifactregistry_v1.Repository
+        virtual_repo = "projects/proj/locations/us/repositories/virtual-repo"
+        nested_repo = "projects/proj/locations/us/repositories/nested-repo"
+        upstream_a = "projects/proj/locations/us/repositories/upstream-a"
+        upstream_b = "projects/proj/locations/us/repositories/upstream-b"
+
+        def repository_config(mode, repository_format=repository.Format.MAVEN, upstreams=()):
+            return SimpleNamespace(
+                mode=mode,
+                format=repository_format,
+                virtual_repository_config=SimpleNamespace(upstream_policies=[SimpleNamespace(repository=name, priority=priority) for name, priority in upstreams]),
+            )
+
+        configs = {
+            virtual_repo: repository_config(repository.Mode.VIRTUAL_REPOSITORY, upstreams=[(nested_repo, 100), (upstream_b, 50)]),
+            nested_repo: repository_config(repository.Mode.VIRTUAL_REPOSITORY, upstreams=[(upstream_a, 10)]),
+            upstream_a: repository_config(repository.Mode.STANDARD_REPOSITORY),
+            upstream_b: repository_config(repository.Mode.STANDARD_REPOSITORY),
+        }
+
+        def artifact_file(parent, version):
+            encoded = f"com%2Fexample%2Ftest-component%2F{version}%2Ftest-component-{version}.yaml"
+            return SimpleNamespace(name=f"{parent}/files/{encoded}")
+
+        gcp_client = Mock()
+        gcp_client_cls.return_value = gcp_client
+        gcp_client.get_repository.side_effect = lambda name: configs[name]
+        gcp_client.list_files.side_effect = lambda request: {
+            upstream_a: [artifact_file(upstream_a, "1.0.0")],
+            upstream_b: [artifact_file(upstream_b, "1.0.0"), artifact_file(upstream_b, "2.0.0")],
+        }[request.parent]
+
+        finder = ArtifactFinder(artifact_provider=GcpArtifactRegistryProvider(
+            credentials=Credentials(google_credentials_object=Mock(), authorized_session=Mock()),
+            project="proj", region_name="us", repository="virtual-repo"))
+
+        def expected_url(version):
+            return f"https://us-maven.pkg.dev/proj/virtual-repo/com/example/test-component/{version}/test-component-{version}.yaml"
+
+        # upstreams are listed directly, but the same artifact found in several of them yields a single URL
+        urls = finder.find_artifact_urls(artifact_id="test-component", version="*", extension="yaml")
+        assert urls == [expected_url("1.0.0"), expected_url("2.0.0")]
+
+        # upstreams are traversed by descending priority, non-virtual ones only, and only once each
+        assert [call.kwargs["name"] for call in gcp_client.get_repository.call_args_list] == [
+            virtual_repo, nested_repo, upstream_a, upstream_b,
+        ]
+        assert [call.kwargs["request"].parent for call in gcp_client.list_files.call_args_list] == [
+            upstream_a, upstream_b,
+        ]
+
+        gcp_client.reset_mock()
+        latest = finder.find_artifact_urls(artifact_id="test-component", version="*", extension="yaml", latest=True)
+        assert latest == [expected_url("2.0.0")]
+        # upstreams of the configured repository are resolved once per provider instance
+        gcp_client.get_repository.assert_not_called()
+        assert gcp_client.list_files.call_count == 2
+
+    @patch('google.cloud.artifactregistry_v1.ArtifactRegistryClient')
+    def test_gcp_generic_repository_keeps_download_api_urls(self, gcp_client_cls):
+        # generic repositories have no `pkg.dev` endpoint, so they are always addressed through the download API
+        repository = artifactregistry_v1.Repository
+        repo = "projects/proj/locations/us/repositories/generic-repo"
+        encoded = "some_sd%2F16.0.2-RELEASE%2Fsome_sd-16.0.2-RELEASE.json"
+
+        gcp_client = Mock()
+        gcp_client_cls.return_value = gcp_client
+        gcp_client.get_repository.return_value = SimpleNamespace(
+            mode=repository.Mode.STANDARD_REPOSITORY,
+            format=repository.Format.GENERIC,
+            virtual_repository_config=None,
+        )
+        gcp_client.list_files.return_value = [SimpleNamespace(name=f"{repo}/files/{encoded}")]
+
+        finder = ArtifactFinder(artifact_provider=GcpArtifactRegistryProvider(
+            credentials=Credentials(google_credentials_object=Mock(), authorized_session=Mock()),
+            project="proj", region_name="us", repository="generic-repo"))
+
+        urls = finder.find_artifact_urls(artifact_id="some_sd", version="16.0.2-RELEASE", extension="json")
+
+        assert urls == [f"https://artifactregistry.googleapis.com/download/v1/{repo}/files/{encoded}:download?alt=media"]
+
+    @patch('google.cloud.artifactregistry_v1.ArtifactRegistryClient')
+    def test_gcp_virtual_repository_with_unsupported_format(self, gcp_client_cls):
+        # Artifact Registry supports virtual repositories for the maven format only
+        repository = artifactregistry_v1.Repository
+        virtual_repo = "projects/proj/locations/us/repositories/generic-virtual-repo"
+        upstream = "projects/proj/locations/us/repositories/generic-repo"
+        encoded = "some_sd%2F16.0.2-RELEASE%2Fsome_sd-16.0.2-RELEASE.json"
+
+        gcp_client = Mock()
+        gcp_client_cls.return_value = gcp_client
+        gcp_client.get_repository.side_effect = lambda name: SimpleNamespace(
+            mode=repository.Mode.VIRTUAL_REPOSITORY if name == virtual_repo else repository.Mode.STANDARD_REPOSITORY,
+            format=repository.Format.GENERIC,
+            virtual_repository_config=SimpleNamespace(upstream_policies=[SimpleNamespace(repository=upstream, priority=100)])
+        )
+        gcp_client.list_files.return_value = [SimpleNamespace(name=f"{upstream}/files/{encoded}")]
+
+        finder = ArtifactFinder(artifact_provider=GcpArtifactRegistryProvider(
+            credentials=Credentials(google_credentials_object=Mock(), authorized_session=Mock()),
+            project="proj", region_name="us", repository="generic-virtual-repo"
+        ))
+
+        with pytest.raises(Exception) as ex:
+            finder.find_artifact_urls(artifact_id="some_sd", version="16.0.2-RELEASE", extension="json")
+
+        assert "can't be served by a virtual repository" in ex.value.args[0]
+
+    @patch('google.cloud.artifactregistry_v1.ArtifactRegistryClient')
+    def test_gcp_virtual_repository_resolves_snapshot(self, gcp_client_cls):
+        repository = artifactregistry_v1.Repository
+        virtual_repo = "projects/proj/locations/us/repositories/virtual-repo"
+        upstream = "projects/proj/locations/us/repositories/upstream-repo"
+        encoded = "com%2Fexample%2Ftest-component%2F1.0-SNAPSHOT%2Fmaven-metadata.xml"
+        metadata = (b"<metadata><versioning><snapshot><timestamp>20250101.010203</timestamp>"
+                    b"<buildNumber>1</buildNumber></snapshot></versioning></metadata>")
+
+        authorized_session = Mock()
+        metadata_response = Mock()
+        metadata_response.content = metadata
+        authorized_session.get.return_value = metadata_response
+
+        gcp_client = Mock()
+        gcp_client_cls.return_value = gcp_client
+        gcp_client.get_repository.side_effect = lambda name: SimpleNamespace(
+            mode=repository.Mode.VIRTUAL_REPOSITORY if name == virtual_repo else repository.Mode.STANDARD_REPOSITORY,
+            format=repository.Format.MAVEN,
+            virtual_repository_config=SimpleNamespace(upstream_policies=[SimpleNamespace(repository=upstream, priority=100)])
+        )
+        gcp_client.list_files.return_value = [SimpleNamespace(name=f"{upstream}/files/{encoded}")]
+
+        finder = ArtifactFinder(artifact_provider=GcpArtifactRegistryProvider(
+            credentials=Credentials(google_credentials_object=Mock(), authorized_session=authorized_session),
+            project="proj", region_name="us", repository="virtual-repo"))
+
+        urls = finder.find_artifact_urls(artifact_id="test-component", version="1.0-SNAPSHOT", extension="jar")
+
+        assert urls == ["https://us-maven.pkg.dev/proj/virtual-repo/com/example/test-component/1.0-SNAPSHOT/test-component-1.0-20250101.010203-1.jar"]
+        # maven-metadata.xml is also read through the virtual repository, not from its upstream
+        authorized_session.get.assert_called_once_with(
+            url="https://us-maven.pkg.dev/proj/virtual-repo/com/example/test-component/1.0-SNAPSHOT/maven-metadata.xml",
+            timeout=None,
+        )
+
+    def test_deduplicate_keeps_original_order(self):
+        assert ArtifactFinderUtils.deduplicate(["a", "b", "a", "c", "b"]) == ["a", "b", "c"]
+        assert ArtifactFinderUtils.deduplicate([]) == []
