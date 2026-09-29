@@ -13,17 +13,27 @@ jobs:
       MINIO_USER: admin
       MINIO_PASSWORD: admin123
       GITLAB_QUBER_TOKEN: ${{ secrets.GITLAB_QUBER_TOKEN }}
-    services:
-      minio:
-        image: minio/minio:edge-cicd
-        ports:
-          - 9000:9000
-        env:
-          MINIO_ROOT_USER: ${{ env.MINIO_USER }}
-          MINIO_ROOT_PASSWORD: ${{ env.MINIO_PASSWORD }}
-        options: --health-cmd "curl -I http://localhost:9000/minio/health/live"
     steps:
       - uses: actions/checkout@v6
+
+      - name: Start MinIO
+        run: |
+          docker run -d --name minio \
+            -p 9000:9000 \
+            -e MINIO_ROOT_USER="$MINIO_USER" \
+            -e MINIO_ROOT_PASSWORD="$MINIO_PASSWORD" \
+            ghcr.io/netcracker/qubership-minio:RELEASE.2026-06-26T06-18-36Z@sha256:8738ba45f08a2a8ed2f61491ffc7ff8c350ac64c20600bebcf80d3af930154ca \
+            server /data
+          for i in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:9000/minio/health/live; then
+              echo "MinIO is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "MinIO did not become ready in time"
+          docker logs minio
+          exit 1
 
       - name: Setup MiniO
         run: ./.github/scripts/setup_minio.sh
