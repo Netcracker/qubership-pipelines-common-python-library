@@ -16,6 +16,11 @@ class ArtifactFinder:
 
     Providers might slightly differ in functionality, refer to the Provider docs
 
+    Artifactory and Nexus providers accept an optional `repositories` list of repository keys. When it is set,
+    searches with exact coordinates (a `group_id` and a version without wildcards) resolve download URLs directly
+    against those repositories before falling back to the registry search API. This supports proxy, remote, and group
+    repositories where search does not return uncached artifacts.
+
     Provides different auth methods for Cloud Providers, implementing `CloudCredentialsProvider` interface
 
     When searching with ``latest=True``, the newest version is chosen by a pluggable comparer.

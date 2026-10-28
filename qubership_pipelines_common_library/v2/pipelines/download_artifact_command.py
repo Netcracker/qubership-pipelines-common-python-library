@@ -59,11 +59,13 @@ class DownloadArtifact(ExecutionCommand):
                 "registry_url": "artifactory_url",              Refer to ArtifactFinder docs and specific Cloud Providers for more information
                 "username": "user",
                 "password": "pass",
+                "repositories": ["libs-release", "libs-snapshot"],      OPTIONAL: ordered repository keys; enables direct URL resolution for exact coordinates
             },
             "nexus": {
-                "registry_url": "nexus_url",
+                "registry_url": "nexus_url",                    registry root URL, not a repository URL
                 "username": "user",
                 "password": "pass",
+                "repositories": ["maven-releases", "maven-snapshots"],  OPTIONAL: ordered repository names; enables direct URL resolution for exact coordinates
             },
             "aws": {
                 "auth_type": "DIRECT | ASSUME_ROLE",

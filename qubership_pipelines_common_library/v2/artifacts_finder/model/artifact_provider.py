@@ -8,8 +8,6 @@ from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact impor
 class ArtifactProvider(ABC):
     """Base class for all artifact providers"""
 
-    TIMESTAMP_VERSION_PATTERN = "^(.*-)?([0-9]{8}\\.[0-9]{6}-[0-9]+)$"
-
     def __init__(self, params: dict = None, **kwargs):
         self.params = params if params else {}
         self._session = requests.Session()

@@ -1,5 +1,4 @@
 import logging
-import re
 
 from pathlib import Path
 from requests.auth import HTTPBasicAuth
@@ -34,8 +33,8 @@ class AzureArtifactsProvider(ArtifactProvider):
             return self._search_wildcard_versions(artifact, latest=latest, comparer=comparer)
 
         acceptable_versions = [artifact.version]
-        if timestamp_version_match := re.match(self.TIMESTAMP_VERSION_PATTERN, artifact.version):
-            acceptable_versions.append(timestamp_version_match.group(1) + "SNAPSHOT")
+        if artifact.is_timestamped_snapshot():
+            acceptable_versions.append(f"{artifact.snapshot_base_version()}-SNAPSHOT")
 
         result_urls = []
         for feed_pkg in self._search_packages(artifact):
