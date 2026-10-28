@@ -15,7 +15,7 @@ from qubership_pipelines_common_library.v2.artifacts_finder.providers.artifactor
 from qubership_pipelines_common_library.v2.artifacts_finder.providers.azure_artifacts import AzureArtifactsProvider
 from qubership_pipelines_common_library.v2.artifacts_finder.providers.gcp_artifact_registry import GcpArtifactRegistryProvider
 from qubership_pipelines_common_library.v2.artifacts_finder.providers.nexus import NexusProvider
-from qubership_pipelines_common_library.v2.artifacts_finder.utils.artifact_finder_utils import ArtifactFinderUtils
+from qubership_pipelines_common_library.v2.artifacts_finder.utils.artifact_finder_utils import ArtifactFinderUtils, ArtifactProviderFactory
 
 
 class TestArtifactFinder:
@@ -416,3 +416,178 @@ class TestArtifactFinder:
     def test_deduplicate_keeps_original_order(self):
         assert ArtifactFinderUtils.deduplicate(["a", "b", "a", "c", "b"]) == ["a", "b", "c"]
         assert ArtifactFinderUtils.deduplicate([]) == []
+
+
+class TestDirectUrlResolution:
+
+    @staticmethod
+    def _gavc_response(*versions):
+        response = Mock()
+        response.status_code = 200
+        response.json.return_value = {"results": [
+            {"downloadUri": f"https://search.example.com/{version}/demo-{version}.json",
+             "ext": "json", "version": version}
+            for version in versions
+        ]}
+        return response
+
+    @staticmethod
+    def _head(status_code=200, headers=None):
+        response = Mock()
+        response.status_code = status_code
+        response.headers = headers or {}
+        response.close = Mock()
+        return response
+
+    @staticmethod
+    def _nexus_empty_search_response():
+        response = Mock()
+        response.status_code = 200
+        response.json.return_value = {"items": []}
+        return response
+
+    @patch('requests.sessions.Session.head')
+    @patch('requests.sessions.Session.get')
+    def test_provider_without_repositories_uses_search(self, session_get, session_head):
+        session_get.return_value = self._gavc_response("1.0.0")
+        finder = ArtifactFinder(artifact_provider=ArtifactoryProvider(
+            registry_url="http://mock.artifactory/artifactory"))
+
+        urls = finder.find_artifact_urls(group_id="com.example", artifact_id="demo",
+                                         version="1.0.0", extension="json")
+
+        assert urls == ["https://search.example.com/1.0.0/demo-1.0.0.json"]
+        session_head.assert_not_called()
+
+    @patch('requests.sessions.Session.head')
+    @patch('requests.sessions.Session.get')
+    def test_direct_resolution_requires_group_and_exact_version(self, session_get, session_head):
+        session_get.return_value = self._gavc_response("1.0.0")
+        finder = ArtifactFinder(artifact_provider=ArtifactoryProvider(
+            registry_url="http://mock.artifactory/artifactory", repositories=["libs-release-local"]))
+
+        finder.find_artifact_urls(artifact_id="demo", version="1.0.0", extension="json")
+        finder.find_artifact_urls(group_id="com.example", artifact_id="demo", version="1.0.*", extension="json")
+
+        session_head.assert_not_called()
+        assert session_get.call_count == 2
+
+    @patch('requests.sessions.Session.head')
+    @patch('requests.sessions.Session.get')
+    def test_artifactory_direct_url_release_hit(self, session_get, session_head):
+        session_head.return_value = self._head()
+        finder = ArtifactFinder(artifact_provider=ArtifactoryProvider(
+            registry_url="http://mock.artifactory/artifactory", repositories=["libs-release-local"]))
+
+        urls = finder.find_artifact_urls(group_id="com.example", artifact_id="demo",
+                                         version="1.0.0", extension="json")
+
+        assert urls == [
+            "http://mock.artifactory/artifactory/libs-release-local/com/example/demo/1.0.0/demo-1.0.0.json"
+        ]
+        session_get.assert_not_called()
+        session_head.assert_called_once_with(
+            "http://mock.artifactory/artifactory/libs-release-local/com/example/demo/1.0.0/demo-1.0.0.json",
+            timeout=None, allow_redirects=True,
+        )
+
+    @patch('requests.sessions.Session.head')
+    @patch('requests.sessions.Session.get')
+    def test_direct_miss_falls_back_to_search(self, session_get, session_head):
+        session_head.return_value = self._head(status_code=404)
+        session_get.return_value = self._gavc_response("1.0.0")
+        finder = ArtifactFinder(artifact_provider=ArtifactoryProvider(
+            registry_url="http://mock.artifactory/artifactory", repositories=["libs-release-local"]))
+
+        urls = finder.find_artifact_urls(group_id="com.example", artifact_id="demo",
+                                         version="1.0.0", extension="json")
+
+        assert urls == ["https://search.example.com/1.0.0/demo-1.0.0.json"]
+
+    @patch('requests.sessions.Session.head')
+    @patch('requests.sessions.Session.get')
+    def test_multiple_repositories_return_all_hits_in_order(self, session_get, session_head):
+        session_head.return_value = self._head()
+        finder = ArtifactFinder(artifact_provider=ArtifactoryProvider(
+            registry_url="http://mock.artifactory/artifactory",
+            repositories=["libs-release", "libs-staging", "libs-release"]))
+
+        urls = finder.find_artifact_urls(group_id="com.example", artifact_id="demo",
+                                         version="1.0.0", extension="json")
+
+        assert urls == [
+            "http://mock.artifactory/artifactory/libs-release/com/example/demo/1.0.0/demo-1.0.0.json",
+            "http://mock.artifactory/artifactory/libs-staging/com/example/demo/1.0.0/demo-1.0.0.json",
+        ]
+        session_get.assert_not_called()
+
+    @patch('requests.sessions.Session.head')
+    @patch('requests.sessions.Session.get')
+    def test_nexus_browse_fallback_for_repository_suffix(self, session_get, session_head):
+        session_head.side_effect = [self._head(status_code=404), self._head()]
+        finder = ArtifactFinder(artifact_provider=NexusProvider(
+            registry_url="https://mock.nexus.url/repository", repositories=["maven-public"]))
+
+        urls = finder.find_artifact_urls(group_id="com.example", artifact_id="demo",
+                                         version="1.0.0", extension="json")
+
+        assert urls == [
+            "https://mock.nexus.url/service/rest/repository/browse/maven-public/"
+            "com/example/demo/1.0.0/demo-1.0.0.json"
+        ]
+        assert [call.args[0] for call in session_head.call_args_list] == [
+            "https://mock.nexus.url/repository/maven-public/com/example/demo/1.0.0/demo-1.0.0.json",
+            "https://mock.nexus.url/service/rest/repository/browse/maven-public/"
+            "com/example/demo/1.0.0/demo-1.0.0.json",
+        ]
+        session_get.assert_not_called()
+
+    @patch('requests.sessions.Session.head')
+    @patch('requests.sessions.Session.get')
+    def test_nexus_browse_fallback_for_root_registry_url(self, session_get, session_head):
+        session_head.side_effect = [self._head(status_code=404), self._head()]
+        finder = ArtifactFinder(artifact_provider=NexusProvider(
+            registry_url="https://mock.nexus.url", repositories=["maven-public"]))
+
+        urls = finder.find_artifact_urls(group_id="com.example", artifact_id="demo",
+                                         version="1.0.0", extension="json")
+
+        assert urls == [
+            "https://mock.nexus.url/service/rest/repository/browse/maven-public/"
+            "com/example/demo/1.0.0/demo-1.0.0.json"
+        ]
+        assert [call.args[0] for call in session_head.call_args_list] == [
+            "https://mock.nexus.url/repository/maven-public/com/example/demo/1.0.0/demo-1.0.0.json",
+            "https://mock.nexus.url/service/rest/repository/browse/maven-public/"
+            "com/example/demo/1.0.0/demo-1.0.0.json",
+        ]
+        session_get.assert_not_called()
+
+    @patch('requests.sessions.Session.head')
+    @patch('requests.sessions.Session.get')
+    def test_nexus_browse_html_is_miss(self, session_get, session_head):
+        session_head.side_effect = [
+            self._head(status_code=404),
+            self._head(headers={"Content-Type": "text/html; charset=UTF-8"}),
+        ]
+        session_get.return_value = self._nexus_empty_search_response()
+        finder = ArtifactFinder(artifact_provider=NexusProvider(
+            registry_url="https://mock.nexus.url/repository", repositories=["maven-public"]))
+
+        urls = finder.find_artifact_urls(group_id="com.example", artifact_id="demo",
+                                         version="1.0.0", extension="json")
+
+        assert urls == []
+
+    def test_invalid_repositories_config_raises(self):
+        with pytest.raises(Exception):
+            ArtifactoryProvider(registry_url="http://mock.artifactory/artifactory", repositories=[1])
+
+    def test_factory_passes_repositories_to_providers(self):
+        artifactory = ArtifactProviderFactory.create_artifactory_provider(
+            {"registry_url": "http://mock.artifactory/artifactory", "repositories": ["libs-release"]}, {})
+        nexus = ArtifactProviderFactory.create_nexus_provider(
+            {"registry_url": "https://mock.nexus.url", "repositories": ["maven-public"]}, {})
+
+        assert artifactory._content_bases[0].url == "http://mock.artifactory/artifactory/libs-release"
+        assert nexus._content_bases[0].url == "https://mock.nexus.url/repository/maven-public"

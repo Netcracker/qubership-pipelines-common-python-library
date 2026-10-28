@@ -1,3 +1,5 @@
+import logging
+
 from qubership_pipelines_common_library.v1.execution.exec_command import ExecutionCommand
 from qubership_pipelines_common_library.v1.utils.utils_dictionary import UtilsDictionary
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact import Artifact
@@ -11,6 +13,7 @@ class ArtifactProviderFactory:
             registry_url=provider_params.get("registry_url"),
             username=provider_params.get("username"),
             password=provider_params.get("password"),
+            repositories=provider_params.get("repositories"),
             params=common_params,
         )
         return provider
@@ -22,6 +25,7 @@ class ArtifactProviderFactory:
             registry_url=provider_params.get("registry_url"),
             username=provider_params.get("username"),
             password=provider_params.get("password"),
+            repositories=provider_params.get("repositories"),
             params=common_params,
         )
         return provider
@@ -190,24 +194,50 @@ class ArtifactFinderUtils:
 
     @staticmethod
     def resolve_snapshot_versions(artifact: Artifact, download_urls: list, provider) -> list[str]:
-        groups = {}
+        base_urls = {}
         for url in download_urls:
             group_id = ArtifactFinderUtils.extract_group_id_from_artifact_url(url)
-            if group_id in groups:
+            if group_id in base_urls:
                 continue
-            base_url = url.rsplit("/", maxsplit=1)[0]
-            groups[group_id] = {
-                "snapshot_url": f"{base_url}/{artifact.artifact_id}-{artifact.version.removesuffix('-SNAPSHOT')}",
-                "metadata_url": f"{base_url}/maven-metadata.xml",
-            }
+            base_urls[group_id] = url.rsplit("/", maxsplit=1)[0]
 
+        base_version = artifact.snapshot_base_version()
         result = []
-        for urls in groups.values():
-            metadata_response = provider._session.get(url=urls.get("metadata_url"), timeout=provider.timeout)
+        for base_url in base_urls.values():
+            metadata_url = f"{base_url}/maven-metadata.xml"
+            metadata_response = provider._session.get(url=metadata_url, timeout=provider.timeout)
             metadata_response.raise_for_status()
-            timestamp = ArtifactFinderUtils.extract_metadata_snapshot_timestamp(metadata_response.content)
-            result.append(f'{urls.get("snapshot_url")}-{timestamp}.{artifact.extension}')
+            resolved_version = ArtifactFinderUtils.resolve_snapshot_version_from_metadata(metadata_response.content, base_version, artifact.extension)
+            if not resolved_version:
+                logging.warning(f"Could not resolve snapshot version in '{metadata_url}'")
+                continue
+            result.append(f"{base_url}/{artifact.artifact_id}-{resolved_version}.{artifact.extension}")
         return result
+
+    @staticmethod
+    def resolve_snapshot_version_from_metadata(metadata_content, base_version: str, extension: str,
+                                               classifier: str = "") -> str | None:
+        """Return the unique snapshot version from version-level `maven-metadata.xml`, or None.
+
+        Uses the `<snapshotVersions>` entry matching `extension` and an empty classifier, and falls back to the
+        `<versioning><snapshot>` timestamp and build number.
+        """
+        import xml.etree.ElementTree as ET
+        try:
+            metadata_xml = ET.fromstring(metadata_content)
+        except ET.ParseError:
+            return None
+        for node in reversed(metadata_xml.findall(".//snapshotVersions/snapshotVersion")):
+            node_classifier = node.findtext("classifier", default="")
+            node_extension = node.findtext("extension", default="")
+            value = node.findtext("value")
+            if node_classifier == classifier and node_extension == extension and value:
+                return value
+        timestamp = metadata_xml.findtext("./versioning/snapshot/timestamp")
+        build_number = metadata_xml.findtext("./versioning/snapshot/buildNumber")
+        if timestamp and build_number:
+            return f"{base_version}-{timestamp}-{build_number}"
+        return None
 
     @staticmethod
     def extract_group_id_from_artifact_url(artifact_url: str) -> str:
@@ -223,11 +253,7 @@ class ArtifactFinderUtils:
 
     @staticmethod
     def parse_snapshot_timestamp_version(version_str: str) -> tuple | None:
-        import re
-        match = re.match(r'^(.+)-(\d{8}\.\d{6}-(\d+))$', version_str)
-        if match:
-            return match.group(1), match.group(2), int(match.group(3))
-        return None
+        return Artifact.parse_timestamped_version(version_str)
 
     @staticmethod
     def extract_metadata_snapshot_timestamp(metadata_content: str) -> str:
