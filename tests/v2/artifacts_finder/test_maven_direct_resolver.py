@@ -234,7 +234,7 @@ class TestSearchSnapshotResolution:
     def test_search_snapshot_resolution_skips_unresolvable_candidate(self, caplog):
         provider = Mock()
         provider.timeout = None
-        provider._session.get.return_value = mock_response(content=b"<metadata/>")
+        provider.get_session.return_value.get.return_value = mock_response(content=b"<metadata/>")
 
         with caplog.at_level("WARNING"):
             urls = ArtifactFinderUtils.resolve_snapshot_versions(

@@ -3,6 +3,7 @@ import pytest
 
 from pathlib import Path
 from unittest.mock import patch, MagicMock
+from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactSearchResult
 from qubership_pipelines_common_library.v2.pipelines.download_artifact_command import DownloadArtifact
 
 
@@ -62,8 +63,9 @@ class TestDownloadArtifact:
         input_params['params']['target_path'] = Path(tmp_path).joinpath("module_cli").as_posix()
         input_params['systems'] = {"registry":{"nexus": {"registry_url": "some_nexus_url"}}}
 
-        nexus_search.return_value = ["test_resource_url"]
+        nexus_search.return_value = ArtifactSearchResult(urls=["test_resource_url"])
         get_response = MagicMock()
+        get_response.status_code = 200
         get_response.content = TestDownloadArtifact.create_sample_zip()
         session_get.return_value = get_response
 

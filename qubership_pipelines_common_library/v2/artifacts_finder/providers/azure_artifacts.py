@@ -1,9 +1,12 @@
 import logging
 
+import requests
+
 from pathlib import Path
+from urllib.parse import unquote, urlparse
 from requests.auth import HTTPBasicAuth
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact import Artifact
-from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider
+from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider, ArtifactSearchResult
 from qubership_pipelines_common_library.v2.artifacts_finder.model.credentials import Credentials
 from qubership_pipelines_common_library.v2.artifacts_finder.utils.artifact_finder_utils import ArtifactFinderUtils
 
@@ -28,9 +31,16 @@ class AzureArtifactsProvider(ArtifactProvider):
     def download_artifact(self, resource_url: str, local_path: str | Path, **kwargs) -> None:
         return self.generic_download(resource_url=resource_url, local_path=local_path)
 
-    def search_artifacts(self, artifact: Artifact, latest: bool = False, comparer=None, **kwargs) -> list[str]:
+    def get_resource_filename(self, resource_url: str) -> str:
+        path = urlparse(resource_url).path.rstrip("/")
+        segments = path.split("/")
+        if len(segments) > 1 and segments[-1] == "content":
+            return unquote(segments[-2])
+        return super().get_resource_filename(resource_url)
+
+    def search_artifacts(self, artifact: Artifact, latest: bool = False, comparer=None, **kwargs) -> ArtifactSearchResult:
         if artifact.has_version_wildcard():
-            return self._search_wildcard_versions(artifact, latest=latest, comparer=comparer)
+            return ArtifactSearchResult(self._search_wildcard_versions(artifact, latest=latest, comparer=comparer))
 
         acceptable_versions = [artifact.version]
         if artifact.is_timestamped_snapshot():
@@ -57,7 +67,7 @@ class AzureArtifactsProvider(ArtifactProvider):
 
             result_urls.append(self._build_download_url(pkg_links, filtered_feed_version, target_file.get("name")))
 
-        return result_urls
+        return ArtifactSearchResult(result_urls)
 
     def get_provider_name(self) -> str:
         return "azure_artifacts"
@@ -92,12 +102,13 @@ class AzureArtifactsProvider(ArtifactProvider):
             "protocolType": "maven",
             "api-version": "7.1",
         }
-        feeds_response = self._session.get(url=feeds_search_url, params=feed_search_params, timeout=self.timeout)
-        feeds_response_json = feeds_response.json()
+        try:
+            feeds_response = self.get_session().get(url=feeds_search_url, params=feed_search_params, timeout=self.timeout)
+        except requests.RequestException as e:
+            raise Exception(f"Could not find '{artifact.artifact_id}' - {self._describe_request_error(e, 'GET', feeds_search_url, feed_search_params)}") from e
         if feeds_response.status_code != 200:
-            logging.error(f"Feeds search error ({feeds_response.status_code}) response: {feeds_response_json}")
-            raise Exception(f"Could not find '{artifact.artifact_id}' - search request returned {feeds_response.status_code}!")
-
+            raise Exception(f"Could not find '{artifact.artifact_id}' - {self._describe_http_response(feeds_response, 'GET', feeds_search_url, feed_search_params)}")
+        feeds_response_json = feeds_response.json()
         logging.debug(f"Feeds search response: {feeds_response_json}")
         packages = feeds_response_json.get("value", [])
         if not packages:
@@ -110,9 +121,14 @@ class AzureArtifactsProvider(ArtifactProvider):
         pkg_versions_url = pkg_links.get("versions", {}).get("href", "")
         if not pkg_versions_url:
             return []
-        response = self._session.get(url=pkg_versions_url, params={"isDeleted": "false"}, timeout=self.timeout)
+        params = {"isDeleted": "false"}
+        try:
+            response = self.get_session().get(url=pkg_versions_url, params=params, timeout=self.timeout)
+        except requests.RequestException as e:
+            logging.warning(f"Skipping package, versions request failed: {self._describe_request_error(e, 'GET', pkg_versions_url, params)}")
+            return []
         if response.status_code != 200:
-            logging.warning(f"Skipping package, versions request returned {response.status_code}")
+            logging.warning(f"Skipping package, versions request failed: {self._describe_http_response(response, 'GET', pkg_versions_url, params)}")
             return []
         return response.json().get("value", [])
 

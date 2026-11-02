@@ -182,8 +182,12 @@ class ArtifactFinderUtils:
 
             provider_name = configured_providers[0]
             provider_config = ArtifactFinderUtils.PROVIDERS_CONFIG.get(provider_name)
-            provider_params = params.get(provider_name)
-            common_params = {"timeout": cmd.timeout_seconds, "verify": cmd.verify}
+            provider_params = params.get(provider_name) or {}
+            common_params = {
+                "timeout": cmd.timeout_seconds,
+                "verify": cmd.verify,
+                "max_retries": provider_params.get("max_retries", 0),
+            }
             if missing := UtilsDictionary.check_required_fields(provider_params, provider_config.get("required_fields", [])):
                 raise Exception(f"Missing required fields for {provider_name}: {missing}")
 
@@ -205,7 +209,7 @@ class ArtifactFinderUtils:
         result = []
         for base_url in base_urls.values():
             metadata_url = f"{base_url}/maven-metadata.xml"
-            metadata_response = provider._session.get(url=metadata_url, timeout=provider.timeout)
+            metadata_response = provider.get_session().get(url=metadata_url, timeout=provider.timeout)
             metadata_response.raise_for_status()
             resolved_version = ArtifactFinderUtils.resolve_snapshot_version_from_metadata(metadata_response.content, base_version, artifact.extension)
             if not resolved_version:

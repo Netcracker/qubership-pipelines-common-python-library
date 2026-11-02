@@ -126,3 +126,33 @@ def normalize_repository_keys(repositories: str | list[str] | None) -> list[str]
             raise Exception("Artifact 'repositories' must contain non-empty repository keys")
         keys.append(normalized)
     return ArtifactFinderUtils.deduplicate(keys)
+
+
+class MavenDirectResolutionMixin:
+    """Adds direct Maven URL resolution with one resolver per thread to a provider.
+
+    The provider implements `_build_content_bases(keys)`. The mixin keeps the constructor-level bases and builds
+    per-request bases from the caller's repository keys; it assumes the provider supplies `get_session()` and
+    `timeout` through `ArtifactProvider`.
+    """
+
+    def _init_direct_resolution(self, repositories: str | list[str] | None) -> None:
+        self._content_bases = self._build_content_bases(normalize_repository_keys(repositories))
+
+    def _build_content_bases(self, keys: list[str]) -> list[RepositoryContentBase]:
+        raise NotImplementedError
+
+    def _content_bases_for(self, repositories: str | list[str] | None) -> list[RepositoryContentBase]:
+        if repositories is None:
+            return self._content_bases
+        return self._build_content_bases(normalize_repository_keys(repositories))
+
+    def _get_direct_resolver(self) -> MavenDirectResolver:
+        resolver = getattr(self._thread_local, "direct_resolver", None)
+        if resolver is None:
+            resolver = MavenDirectResolver(self.get_session(), self.timeout)
+            self._thread_local.direct_resolver = resolver
+        return resolver
+
+    def _resolve_direct_urls(self, artifact: Artifact, repositories: str | list[str] | None) -> list[str] | None:
+        return self._get_direct_resolver().resolve_if_applicable(artifact, self._content_bases_for(repositories))
