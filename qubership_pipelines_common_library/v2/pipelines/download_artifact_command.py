@@ -102,6 +102,9 @@ class DownloadArtifact(ExecutionCommand):
     }
     ```
 
+    Each provider section accepts an optional `max_retries` (default 0). A positive value enables the provider's
+    native retry handling for transient connection and server failures; 0 disables retries.
+
     Output Parameters:
         - params.target_path: Path where PYZ Module was extracted
         - params.file_size: File size of downloaded artifact (in bytes)

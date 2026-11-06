@@ -1,10 +1,14 @@
 import logging
 
+import requests
+
 from pathlib import Path
-from urllib.parse import unquote
+from urllib.parse import unquote, urlparse
+from google.api_core import exceptions, retry
+from google.auth.transport.requests import AuthorizedSession
 from google.cloud import artifactregistry_v1
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact import Artifact
-from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider
+from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider, ArtifactSearchResult
 from qubership_pipelines_common_library.v2.artifacts_finder.model.credentials import Credentials
 from qubership_pipelines_common_library.v2.artifacts_finder.utils.artifact_finder_utils import ArtifactFinderUtils
 
@@ -42,24 +46,43 @@ class GcpArtifactRegistryProvider(ArtifactProvider):
         self._repository = repository
         self._repo_resource_id = f"projects/{project}/locations/{region_name}/repositories/{repository}"
 
-        self._gcp_client = artifactregistry_v1.ArtifactRegistryClient(
-            credentials=self._credentials.google_credentials_object
-        )
-        self._authorized_session = self._credentials.authorized_session
+        google_credentials = self._credentials.google_credentials_object
+        if google_credentials is None and isinstance(self._credentials.authorized_session, AuthorizedSession):
+            google_credentials = self._credentials.authorized_session.credentials
+        self._gcp_client = artifactregistry_v1.ArtifactRegistryClient(credentials=google_credentials)
         self._repository_configs = {}
         self._repositories_to_search = None
+        self._apply_pool_settings(self._session_template())
 
     def download_artifact(self, resource_url: str, local_path: str | Path, **kwargs) -> None:
-        response = self._authorized_session.get(url=resource_url, timeout=self.timeout)
-        response.raise_for_status()
-        with open(local_path, 'wb') as file:
-            file.write(response.content)
+        return self.generic_download(resource_url=resource_url, local_path=local_path)
 
-    def search_artifacts(self, artifact: Artifact, latest: bool = False, comparer=None, **kwargs) -> list[str]:
+    def get_resource_filename(self, resource_url: str) -> str:
+        path = unquote(urlparse(resource_url).path)
+        # Generic repositories use "<package>:<version>:<filename>" in the last segment; maven paths have no colon.
+        filename = path.rstrip("/").rsplit("/", 1)[-1].removesuffix(":download")
+        return filename.rsplit(":", 1)[-1]
+
+    def _session_template(self) -> requests.Session:
+        template = self._credentials.authorized_session
+        return template if isinstance(template, requests.Session) else self._session
+
+    def _new_session(self) -> AuthorizedSession:
+        template = self._session_template()
+        credentials = self._credentials.google_credentials_object
+        if credentials is None and isinstance(template, AuthorizedSession):
+            credentials = template.credentials
+        if credentials is None:
+            raise ValueError("GCP provider requires 'google_credentials_object' or an authorized session with credentials")
+        session = AuthorizedSession(credentials=credentials)
+        self._copy_session_settings(session, template)
+        return session
+
+    def search_artifacts(self, artifact: Artifact, latest: bool = False, comparer=None, **kwargs) -> ArtifactSearchResult:
         if artifact.has_version_wildcard():
-            return self._search_wildcard_versions(artifact, latest=latest, comparer=comparer)
+            return ArtifactSearchResult(self._search_wildcard_versions(artifact, latest=latest, comparer=comparer))
         if artifact.is_snapshot():
-            return self._search_snapshot_artifacts(artifact)
+            return ArtifactSearchResult(self._search_snapshot_artifacts(artifact))
 
         group_filter = self._group_filter(artifact)
         urls = []
@@ -69,7 +92,7 @@ class GcpArtifactRegistryProvider(ArtifactProvider):
                 if group_filter and group_filter not in unquote(file.name):
                     continue
                 urls.append(self._build_download_url(file.name, parent_repo))
-        return ArtifactFinderUtils.deduplicate(urls)
+        return ArtifactSearchResult(ArtifactFinderUtils.deduplicate(urls))
 
     def get_provider_name(self) -> str:
         return "gcp_artifact_registry"
@@ -100,12 +123,45 @@ class GcpArtifactRegistryProvider(ArtifactProvider):
             return [latest_url] if latest_url else []
         return [url for _, url in candidates]
 
+    def _grpc_call_options(self) -> dict:
+        if self._max_retries <= 0:
+            return {"retry": None}
+        timeout = self.timeout
+        if isinstance(timeout, (tuple, list)):
+            timeout = max(timeout)
+        retryable = retry.if_exception_type(
+            exceptions.ServiceUnavailable,
+            exceptions.DeadlineExceeded,
+            exceptions.TooManyRequests,
+            exceptions.InternalServerError,
+            exceptions.BadGateway,
+            exceptions.GatewayTimeout,
+        )
+        attempts = 0
+
+        def should_retry(error: Exception) -> bool:
+            # google.api_core.retry.Retry is deadline-based; count retryable failures to honor max_retries.
+            nonlocal attempts
+            if not retryable(error):
+                return False
+            attempts += 1
+            return attempts <= self._max_retries
+
+        policy = retry.Retry(
+            predicate=should_retry,
+            initial=self.RETRY_BACKOFF_FACTOR,
+            maximum=self.RETRY_BACKOFF_MAX,
+            multiplier=2.0,
+            timeout=timeout * (self._max_retries + 1),
+        )
+        return {"retry": policy, "timeout": timeout}
+
     def _list_files(self, parent_repo: str, name_filter: str):
         list_files_request = artifactregistry_v1.ListFilesRequest(
             parent=parent_repo,
             filter=f'name="{name_filter}"',
         )
-        return self._gcp_client.list_files(request=list_files_request)
+        return self._gcp_client.list_files(request=list_files_request, **self._grpc_call_options())
 
     def _search_repositories(self) -> list[str]:
         if self._repositories_to_search is None:
@@ -137,7 +193,7 @@ class GcpArtifactRegistryProvider(ArtifactProvider):
 
     def _get_repository(self, resource_id: str):
         if resource_id not in self._repository_configs:
-            self._repository_configs[resource_id] = self._gcp_client.get_repository(name=resource_id)
+            self._repository_configs[resource_id] = self._gcp_client.get_repository(name=resource_id, **self._grpc_call_options())
         return self._repository_configs[resource_id]
 
     def _get_repository_mode(self):
@@ -170,8 +226,12 @@ class GcpArtifactRegistryProvider(ArtifactProvider):
                     continue
 
                 metadata_url = self._build_download_url(file.name, parent_repo)
-                response = self._authorized_session.get(url=metadata_url, timeout=self.timeout)
-                response.raise_for_status()
+                try:
+                    response = self.get_session().get(url=metadata_url, timeout=self.timeout)
+                except requests.RequestException as e:
+                    raise Exception(self._describe_request_error(e, "GET", metadata_url)) from e
+                if response.status_code != 200:
+                    raise Exception(self._describe_http_response(response, "GET", metadata_url))
                 timestamp = ArtifactFinderUtils.extract_metadata_snapshot_timestamp(response.content)
                 resolved_version = f"{base_version}-{timestamp}"
 

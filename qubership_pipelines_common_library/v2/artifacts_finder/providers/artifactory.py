@@ -1,17 +1,18 @@
 import logging
 
+import requests
+
 from pathlib import Path
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact import Artifact
-from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider
+from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider, ArtifactSearchResult
 from qubership_pipelines_common_library.v2.artifacts_finder.utils.artifact_finder_utils import ArtifactFinderUtils
 from qubership_pipelines_common_library.v2.artifacts_finder.utils.maven_direct_resolver import (
-    MavenDirectResolver,
+    MavenDirectResolutionMixin,
     RepositoryContentBase,
-    normalize_repository_keys,
 )
 
 
-class ArtifactoryProvider(ArtifactProvider):
+class ArtifactoryProvider(MavenDirectResolutionMixin, ArtifactProvider):
 
     def __init__(self, registry_url: str, username: str = None, password: str = None, repositories: str | list[str] = None, **kwargs):
         """
@@ -33,18 +34,18 @@ class ArtifactoryProvider(ArtifactProvider):
         if password:
             from requests.auth import HTTPBasicAuth
             self._session.auth = HTTPBasicAuth(username, password)
-        self._direct_resolver = MavenDirectResolver(self._session, self.timeout)
-        self._content_bases = [RepositoryContentBase(url=f"{registry_url.rstrip('/')}/{key}") for key in normalize_repository_keys(repositories)]
+        self._init_direct_resolution(repositories)
 
     def download_artifact(self, resource_url: str, local_path: str | Path, **kwargs) -> None:
         return self.generic_download(resource_url=resource_url, local_path=local_path)
 
-    def search_artifacts(self, artifact: Artifact, latest: bool = False, comparer=None, **kwargs) -> list[str]:
+    def search_artifacts(self, artifact: Artifact, latest: bool = False, comparer=None,
+                         repositories: str | list[str] = None, **kwargs) -> ArtifactSearchResult:
         if artifact.has_version_wildcard():
-            return self._search_wildcard_versions(artifact, latest=latest, comparer=comparer)
+            return ArtifactSearchResult(self._search_wildcard_versions(artifact, latest=latest, comparer=comparer), method="search")
 
-        if direct_urls := self._direct_resolver.resolve_if_applicable(artifact, self._content_bases):
-            return direct_urls
+        if direct_urls := self._resolve_direct_urls(artifact, repositories):
+            return ArtifactSearchResult(direct_urls, method="direct")
 
         is_timestamped_snapshot = artifact.is_timestamped_snapshot()
         if is_timestamped_snapshot:
@@ -65,12 +66,14 @@ class ArtifactoryProvider(ArtifactProvider):
             and (not is_timestamped_snapshot or result["downloadUri"].endswith(f"{artifact.version}.{artifact.extension}"))
         ]
         if artifact.is_snapshot():
-            return ArtifactFinderUtils.resolve_snapshot_versions(artifact=artifact, download_urls=download_urls, provider=self)
-        else:
-            return download_urls
+            download_urls = ArtifactFinderUtils.resolve_snapshot_versions(artifact=artifact, download_urls=download_urls, provider=self)
+        return ArtifactSearchResult(download_urls, method="search")
 
     def get_provider_name(self) -> str:
         return "artifactory"
+
+    def _build_content_bases(self, keys: list[str]) -> list[RepositoryContentBase]:
+        return [RepositoryContentBase(url=f"{self.registry_url.rstrip('/')}/{key}") for key in keys]
 
     def _search_wildcard_versions(self, artifact: Artifact, latest: bool = False, comparer=None) -> list[str]:
         search_params = {
@@ -94,7 +97,10 @@ class ArtifactoryProvider(ArtifactProvider):
     def _gavc_search(self, search_params: dict, artifact_id: str) -> list[dict]:
         search_api_url = f"{self.registry_url}/api/search/gavc"
         logging.debug(f"Search URL: {search_api_url}"f"\nSearch Parameters: {search_params}")
-        response = self._session.get(url=search_api_url, params=search_params, timeout=self.timeout)
+        try:
+            response = self.get_session().get(url=search_api_url, params=search_params, timeout=self.timeout)
+        except requests.RequestException as e:
+            raise Exception(f"Could not find '{artifact_id}' - {self._describe_request_error(e, 'GET', search_api_url, search_params)}") from e
         if response.status_code != 200:
-            raise Exception(f"Could not find '{artifact_id}' - search request returned {response.status_code}!")
+            raise Exception(f"Could not find '{artifact_id}' - {self._describe_http_response(response, 'GET', search_api_url, search_params)}")
         return response.json().get("results", [])

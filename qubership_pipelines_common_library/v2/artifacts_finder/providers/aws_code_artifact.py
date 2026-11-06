@@ -4,7 +4,7 @@ import boto3
 from pathlib import Path
 from botocore.config import Config
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact import Artifact
-from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider
+from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider, ArtifactSearchResult
 from qubership_pipelines_common_library.v2.artifacts_finder.model.credentials import Credentials
 from qubership_pipelines_common_library.v2.artifacts_finder.utils.artifact_finder_utils import ArtifactFinderUtils
 
@@ -23,13 +23,28 @@ class AwsCodeArtifactProvider(ArtifactProvider):
         self._domain = domain
         self._repository = repository
         self._format = package_format
+        config_kwargs = {
+            "region_name": credentials.region_name,
+            "retries": {"total_max_attempts": self._max_retries + 1, "mode": "standard"},
+        }
+        if self._max_retries > 0:
+            connect_timeout, read_timeout = self._timeout_pair()
+            config_kwargs.update({
+                "connect_timeout": connect_timeout,
+                "read_timeout": read_timeout,
+            })
         self._aws_client = boto3.client(
             service_name='codeartifact',
-            config=Config(region_name=credentials.region_name),
+            config=Config(**config_kwargs),
             aws_access_key_id=credentials.access_key,
             aws_secret_access_key=credentials.secret_key,
             aws_session_token=credentials.session_token,
         )
+
+    def _timeout_pair(self) -> tuple[float, float]:
+        if isinstance(self.timeout, (tuple, list)):
+            return self.timeout[0], self.timeout[-1]
+        return self.timeout, self.timeout
 
     def download_artifact(self, resource_url: str, local_path: str | Path, **kwargs) -> None:
         """ 'resource_url' is actually AWS-specific resource_id, expected to be "namespace/package/version/asset_name" """
@@ -43,10 +58,10 @@ class AwsCodeArtifactProvider(ArtifactProvider):
         with open(local_path, 'wb') as file:
             file.write(response.get('asset').read())
 
-    def search_artifacts(self, artifact: Artifact, latest: bool = False, comparer=None, **kwargs) -> list[str]:
+    def search_artifacts(self, artifact: Artifact, latest: bool = False, comparer=None, **kwargs) -> ArtifactSearchResult:
         namespaces = self._resolve_namespaces(artifact)
         if not namespaces:
-            return []
+            return ArtifactSearchResult()
 
         if artifact.has_version_wildcard():
             candidates = self._search_wildcard_versions(artifact, namespaces, latest=latest, comparer=comparer)
@@ -66,7 +81,7 @@ class AwsCodeArtifactProvider(ArtifactProvider):
         for namespace, package_version in candidates:
             results.extend(self._collect_assets(artifact, namespace, package_version))
         logging.info(f"AWS search results: {results}")
-        return results
+        return ArtifactSearchResult(results)
 
     def get_provider_name(self) -> str:
         return "aws_code_artifact"
