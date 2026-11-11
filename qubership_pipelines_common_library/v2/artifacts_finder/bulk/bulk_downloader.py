@@ -10,7 +10,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact import Artifact
-from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider
+from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider, ArtifactProviderError
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_request import ArtifactRequest
 from qubership_pipelines_common_library.v2.artifacts_finder.model.bulk_download_report import (
     BulkArtifactDownloadError,
@@ -19,6 +19,7 @@ from qubership_pipelines_common_library.v2.artifacts_finder.model.bulk_download_
     BulkDownloadResult,
     BulkDownloadStatus,
 )
+from qubership_pipelines_common_library.v2.artifacts_finder.providers.multi_artifact_provider import MultiArtifactProvider
 from qubership_pipelines_common_library.v2.artifacts_finder.utils.maven_direct_resolver import normalize_repository_keys
 
 SKIPPED_ERROR = "Skipped because an earlier artifact failed"
@@ -26,9 +27,37 @@ NOT_FOUND_ERROR = "No matching artifacts found"
 
 
 @dataclass
+class _ProviderFailures:
+    unavailable: dict[ArtifactProvider, str] = field(default_factory=dict)
+    lock: threading.Lock = field(default_factory=threading.Lock)
+
+    def record(self, provider: ArtifactProvider, error: Exception) -> None:
+        reason = _unavailable_reason(error)
+        if reason is not None:
+            with self.lock:
+                self.unavailable.setdefault(provider, reason)
+
+    def reason(self, provider: ArtifactProvider) -> str | None:
+        with self.lock:
+            return self.unavailable.get(provider)
+
+    def snapshot(self) -> dict[ArtifactProvider, str]:
+        with self.lock:
+            return dict(self.unavailable)
+
+
+def _unavailable_reason(error: Exception) -> str | None:
+    if not isinstance(error, ArtifactProviderError):
+        return None
+    description = {401: "authentication failed", 403: "authorization failed", 429: "rate limited"}.get(error.status_code)
+    return f"{description} (HTTP {error.status_code})" if description else None
+
+
+@dataclass
 class _RunState:
     claimed: dict[str, int] = field(default_factory=dict)
     claim_lock: threading.Lock = field(default_factory=threading.Lock)
+    provider_failures: _ProviderFailures = field(default_factory=_ProviderFailures)
 
 
 @dataclass
@@ -113,7 +142,7 @@ class BulkArtifactDownloader:
 
     def _process(self, state: _RunState, index: int, request: ArtifactRequest) -> BulkDownloadResult:
         search_started = time.monotonic()
-        resolution = self._resolve(request)
+        resolution = self._resolve(state, request)
         search_duration = time.monotonic() - search_started
         provider = resolution.provider
         provider_name = provider.get_provider_name() if provider is not None else None
@@ -146,7 +175,7 @@ class BulkArtifactDownloader:
                 search_duration, resolution.method)
 
         download_started = time.monotonic()
-        result = self._download(provider, request, url, target, match_count)
+        result = self._download(state, provider, request, url, target, match_count)
         result.download_duration = time.monotonic() - download_started
         return self._with_timing(result, search_duration, resolution.method)
 
@@ -157,7 +186,8 @@ class BulkArtifactDownloader:
         result.total_duration = search_duration + (result.download_duration or 0.0)
         return result
 
-    def _resolve(self, request: ArtifactRequest) -> _Resolution:
+    def _resolve(self, state: _RunState, request: ArtifactRequest) -> _Resolution:
+        provider_group = isinstance(self._provider, MultiArtifactProvider)
         try:
             repositories = request.repositories if request.repositories is not None else self._default_repositories
             search_kwargs = {
@@ -167,15 +197,27 @@ class BulkArtifactDownloader:
             }
             if repositories is not None:
                 search_kwargs["repositories"] = repositories
+            if provider_group:
+                search_kwargs["unavailable_providers"] = state.provider_failures.snapshot()
+                search_kwargs["on_provider_error"] = state.provider_failures.record
+            else:
+                reason = state.provider_failures.reason(self._provider)
+                if reason is not None:
+                    return _Resolution(request=request, error=self._unavailable_error(self._provider, reason))
             search_result = self._provider.search_artifacts(**search_kwargs)
             provider = search_result.provider or self._provider
             return _Resolution(request=request, urls=list(search_result.urls),
                                method=search_result.method, provider=provider)
         except Exception as e:
+            if not provider_group:
+                state.provider_failures.record(self._provider, e)
             return _Resolution(request=request, error=self._error_text(e))
 
-    def _download(self, provider: ArtifactProvider, request: ArtifactRequest, url: str, target: Path,
-                  match_count: int) -> BulkDownloadResult:
+    @staticmethod
+    def _unavailable_error(provider: ArtifactProvider, reason: str) -> str:
+        return f"Provider '{provider.get_provider_name()}' unavailable: {reason}"
+
+    def _download(self, state: _RunState, provider: ArtifactProvider, request: ArtifactRequest, url: str, target: Path, match_count: int) -> BulkDownloadResult:
         part_path = None
         provider_name = provider.get_provider_name()
         try:
@@ -184,6 +226,7 @@ class BulkArtifactDownloader:
             provider.download_artifact(resource_url=url, local_path=part_path)
             os.replace(part_path, target)
         except Exception as e:
+            state.provider_failures.record(provider, e)
             if part_path is not None:
                 try:
                     part_path.unlink(missing_ok=True)

@@ -18,6 +18,12 @@ class ArtifactSearchResult:
     provider: "ArtifactProvider | None" = None
 
 
+class ArtifactProviderError(Exception):
+    def __init__(self, message: str, status_code: int | None = None):
+        super().__init__(message)
+        self.status_code = status_code
+
+
 class ArtifactProvider(ABC):
     """Base class for all artifact providers.
 
@@ -31,7 +37,8 @@ class ArtifactProvider(ABC):
     DEFAULT_TIMEOUT = 30.0
 
     RETRY_METHODS = frozenset({"GET", "HEAD"})
-    RETRY_STATUS_CODES = (408, 429, 500, 502, 503, 504)
+    RETRY_STATUS_CODES = (408, 500, 502, 503, 504)
+    RETRY_AFTER_MAX = 30
     RETRY_BACKOFF_FACTOR = 0.5
     RETRY_BACKOFF_MAX = 8.0
     RETRY_BACKOFF_JITTER = 0.5
@@ -75,6 +82,7 @@ class ArtifactProvider(ABC):
             status_forcelist=self.RETRY_STATUS_CODES,
             allowed_methods=self.RETRY_METHODS,
             respect_retry_after_header=True,
+            retry_after_max=self.RETRY_AFTER_MAX,
             raise_on_status=False, # Return the last response after the retries are exhausted
         )
 
@@ -107,6 +115,10 @@ class ArtifactProvider(ABC):
         status = f"HTTP {response.status_code}" + (f" {reason}" if reason else "")
         suffix = f": {body[:300]}" if body else ""
         return f"{method} {request_url} -> {status}{suffix}"
+
+    @classmethod
+    def _http_error(cls, response, method: str = "GET", url: str = None, params: dict = None) -> ArtifactProviderError:
+        return ArtifactProviderError(cls._describe_http_response(response, method, url, params), status_code=response.status_code)
 
     @classmethod
     def _describe_request_error(cls, error: Exception, method: str, url: str, params: dict = None) -> str:
@@ -162,7 +174,7 @@ class ArtifactProvider(ABC):
         except requests.RequestException as e:
             raise Exception(self._describe_request_error(e, "GET", resource_url)) from e
         if response.status_code >= 400:
-            raise Exception(self._describe_http_response(response, "GET", resource_url))
+            raise self._http_error(response, "GET", resource_url)
         with open(local_path, 'wb') as file:
             file.write(response.content)
 

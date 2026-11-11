@@ -231,7 +231,7 @@ class GcpArtifactRegistryProvider(ArtifactProvider):
                 except requests.RequestException as e:
                     raise Exception(self._describe_request_error(e, "GET", metadata_url)) from e
                 if response.status_code != 200:
-                    raise Exception(self._describe_http_response(response, "GET", metadata_url))
+                    raise self._http_error(response, "GET", metadata_url)
                 timestamp = ArtifactFinderUtils.extract_metadata_snapshot_timestamp(response.content)
                 resolved_version = f"{base_version}-{timestamp}"
 

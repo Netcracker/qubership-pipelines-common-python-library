@@ -10,7 +10,11 @@ from qubership_pipelines_common_library.v2.artifacts_finder.artifact_finder impo
 from qubership_pipelines_common_library.v2.artifacts_finder.auth.aws_credentials import AwsCredentialsProvider
 from qubership_pipelines_common_library.v2.artifacts_finder.comparers.default_version_comparer import DefaultVersionComparer
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact import Artifact
-from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider, ArtifactSearchResult
+from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import (
+    ArtifactProvider,
+    ArtifactProviderError,
+    ArtifactSearchResult,
+)
 from qubership_pipelines_common_library.v2.artifacts_finder.model.credentials import Credentials
 from qubership_pipelines_common_library.v2.artifacts_finder.providers.artifactory import ArtifactoryProvider
 from qubership_pipelines_common_library.v2.artifacts_finder.providers.azure_artifacts import AzureArtifactsProvider
@@ -591,6 +595,8 @@ class TestErrorMessages:
             provider.search_artifacts(Artifact(group_id="com.example", artifact_id="demo", version="1.*"))
 
         message = str(ex.value)
+        assert isinstance(ex.value, ArtifactProviderError)
+        assert ex.value.status_code == 401
         assert "GET http://mock.artifactory/artifactory/api/search/gavc?" in message
         assert "a=demo" in message
         assert "HTTP 401 Unauthorized" in message
@@ -622,6 +628,8 @@ class TestErrorMessages:
             provider.download_artifact(url, tmp_path / "x.json")
 
         message = str(ex.value)
+        assert isinstance(ex.value, ArtifactProviderError)
+        assert ex.value.status_code == 404
         assert f"GET {url} -> HTTP 404 Not Found" in message
         assert "missing" in message
 
@@ -756,45 +764,35 @@ class TestDirectUrlResolution:
 
     @patch('requests.sessions.Session.head')
     @patch('requests.sessions.Session.get')
-    def test_nexus_browse_fallback_for_repository_suffix(self, session_get, session_head):
-        session_head.side_effect = [self._head(status_code=404), self._head()]
+    def test_nexus_repository_suffix_falls_back_to_search_after_direct_miss(self, session_get, session_head):
+        session_head.return_value = self._head(status_code=404)
+        session_get.return_value = self._nexus_empty_search_response()
         finder = ArtifactFinder(artifact_provider=NexusProvider(
             registry_url="https://mock.nexus.url/repository", repositories=["maven-public"]))
 
         urls = finder.find_artifact_urls(group_id="com.example", artifact_id="demo",
                                          version="1.0.0", extension="json")
 
-        assert urls == [
-            "https://mock.nexus.url/service/rest/repository/browse/maven-public/"
-            "com/example/demo/1.0.0/demo-1.0.0.json"
-        ]
-        assert [call.args[0] for call in session_head.call_args_list] == [
+        assert urls == []
+        session_head.assert_called_once_with(
             "https://mock.nexus.url/repository/maven-public/com/example/demo/1.0.0/demo-1.0.0.json",
-            "https://mock.nexus.url/service/rest/repository/browse/maven-public/"
-            "com/example/demo/1.0.0/demo-1.0.0.json",
-        ]
-        session_get.assert_not_called()
+            timeout=None, allow_redirects=True)
 
     @patch('requests.sessions.Session.head')
     @patch('requests.sessions.Session.get')
-    def test_nexus_browse_fallback_for_root_registry_url(self, session_get, session_head):
-        session_head.side_effect = [self._head(status_code=404), self._head()]
+    def test_nexus_root_registry_falls_back_to_search_after_direct_miss(self, session_get, session_head):
+        session_head.return_value = self._head(status_code=404)
+        session_get.return_value = self._nexus_empty_search_response()
         finder = ArtifactFinder(artifact_provider=NexusProvider(
             registry_url="https://mock.nexus.url", repositories=["maven-public"]))
 
         urls = finder.find_artifact_urls(group_id="com.example", artifact_id="demo",
                                          version="1.0.0", extension="json")
 
-        assert urls == [
-            "https://mock.nexus.url/service/rest/repository/browse/maven-public/"
-            "com/example/demo/1.0.0/demo-1.0.0.json"
-        ]
-        assert [call.args[0] for call in session_head.call_args_list] == [
+        assert urls == []
+        session_head.assert_called_once_with(
             "https://mock.nexus.url/repository/maven-public/com/example/demo/1.0.0/demo-1.0.0.json",
-            "https://mock.nexus.url/service/rest/repository/browse/maven-public/"
-            "com/example/demo/1.0.0/demo-1.0.0.json",
-        ]
-        session_get.assert_not_called()
+            timeout=None, allow_redirects=True)
 
     @patch('requests.sessions.Session.head')
     @patch('requests.sessions.Session.get')

@@ -16,7 +16,11 @@ from urllib3.util.retry import Retry
 
 from qubership_pipelines_common_library.v2.artifacts_finder.artifact_finder import ArtifactFinder
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact import Artifact
-from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider, ArtifactSearchResult
+from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import (
+    ArtifactProvider,
+    ArtifactProviderError,
+    ArtifactSearchResult,
+)
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_request import ArtifactRequest
 from qubership_pipelines_common_library.v2.artifacts_finder.model.bulk_download_report import (
     BulkArtifactDownloadError,
@@ -541,6 +545,33 @@ class TestMultipleProvidersBulk:
         assert report.downloaded_count == 1
         assert report.results[0].provider_name == "second"
 
+    @pytest.mark.parametrize("status_code", [401, 403, 429])
+    def test_unavailable_provider_is_skipped_for_remaining_artifacts(self, tmp_path, status_code):
+        first, second = FakeProvider(name="first"), FakeProvider(name="second")
+        one, two = artifact("one"), artifact("two")
+        first.results[("one", "1.0.0")] = ArtifactProviderError("provider rejected request", status_code=status_code)
+        register(second, one, two)
+
+        report = asyncio.run(finder_with_many(first, second).download_artifacts(
+            [ArtifactRequest(one), ArtifactRequest(two)], tmp_path, max_workers=1))
+
+        assert report.downloaded_count == 2
+        assert [result.provider_name for result in report.results] == ["second", "second"]
+        assert len(first.search_calls) == 1
+
+    def test_only_provider_failure_fails_remaining_artifacts_without_network(self, tmp_path):
+        provider = FakeProvider(name="only")
+        one, two = artifact("one"), artifact("two")
+        provider.results[("one", "1.0.0")] = ArtifactProviderError("provider rejected request", status_code=401)
+        register(provider, two)
+
+        report = asyncio.run(finder_with(provider).download_artifacts(
+            [ArtifactRequest(one), ArtifactRequest(two)], tmp_path, max_workers=1))
+
+        assert report.failed_count == 2
+        assert len(provider.search_calls) == 1
+        assert "Provider 'only' unavailable: authentication failed (HTTP 401)" in report.results[1].error
+
     def test_all_provider_errors_fail_with_aggregate_message(self, tmp_path):
         first, second = FakeProvider(name="first"), FakeProvider(name="second")
         one = artifact("one")
@@ -695,7 +726,8 @@ class TestProviderSessionsAndFilenames:
         assert retry.backoff_factor == 0.5
         assert retry.backoff_max == 8.0
         assert retry.backoff_jitter == 0.5
-        assert set(retry.status_forcelist) == {408, 429, 500, 502, 503, 504}
+        assert set(retry.status_forcelist) == {408, 500, 502, 503, 504}
+        assert retry.retry_after_max == 30
         assert retry.allowed_methods == frozenset({"GET", "HEAD"})
         assert retry.respect_retry_after_header is True
         assert retry.raise_on_status is False
