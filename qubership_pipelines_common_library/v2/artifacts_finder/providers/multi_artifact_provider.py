@@ -2,6 +2,7 @@ import logging
 import threading
 
 from pathlib import Path
+from typing import Callable
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact import Artifact
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider, ArtifactSearchResult
 
@@ -22,12 +23,23 @@ class MultiArtifactProvider(ArtifactProvider):
         self._resolved_providers: dict[str, ArtifactProvider] = {}
         self._resolved_providers_lock = threading.Lock()
 
-    def search_artifacts(self, artifact: Artifact, latest: bool = False, comparer=None, **kwargs) -> ArtifactSearchResult:
+    def search_artifacts(self, artifact: Artifact, latest: bool = False, comparer=None,
+                         unavailable_providers: dict[ArtifactProvider, str] | None = None,
+                         on_provider_error: Callable[[ArtifactProvider, Exception], None] | None = None,
+                         **kwargs) -> ArtifactSearchResult:
         errors = []
         for provider in self.providers:
+            if unavailable_providers:
+                reason = unavailable_providers.get(provider)
+                if reason is not None:
+                    logging.debug("Skipping artifact provider '%s': %s", provider.get_provider_name(), reason)
+                    errors.append((provider, Exception(f"Provider unavailable: {reason}")))
+                    continue
             try:
                 result = provider.search_artifacts(artifact=artifact, latest=latest, comparer=comparer, **kwargs)
             except Exception as e:
+                if on_provider_error is not None:
+                    on_provider_error(provider, e)
                 if len(self.providers) == 1:
                     raise
                 logging.debug("Artifact provider '%s' could not resolve '%s:%s': %s", provider.get_provider_name(), artifact.artifact_id, artifact.version, e)

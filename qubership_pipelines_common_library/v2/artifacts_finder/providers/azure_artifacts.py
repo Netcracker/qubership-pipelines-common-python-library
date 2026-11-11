@@ -6,7 +6,7 @@ from pathlib import Path
 from urllib.parse import unquote, urlparse
 from requests.auth import HTTPBasicAuth
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact import Artifact
-from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider, ArtifactSearchResult
+from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider, ArtifactProviderError, ArtifactSearchResult
 from qubership_pipelines_common_library.v2.artifacts_finder.model.credentials import Credentials
 from qubership_pipelines_common_library.v2.artifacts_finder.utils.artifact_finder_utils import ArtifactFinderUtils
 
@@ -107,7 +107,7 @@ class AzureArtifactsProvider(ArtifactProvider):
         except requests.RequestException as e:
             raise Exception(f"Could not find '{artifact.artifact_id}' - {self._describe_request_error(e, 'GET', feeds_search_url, feed_search_params)}") from e
         if feeds_response.status_code != 200:
-            raise Exception(f"Could not find '{artifact.artifact_id}' - {self._describe_http_response(feeds_response, 'GET', feeds_search_url, feed_search_params)}")
+            raise ArtifactProviderError(f"Could not find '{artifact.artifact_id}' - {self._describe_http_response(feeds_response, 'GET', feeds_search_url, feed_search_params)}", status_code=feeds_response.status_code)
         feeds_response_json = feeds_response.json()
         logging.debug(f"Feeds search response: {feeds_response_json}")
         packages = feeds_response_json.get("value", [])

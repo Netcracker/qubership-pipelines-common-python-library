@@ -210,7 +210,8 @@ class ArtifactFinderUtils:
         for base_url in base_urls.values():
             metadata_url = f"{base_url}/maven-metadata.xml"
             metadata_response = provider.get_session().get(url=metadata_url, timeout=provider.timeout)
-            metadata_response.raise_for_status()
+            if metadata_response.status_code != 200:
+                raise provider._http_error(metadata_response, "GET", metadata_url)
             resolved_version = ArtifactFinderUtils.resolve_snapshot_version_from_metadata(metadata_response.content, base_version, artifact.extension)
             if not resolved_version:
                 logging.warning(f"Could not resolve snapshot version in '{metadata_url}'")

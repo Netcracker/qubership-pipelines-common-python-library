@@ -4,7 +4,7 @@ import requests
 
 from pathlib import Path
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact import Artifact
-from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider, ArtifactSearchResult
+from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider, ArtifactProviderError, ArtifactSearchResult
 from qubership_pipelines_common_library.v2.artifacts_finder.utils.artifact_finder_utils import ArtifactFinderUtils
 from qubership_pipelines_common_library.v2.artifacts_finder.utils.maven_direct_resolver import (
     MavenDirectResolutionMixin,
@@ -102,5 +102,5 @@ class ArtifactoryProvider(MavenDirectResolutionMixin, ArtifactProvider):
         except requests.RequestException as e:
             raise Exception(f"Could not find '{artifact_id}' - {self._describe_request_error(e, 'GET', search_api_url, search_params)}") from e
         if response.status_code != 200:
-            raise Exception(f"Could not find '{artifact_id}' - {self._describe_http_response(response, 'GET', search_api_url, search_params)}")
+            raise ArtifactProviderError(f"Could not find '{artifact_id}' - {self._describe_http_response(response, 'GET', search_api_url, search_params)}", status_code=response.status_code)
         return response.json().get("results", [])

@@ -2,7 +2,7 @@ import requests
 
 from pathlib import Path
 from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact import Artifact
-from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider, ArtifactSearchResult
+from qubership_pipelines_common_library.v2.artifacts_finder.model.artifact_provider import ArtifactProvider, ArtifactProviderError, ArtifactSearchResult
 from qubership_pipelines_common_library.v2.artifacts_finder.utils.artifact_finder_utils import ArtifactFinderUtils
 from qubership_pipelines_common_library.v2.artifacts_finder.utils.maven_direct_resolver import (
     MavenDirectResolutionMixin,
@@ -67,11 +67,12 @@ class NexusProvider(MavenDirectResolutionMixin, ArtifactProvider):
 
     def _build_content_bases(self, keys: list[str]) -> list[RepositoryContentBase]:
         root = self.registry_url.rstrip("/")
-        host_root = root.removesuffix("/repository")
+        #host_root = root.removesuffix("/repository")
         content_root = root if root.endswith("/repository") else f"{root}/repository"
         # Legacy fallback for older Nexus instances where the normal content index is unavailable.
-        browse_root = f"{host_root}/service/rest/repository/browse"
-        return [RepositoryContentBase(url=f"{content_root}/{key}", fallback_url=f"{browse_root}/{key}") for key in keys]
+        #browse_root = f"{host_root}/service/rest/repository/browse"
+        #return [RepositoryContentBase(url=f"{content_root}/{key}", fallback_url=f"{browse_root}/{key}") for key in keys]
+        return [RepositoryContentBase(url=f"{content_root}/{key}") for key in keys]
 
     def _search_wildcard_versions(self, artifact: Artifact, latest: bool = False, comparer=None) -> list[str]:
         search_params = self._base_search_params(artifact)
@@ -104,7 +105,7 @@ class NexusProvider(MavenDirectResolutionMixin, ArtifactProvider):
             except requests.RequestException as e:
                 raise Exception(f"Could not find '{artifact_id}' - {self._describe_request_error(e, 'GET', search_url, page_params)}") from e
             if response.status_code != 200:
-                raise Exception(f"Could not find '{artifact_id}' - {self._describe_http_response(response, 'GET', search_url, page_params)}")
+                raise ArtifactProviderError(f"Could not find '{artifact_id}' - {self._describe_http_response(response, 'GET', search_url, page_params)}", status_code=response.status_code)
             data = response.json()
             items.extend(data.get("items", []))
             continuation_token = data.get("continuationToken")
